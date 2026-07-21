@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>碳核算管理 - 核算模型管理</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="./eco-admin-theme.css" rel="stylesheet"/>
+  <script src="./shared-mock-data.js"></script>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: Inter, "Microsoft YaHei", sans-serif;
+    }
+
+    .model-layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      align-items: stretch;
+      min-height: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
+    }
+
+    .model-table-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .model-standard-cell {
+      max-width: 240px;
+    }
+
+    .model-standard-cell span {
+      display: inline-block;
+      max-width: 230px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: bottom;
+    }
+
+    .model-empty-cell {
+      height: 120px;
+      color: var(--eco-muted);
+      font-weight: 650;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="eco-page model-theme">
+  <main class="h-screen min-h-0 flex flex-col p-6">
+    <section class="eco-card model-main-card flex-1 min-h-0 flex flex-col overflow-hidden">
+      <div class="model-filter-bar eco-filter-bar">
+        <div class="flex items-center gap-3 min-w-0 flex-wrap">
+          <input id="model-search-input" class="eco-input eco-filter-input" placeholder="请输入模型名称" type="text"/>
+          <label class="eco-filter-label">
+            <span class="eco-form-label">适用范围:</span>
+            <select id="model-scope-filter" class="eco-select eco-filter-select-sm eco-control-sm">
+              <option>全部</option>
+            </select>
+          </label>
+        </div>
+        <div class="flex gap-2">
+          <button id="model-reset-btn" class="eco-btn eco-btn-secondary eco-btn-sm" type="button">重置</button>
+          <button id="model-add-btn" class="eco-btn eco-btn-primary eco-btn-sm" type="button">
+            <span>新增模型</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="model-layout">
+        <aside class="model-tree-panel eco-tree-panel flex flex-col">
+          <div id="model-tree" class="model-tree-content flex-1 overflow-y-auto p-2">
+            <div class="eco-muted-text px-2 py-3">正在读取边界分类</div>
+          </div>
+        </aside>
+
+        <section class="model-list-panel min-w-0 min-h-0 flex flex-col overflow-hidden">
+          <div class="flex items-center justify-between p-4 border-b eco-divider">
+            <span class="eco-section-title">模型列表</span>
+          </div>
+
+          <div class="eco-table-wrap model-table-scroll">
+            <table class="eco-table w-full text-left">
+              <thead>
+                <tr>
+                  <th>模型名称</th>
+                  <th>适用范围</th>
+                  <th>排放类别</th>
+                  <th>引用标准</th>
+                  <th>核算方法</th>
+                  <th>版本号</th>
+                  <th>状态</th>
+                  <th class="w-44">操作</th>
+                </tr>
+              </thead>
+              <tbody id="model-table-body">
+                <tr><td class="model-empty-cell" colspan="8">正在读取共享模型数据</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="model-pagination eco-pagination">
+            <div id="model-pagination-summary" class="eco-pagination-summary">共 0 条，显示 0-0 条</div>
+            <div class="eco-pagination-controls">
+              <div id="model-pager" class="eco-pagination-pages"></div>
+              <select id="model-page-size-select" class="eco-select eco-page-size">
+                <option value="10">10 条/页</option>
+                <option value="20">20 条/页</option>
+              </select>
+              <div class="eco-pagination-controls">
+                <span>前往</span>
+                <input id="model-page-jump" class="eco-input eco-page-jump" min="1" type="number" value="1"/>
+                <span>页</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div id="model-subpage" class="model-subpage hidden flex-1 min-h-0 overflow-auto p-6"></div>
+    </section>
+  </main>
+
+  <div id="model-form-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" data-close-modal></div>
+    <div class="eco-card relative w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div class="px-6 py-4 border-b eco-divider flex items-center justify-between">
+        <h3 id="model-form-title" class="eco-section-title">新增核算模型</h3>
+        <button class="text-gray-400 hover:text-gray-600" type="button" data-close-modal>
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-6 space-y-5">
+        <section class="eco-form-card p-4">
+          <h4 class="eco-form-heading mb-4">基本信息</h4>
+          <div class="eco-form-grid-2">
+            <div class="eco-field">
+              <label class="eco-form-label">模型名称</label>
+              <input id="model-form-name" class="eco-input h-11 w-full" placeholder="请输入模型名称" type="text"/>
+            </div>
+            <div class="eco-field">
+              <label class="eco-form-label">版本号</label>
+              <input id="model-form-version" class="eco-input h-11 w-full" type="text" value="v1.0.0"/>
+            </div>
+            <div class="eco-field">
+              <label class="eco-form-label">所属范围</label>
+              <select id="model-form-scope" class="eco-select h-11 w-full"></select>
+            </div>
+            <div class="eco-field">
+              <label class="eco-form-label">所属类别</label>
+              <select id="model-form-category" class="eco-select h-11 w-full"></select>
+            </div>
+            <div class="eco-field">
+              <label class="eco-form-label">引用标准</label>
+              <select id="model-form-standard" class="eco-select h-11 w-full"></select>
+            </div>
+            <div class="eco-field">
+              <label class="eco-form-label">状态</label>
+              <select id="model-form-status" class="eco-select h-11 w-full">
+                <option value="草稿">草稿</option>
+                <option value="启用">生效</option>
+                <option value="停用">停用</option>
+              </select>
+            </div>
+            <div class="eco-field">
+              <label class="eco-form-label">生效时间</label>
+              <input id="model-form-effective" class="eco-input h-11 w-full" type="date"/>
+            </div>
+            <div class="eco-field">
+              <label class="eco-form-label">失效时间</label>
+              <input id="model-form-expire" class="eco-input h-11 w-full" type="date"/>
+            </div>
+          </div>
+        </section>
+
+        <section class="eco-form-card p-4">
+          <h4 class="eco-form-heading mb-4">核算逻辑</h4>
+          <div class="eco-form-grid-2">
+            <div class="eco-field">
+              <label class="eco-form-label">核算方法</label>
+              <select id="model-form-method" class="eco-select h-11 w-full">
+                <option>排放因子法</option>
+                <option>物料平衡法</option>
+                <option>实测法</option>
+              </select>
+            </div>
+            <div class="eco-field">
+              <label class="eco-form-label">核算单位</label>
+              <input id="model-form-unit" class="eco-input h-11 w-full" value="tCO2e" type="text"/>
+            </div>
+            <div class="eco-field col-span-2">
+              <label class="eco-form-label">计算公式</label>
+              <textarea id="model-form-formula" class="eco-textarea w-full font-mono"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <section class="eco-form-card p-4">
+          <h4 class="eco-form-heading mb-4">版本变更</h4>
+          <textarea id="model-form-change" class="eco-textarea w-full" placeholder="请描述此版本的变更内容..."></textarea>
+        </section>
+      </div>
+      <div class="px-6 py-4 border-t eco-divider flex justify-end gap-3">
+        <button class="eco-btn eco-btn-secondary" type="button" data-close-modal>取消</button>
+        <button id="model-form-save" class="eco-btn eco-btn-primary" type="button">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="model-detail-popup" class="fixed inset-0 z-[70] hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" data-close-detail></div>
+    <div class="eco-card relative w-full max-w-2xl max-h-[86vh] overflow-hidden flex flex-col">
+      <div class="px-6 py-4 border-b eco-divider flex items-center justify-between">
+        <h3 id="model-detail-title" class="eco-section-title">核算模型详情</h3>
+        <button class="text-gray-400 hover:text-gray-600" type="button" data-close-detail>
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="model-detail-body" class="flex-1 overflow-y-auto p-6"></div>
+      <div class="px-6 py-4 border-t eco-divider flex justify-end gap-3">
+        <button class="eco-btn eco-btn-secondary" type="button" data-close-detail>关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (() => {
+    const Mock = window.CarbonAccountingMock || window;
+    const state = {
+      keyword: "",
+      scope: "全部",
+      status: "全部",
+      treeFilter: null,
+      expandedTree: new Set(),
+      page: 1,
+      pageSize: 10,
+      editingId: null,
+      selectedModelId: ""
+    };
+
+    const byId = id => document.getElementById(id);
+    const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    const todayString = () => new Date().toISOString().slice(0, 10);
+    const normalizeDate = value => String(value || "").slice(0, 10);
+    const sharedReady = Boolean(Mock && (Mock.AccountingModels || Mock.getAccountingModels));
+
+    const els = {
+      tbody: byId("model-table-body"),
+      tree: byId("model-tree"),
+      search: byId("model-search-input"),
+      scope: byId("model-scope-filter"),
+      reset: byId("model-reset-btn"),
+      add: byId("model-add-btn"),
+      filterBar: document.querySelector(".model-filter-bar"),
+      layout: document.querySelector(".model-layout"),
+      subpage: byId("model-subpage"),
+      pager: byId("model-pager"),
+      summary: byId("model-pagination-summary"),
+      pageSize: byId("model-page-size-select"),
+      pageJump: byId("model-page-jump"),
+      modal: byId("model-form-modal"),
+      detail: byId("model-detail-popup"),
+      detailTitle: byId("model-detail-title"),
+      detailBody: byId("model-detail-body")
+    };
+
+    let models = [];
+
+    function scopeLabel(scope) {
+      return Mock.toScopeLabel?.(scope) || scope || "未分类范围";
+    }
+
+    function categoryLabel(category) {
+      return Mock.toCategoryLabel?.(category) || category || "未分类类别";
+    }
+
+    function standards() {
+      const standardFiles = Mock.getStandardFiles?.() || Mock.StandardFiles || [];
+      return Array.isArray(standardFiles) ? standardFiles : [];
+    }
+
+    function standardFor(model = {}) {
+      const id = model.standardId || model.factorMatchRule?.standardId || "";
+      return standards().find(standard => standard.id === id)
+        || (Mock.FactorStandards || []).find(standard => standard.id === id)
+        || null;
+    }
+
+    function formulaByMethod(method = "排放因子法") {
+      if (method === "物料平衡法") return "CO2e = [原料投入量 × 原料含碳量 - 产品产出量 × 产品含碳量] × 44/12";
+      if (method === "实测法") return "CO2e = ∑(浓度 × 流速 × 时间)";
+      return "CO2e = 活动数据 × 排放因子 × GWP";
+    }
+
+    function versionStatus(model = {}) {
+      if (model.status === "停用" || model.status === "草稿") return model.status;
+      const today = todayString();
+      const start = normalizeDate(model.effectiveDate || model.effectiveAt || model.periodStart);
+      const end = normalizeDate(model.expireDate || model.expiredAt || model.periodEnd);
+      if (start && start > today) return "待生效";
+      if (end && end < today) return "已失效";
+      return "启用";
+    }
+
+    function normalizeModel(raw = {}) {
+      const standard = standardFor(raw);
+      return {
+        raw,
+        id: raw.id,
+        name: raw.name || `${categoryLabel(raw.category || raw.categoryCode)}核算模型`,
+        scope: raw.scope || "",
+        category: raw.category || raw.categoryCode || "",
+        scopeLabel: scopeLabel(raw.scope),
+        categoryLabel: raw.categoryLabel || categoryLabel(raw.category || raw.categoryCode),
+        standardId: raw.standardId || raw.factorMatchRule?.standardId || "",
+        standard: raw.standard || raw.standardName || standard?.name || "未配置标准",
+        method: raw.method || "排放因子法",
+        formula: raw.formula || formulaByMethod(raw.method),
+        version: raw.version || "v1.0.0",
+        unit: raw.unit || "tCO2e",
+        measureUnit: raw.measureUnit || raw.activityDataType || "-",
+        precision: raw.precision || "小数点后 4 位",
+        effectiveAt: raw.effectiveDate || raw.effectiveAt || raw.periodStart || "2024-01-01",
+        expiredAt: raw.expireDate || raw.expiredAt || raw.periodEnd || "长期有效",
+        status: versionStatus(raw),
+        type: raw.type || "共享模型"
+      };
+    }
+
+    function loadModels() {
+      const source = Mock.getAccountingModels?.() || Mock.AccountingModels || [];
+      models = source.map(normalizeModel);
+    }
+
+    function modelTree() {
+      const tree = Mock.buildModelCategoryTree?.();
+      if (Array.isArray(tree) && tree.length) return tree;
+      const groups = new Map();
+      (Mock.BoundaryCategories || []).forEach(node => {
+        if (!groups.has(node.scope)) groups.set(node.scope, { scope: node.scope, treeLabel: scopeLabel(node.scope), children: [] });
+        groups.get(node.scope).children.push({ category: node.category, categoryLabel: node.categoryLabel || categoryLabel(node.category) });
+      });
+      return Array.from(groups.values());
+    }
+
+    function getFilteredModels() {
+      return models.filter(model => {
+        const text = [model.name, model.scopeLabel, model.categoryLabel, model.standard, model.method, model.version, model.status].join(" ").toLowerCase();
+        const matchesKeyword = !state.keyword || text.includes(state.keyword.toLowerCase());
+        const matchesScope = state.scope === "全部" || model.scopeLabel === state.scope;
+        const matchesStatus = state.status === "全部" || model.status === state.status;
+        const matchesTree = !state.treeFilter || (
+          state.treeFilter.key === "scopeCategory"
+            ? `${model.scope}|${model.category}` === state.treeFilter.value
+            : String(model[state.treeFilter.key] || "") === state.treeFilter.value
+        );
+        return matchesKeyword && matchesScope && matchesStatus && matchesTree;
+      });
+    }
+
+    function statusClass(status) {
+      if (status === "启用") return "eco-status-badge eco-status-active";
+      if (status === "停用") return "eco-status-badge eco-status-disabled";
+      if (status === "待生效") return "eco-status-badge eco-status-pending";
+      if (status === "已失效") return "eco-status-badge eco-status-expired";
+      return "eco-status-badge eco-status-draft";
+    }
+
+    function statusToggleClass(status) {
+      return `eco-status-toggle ${status === "停用" ? "eco-status-toggle-off" : "eco-status-toggle-on"}`;
+    }
+
+    function renderRows() {
+      const filtered = getFilteredModels();
+      const pageCount = Math.max(1, Math.ceil(filtered.length / state.pageSize));
+      state.page = Math.min(Math.max(state.page, 1), pageCount);
+      const start = (state.page - 1) * state.pageSize;
+      const rows = filtered.slice(start, start + state.pageSize);
+      els.tbody.innerHTML = rows.length ? rows.map(model => `
+        <tr class="table-row" data-model-id="${escapeHtml(model.id)}">
+          <td><button class="eco-list-primary-text" type="button" data-action="detail">${escapeHtml(model.name)}</button></td>
+          <td><span class="eco-table-cell-text">${escapeHtml(model.scopeLabel)}</span></td>
+          <td><span class="eco-table-cell-text">${escapeHtml(model.categoryLabel)}</span></td>
+          <td class="model-standard-cell" title="${escapeHtml(model.standard)}"><span class="eco-table-cell-text">${escapeHtml(model.standard)}</span></td>
+          <td><span class="eco-table-cell-text">${escapeHtml(model.method)}</span></td>
+          <td><span class="eco-table-cell-text">${escapeHtml(model.version)}</span></td>
+          <td>
+            <button class="${statusToggleClass(model.status)}" type="button" data-action="toggle-status" title="${model.status === "停用" ? "启用模型" : "停用模型"}" aria-label="${model.status === "停用" ? "启用模型" : "停用模型"}">
+              <span class="eco-status-toggle-track"><span class="eco-status-toggle-thumb"></span></span>
+            </button>
+          </td>
+          <td>
+            <div class="eco-action-buttons justify-start">
+              <button class="eco-link-text" type="button" data-action="detail">详情</button>
+              <button class="eco-link-text" type="button" data-action="edit">编辑</button>
+              <div class="inline-block relative">
+                <button class="eco-link-text flex items-center gap-1" type="button" data-action="more">
+                  <span>更多</span><span class="material-symbols-outlined text-sm">arrow_drop_down</span>
+                </button>
+                <div class="eco-dropdown-menu hidden absolute right-0 mt-2 w-36 z-50 py-1">
+                  <button class="eco-dropdown-item" type="button" data-action="versions">版本管理</button>
+                  <button class="eco-dropdown-item" type="button" data-action="changes">变更记录</button>
+                  <button class="eco-dropdown-item eco-dropdown-item-danger" type="button" data-action="delete">删除</button>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `).join("") : `<tr><td class="model-empty-cell" colspan="8">暂无匹配的模型</td></tr>`;
+      renderPager(filtered.length);
+    }
+
+    function renderPager(total) {
+      const pageCount = Math.max(1, Math.ceil(total / state.pageSize));
+      state.page = Math.min(Math.max(state.page, 1), pageCount);
+      const startItem = total ? (state.page - 1) * state.pageSize + 1 : 0;
+      const endItem = total ? Math.min(total, state.page * state.pageSize) : 0;
+      els.summary.textContent = `共 ${total} 条，显示 ${startItem}-${endItem} 条`;
+      els.pageJump.max = String(pageCount);
+      els.pageJump.value = String(state.page);
+      const pages = pageCount <= 5
+        ? Array.from({ length: pageCount }, (_, index) => index + 1)
+        : Array.from(new Set([1, Math.max(1, state.page - 1), state.page, Math.min(pageCount, state.page + 1), pageCount])).sort((a, b) => a - b);
+      els.pager.innerHTML = `
+        <button class="eco-page-btn eco-page-btn-icon" data-page="prev" ${state.page <= 1 ? "disabled" : ""}><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+        ${pages.map((page, index) => `${index > 0 && page - pages[index - 1] > 1 ? '<span class="eco-muted-text">...</span>' : ''}<button class="eco-page-btn ${page === state.page ? 'eco-page-btn-active' : ''}" data-page="${page}" aria-current="${page === state.page ? 'page' : 'false'}">${page}</button>`).join("")}
+        <button class="eco-page-btn eco-page-btn-icon" data-page="next" ${state.page >= pageCount ? "disabled" : ""}><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+      `;
+    }
+
+    function countWhere(predicate) {
+      return models.filter(predicate).length;
+    }
+
+    function renderTree() {
+      const tree = modelTree();
+      const branches = tree.map(scope => {
+        const nodeId = `scope:${scope.scope}`;
+        const expanded = state.expandedTree.has(nodeId) || !state.expandedTree.size;
+        const children = (scope.children || []).map(category => {
+          const value = `${scope.scope}|${category.category}`;
+          const active = state.treeFilter?.key === "scopeCategory" && state.treeFilter.value === value;
+          const count = countWhere(model => model.scope === scope.scope && model.category === category.category);
+          return `<li class="eco-tree-item eco-tree-text-item justify-between ${active ? "active" : ""}" aria-current="${active ? "true" : "false"}" data-tree-key="scopeCategory" data-tree-value="${escapeHtml(value)}"><span>${escapeHtml(category.categoryLabel || categoryLabel(category.category))}</span><span class="tree-count">(${count})</span></li>`;
+        }).join("");
+        const active = state.treeFilter?.key === "scope" && state.treeFilter.value === scope.scope;
+        return `<li><div class="eco-tree-item eco-tree-group ${active ? "active" : ""}" aria-current="${active ? "true" : "false"}" data-tree-key="scope" data-tree-value="${escapeHtml(scope.scope)}" data-tree-id="${escapeHtml(nodeId)}"><span class="material-symbols-outlined text-sm mr-1">${expanded ? "expand_more" : "chevron_right"}</span><span class="flex-1">${escapeHtml(scope.treeLabel || scope.scopeLabel || scopeLabel(scope.scope))}</span><span class="tree-count">(${countWhere(model => model.scope === scope.scope)})</span></div><ul class="${expanded ? "" : "hidden"} pl-7 space-y-1 mt-1">${children}</ul></li>`;
+      }).join("");
+      const disabledActive = state.treeFilter?.key === "status" && state.treeFilter.value === "停用";
+      els.tree.innerHTML = `<div class="mb-4"><div class="eco-form-label px-2 py-2">按核算边界分类</div><ul class="space-y-1 mt-1">${branches}<li class="eco-tree-item eco-tree-text-item justify-between ${disabledActive ? "active" : ""}" data-tree-key="status" data-tree-value="停用"><span>已停用模型</span><span class="tree-count">(${countWhere(model => model.status === "停用")})</span></li></ul></div>`;
+    }
+
+    function fillSelect(select, options, value = "") {
+      select.innerHTML = options.map(option => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join("");
+      if (Array.from(select.options).some(option => option.value === value)) select.value = value;
+    }
+
+    function setupFilterOptions() {
+      const scopes = Array.from(new Set(models.map(model => model.scopeLabel).filter(Boolean)));
+      fillSelect(els.scope, [{ value: "全部", label: "全部" }, ...scopes.map(scope => ({ value: scope, label: scope }))], state.scope);
+    }
+
+    function standardOptions() {
+      return [{ value: "", label: "请选择引用标准" }, ...standards().map(standard => ({ value: standard.id, label: standard.name }))];
+    }
+
+    function categoryOptions(scope) {
+      const group = modelTree().find(item => item.scope === scope);
+      return (group?.children || []).map(category => ({ value: category.category, label: category.categoryLabel || categoryLabel(category.category) }));
+    }
+
+    function openForm(model = null) {
+      state.editingId = model?.id || null;
+      byId("model-form-title").textContent = model ? "编辑当前版本" : "新增核算模型";
+      const raw = model?.raw || {};
+      const tree = modelTree();
+      const scope = raw.scope || tree[0]?.scope || "";
+      fillSelect(byId("model-form-scope"), tree.map(item => ({ value: item.scope, label: item.treeLabel || item.scopeLabel || scopeLabel(item.scope) })), scope);
+      fillSelect(byId("model-form-category"), categoryOptions(scope), raw.category || raw.categoryCode || categoryOptions(scope)[0]?.value || "");
+      fillSelect(byId("model-form-standard"), standardOptions(), raw.standardId || raw.factorMatchRule?.standardId || "");
+      byId("model-form-name").value = raw.name || "";
+      byId("model-form-version").value = raw.version || "v1.0.0";
+      byId("model-form-status").value = raw.status === "停用" ? "停用" : raw.status === "草稿" ? "草稿" : "启用";
+      byId("model-form-effective").value = normalizeDate(raw.effectiveDate || raw.effectiveAt) || "";
+      byId("model-form-expire").value = normalizeDate(raw.expireDate || raw.expiredAt) || "";
+      byId("model-form-method").value = raw.method || "排放因子法";
+      byId("model-form-formula").value = raw.formula || formulaByMethod(raw.method);
+      byId("model-form-unit").value = raw.unit || "tCO2e";
+      byId("model-form-change").value = model ? `修改当前版本 ${raw.version || "v1.0.0"} 的配置。` : "";
+      els.modal.classList.remove("hidden");
+      els.modal.classList.add("flex");
+    }
+
+    function closeForm() {
+      els.modal.classList.add("hidden");
+      els.modal.classList.remove("flex");
+      state.editingId = null;
+    }
+
+    function readFormPayload() {
+      const scope = byId("model-form-scope").value;
+      const category = byId("model-form-category").value;
+      const standardId = byId("model-form-standard").value;
+      const standard = standardFor({ standardId });
+      const method = byId("model-form-method").value || "排放因子法";
+      const effectiveDate = byId("model-form-effective").value || todayString();
+      const expireDate = byId("model-form-expire").value || "";
+      return {
+        name: byId("model-form-name").value.trim() || `${categoryLabel(category)}核算模型`,
+        version: byId("model-form-version").value.trim() || "v1.0.0",
+        scope,
+        category,
+        categoryCode: category,
+        standardId,
+        standard: standard?.name || "",
+        standardFileName: standard?.fileName || "",
+        standardAttachment: standard?.fileName ? { name: standard.fileName, fileUrl: standard.fileUrl || "", dataUrl: standard.dataUrl || "" } : null,
+        method,
+        formula: byId("model-form-formula").value.trim() || formulaByMethod(method),
+        unit: byId("model-form-unit").value.trim() || "tCO2e",
+        precision: "小数点后 4 位",
+        effectiveDate,
+        expireDate,
+        periodStart: effectiveDate.slice(0, 7),
+        periodEnd: expireDate.slice(0, 7),
+        status: byId("model-form-status").value || "启用",
+        factorMatchRule: { standardId, activityDataType: "", fields: ["categoryCode", "activityDataType", "standardId"] },
+        changeDescription: byId("model-form-change").value.trim() || "保存模型配置。"
+      };
+    }
+
+    function saveForm() {
+      const current = state.editingId ? (Mock.AccountingModels || []).find(item => item.id === state.editingId) : null;
+      const formPayload = readFormPayload();
+      const previousLogs = Array.isArray(current?.changeLog) ? current.changeLog : [];
+      const changeEntry = {
+        version: formPayload.version,
+        operator: "当前用户",
+        date: todayString(),
+        status: "当前版本",
+        description: formPayload.changeDescription
+      };
+      const payload = {
+        ...(current || {}),
+        ...formPayload,
+        id: state.editingId || `am-${Date.now()}`,
+        type: current?.type || "自定义模型",
+        changeLog: [changeEntry, ...previousLogs.map(log => ({ ...log, status: log.status === "当前版本" ? "历史版本" : log.status }))]
+      };
+      delete payload.changeDescription;
+      if (Mock.updateAccountingModel && current) Mock.updateAccountingModel(payload.id, payload);
+      else if (Mock.upsertAccountingModel) Mock.upsertAccountingModel(payload);
+      else {
+        Mock.AccountingModels = Mock.AccountingModels || [];
+        const index = Mock.AccountingModels.findIndex(item => item.id === payload.id);
+        if (index >= 0) Mock.AccountingModels[index] = payload;
+        else Mock.AccountingModels.unshift(payload);
+        Mock.saveState?.();
+      }
+      refresh();
+      closeForm();
+    }
+
+    function openInfoModal(title, bodyHtml) {
+      els.detailTitle.textContent = title;
+      els.detailBody.innerHTML = bodyHtml;
+      els.detail.classList.remove("hidden");
+      els.detail.classList.add("flex");
+    }
+
+    function showDetail(model) {
+      openInfoModal("核算模型详情", `
+        <section class="eco-form-card p-4">
+          <h4 class="eco-form-heading mb-4">基础信息</h4>
+          <div class="grid grid-cols-2 gap-y-3 gap-x-8">
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">模型名称：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.name)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">版本号：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.version)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算范围：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.scopeLabel)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">排放类别：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.categoryLabel)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">状态：</span><span class="${statusClass(model.status)}">${escapeHtml(model.status)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算方法：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.method)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算单位：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.unit)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">计量单位：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.measureUnit)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">生效时间：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.effectiveAt)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">失效时间：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.expiredAt)}</span></div>
+            <div class="flex col-span-2"><span class="eco-detail-label w-24 shrink-0">引用标准：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.standard)}</span></div>
+          </div>
+        </section>
+      `);
+    }
+
+    function changeLogs(model) {
+      const logs = Array.isArray(model.raw?.changeLog) && model.raw.changeLog.length
+        ? model.raw.changeLog
+        : [{
+            version: model.version,
+            operator: model.raw?.operator || "系统",
+            date: model.effectiveAt,
+            status: "当前版本",
+            description: model.raw?.description || "初始化共享模型配置。"
+          }];
+      return logs.map((log, index) => ({
+        version: log.version || model.version,
+        operator: log.operator || "系统",
+        date: log.date || log.createdAt || model.effectiveAt,
+        status: log.status || (index === 0 ? "当前版本" : "历史版本"),
+        description: log.description || log.content || "保存模型配置。"
+      }));
+    }
+
+    function versionRows(model) {
+      const seen = new Set();
+      return changeLogs(model).filter(log => {
+        if (seen.has(log.version)) return false;
+        seen.add(log.version);
+        return true;
+      });
+    }
+
+    function snapshotForVersion(model, log, index) {
+      const versionOffset = index ? index : 0;
+      const categoryLabelText = model.categoryLabel || categoryLabel(model.category);
+      const raw = model.raw || {};
+      const standard = standardFor(raw);
+      const standardCode = raw.standardCode || standard?.code || "STD_NDRC_GHG_GUIDE";
+      const standardAttachment = raw.standardAttachment?.name || raw.standardFileName || raw.attachmentName || `${standardCode}.pdf`;
+      const factorName = raw.factorName || raw.factorGroupName || raw.factorSetName || "天然气锅炉燃烧因子组";
+      return {
+        name: model.name,
+        version: log.version || model.version,
+        status: model.status === "停用" ? "停用" : "启用",
+        standard: model.standard,
+        standardCode,
+        standardAttachment,
+        scopeLabel: model.scopeLabel,
+        categoryLabel: categoryLabelText,
+        method: model.method,
+        formula: model.formula,
+        unit: model.unit,
+        measureUnit: model.measureUnit || raw.measureUnit || raw.activityDataType || "Nm³",
+        precision: model.precision || raw.precision || "小数点后 4 位",
+        factorName,
+        activityDataType: raw.activityDataType || raw.factorMatchRule?.activityDataType || "fuel_consumption",
+        matchType: raw.matchType || raw.factorType || "因子组",
+        gwpVersion: raw.gwpVersionCode || raw.gwpVersion || raw.gwp || "AR6",
+        effectiveAt: log.date || model.effectiveAt,
+        expiredAt: index ? log.date || model.effectiveAt : model.expiredAt,
+        score: Math.max(82, 96 - versionOffset * 4),
+        description: log.description
+      };
+    }
+
+    function compareRows(current, history) {
+      return [
+        ["模型名称", current.name, history.name],
+        ["模型版本", current.version, history.version],
+        ["生效时间", current.effectiveAt, history.effectiveAt],
+        ["失效时间", current.expiredAt, history.expiredAt],
+        ["状态", current.status, history.status],
+        ["核算方法", current.method, history.method],
+        ["核算单位", current.unit, history.unit],
+        ["计量单位", current.measureUnit, history.measureUnit],
+        ["计算公式", current.formula, history.formula],
+        ["计算精度", current.precision, history.precision],
+        ["引用标准", current.standard, history.standard],
+        ["标准编号", current.standardCode, history.standardCode],
+        ["标准附件", current.standardAttachment, history.standardAttachment, "file"],
+        ["核算范围", current.scopeLabel, history.scopeLabel],
+        ["排放类别", current.categoryLabel, history.categoryLabel]
+      ];
+    }
+
+    function renderCompareWorkspace(model, logs) {
+      const current = snapshotForVersion(model, logs[0], 0);
+      const history = snapshotForVersion(model, logs[1] || logs[0], logs[1] ? 1 : 0);
+      const rows = compareRows(current, history);
+      const changed = rows.filter(([, left, right]) => String(left || "") !== String(right || "")).length;
+      const score = changed ? Math.max(80, 100 - changed * 5) : 100;
+      const historyOptions = logs.slice(1).map((log, index) => `<option value="${index + 1}">${escapeHtml(log.version)} ${escapeHtml(log.date || "")}</option>`).join("") || `<option value="0">暂无可对比版本</option>`;
+      const renderValue = (value, type) => {
+        if (type === "file") {
+          return `<a class="model-compare-link" href="javascript:void(0)"><span class="material-symbols-outlined">download</span>${escapeHtml(value || "-")}</a>`;
+        }
+        return escapeHtml(value || "-");
+      };
+      return `
+        <div class="model-original-compare-layout">
+          <section class="model-compare-table-card">
+              <table class="model-compare-table">
+                <thead>
+                  <tr>
+                    <th>属性</th>
+                    <th>
+                      <div class="model-compare-head-title">当前生效版本 (${escapeHtml(current.version)})</div>
+                      <span class="model-current-badge">当前启用</span>
+                    </th>
+                    <th>
+                      <div class="model-compare-head-title">当前版本 (${escapeHtml(history.version)})</div>
+                      <select id="version-history-select" class="eco-select eco-control-sm model-history-select">
+                        ${historyOptions}
+                      </select>
+                      <button id="version-rollback-selected" class="eco-btn eco-btn-primary eco-btn-sm model-rollback-button" type="button" ${logs.length > 1 ? "" : "disabled"}>回滚到该版本</button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map(([label, left, right, type]) => {
+                    return `<tr>
+                      <td class="model-compare-label eco-table-head-text">${escapeHtml(label)}</td>
+                      <td class="model-compare-current eco-list-primary-text">${renderValue(left, type)}</td>
+                      <td class="model-compare-history eco-table-cell-text">${renderValue(right, type)}</td>
+                    </tr>`;
+                  }).join("")}
+                </tbody>
+              </table>
+          </section>
+          <aside class="model-compare-side">
+            <section class="model-side-card">
+              <h3>版本影响分析</h3>
+              <div class="model-impact-count"><strong>${changed}</strong><span>项</span><em>配置项变化</em></div>
+              <p>${changed ? "当前版本与所选历史版本存在配置差异。" : "当前版本与所选历史版本配置基本一致。"}</p>
+              <div class="model-score-row"><span>模型合规性评分</span><strong>${score}%</strong></div>
+              <div class="model-score-track"><span style="width:${score}%"></span></div>
+            </section>
+            <section class="model-side-card">
+              <h3>核心变更日志</h3>
+              <div class="model-core-log">
+                <span class="model-log-dot"></span>
+                <div>
+                  <strong>${escapeHtml(logs[0]?.version || model.version)}</strong>
+                  <p>${escapeHtml(logs[0]?.description || "初始化共享模型配置。")}</p>
+                  <em>${escapeHtml(logs[0]?.date || model.effectiveAt)} <span>|</span> 当前版本</em>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      `;
+    }
+
+    function renderRecordWorkspace(model, logs) {
+      return `
+        <div class="space-y-5">
+          <div class="grid grid-cols-3 gap-4">
+            <div class="eco-stat-card"><div class="eco-stat-label">当前版本</div><div class="eco-stat-value text-[22px]">${escapeHtml(model.version)}</div></div>
+            <div class="eco-stat-card"><div class="eco-stat-label">当前状态</div><div class="mt-2"><span class="${statusClass(model.status)}">${escapeHtml(model.status)}</span></div></div>
+            <div class="eco-stat-card"><div class="eco-stat-label">引用标准</div><div class="eco-list-primary-text mt-2 whitespace-normal">${escapeHtml(model.standard)}</div></div>
+          </div>
+          <section class="eco-card-compact">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="eco-section-title">变更记录</h3>
+                <p class="eco-helper-text">按版本发布、状态切换、编辑发布等操作记录模型变更。</p>
+              </div>
+              <span class="eco-pagination-summary">共 ${logs.length} 条</span>
+            </div>
+            <div class="space-y-3">
+              ${logs.map((log, index) => `
+                <div class="model-record-card">
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <div class="eco-list-primary-text">${escapeHtml(log.version)} · ${escapeHtml(log.status)}</div>
+                      <div class="eco-helper-text mt-1">${escapeHtml(log.date)} / ${escapeHtml(log.operator)}</div>
+                    </div>
+                    <span class="${index ? "eco-status-badge eco-status-disabled" : "eco-status-badge eco-status-active"}">${index ? "历史版本" : "当前版本"}</span>
+                  </div>
+                  <div class="eco-list-secondary-text whitespace-normal mt-3">${escapeHtml(log.description)}</div>
+                </div>
+              `).join("")}
+            </div>
+          </section>
+        </div>
+      `;
+    }
+
+    function subpageTable(type, model) {
+      const logs = changeLogs(model);
+      const isVersions = type === "versions";
+      return `
+        <section id="embedded-version-workspace" class="eco-card model-version-workspace">
+          <div class="model-workspace-header">
+            <div>
+              <button id="version-back-button" class="model-back-link" type="button" data-action="back-list">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                <span>返回</span>
+              </button>
+              <h2 id="version-workspace-title" class="model-workspace-title">${isVersions ? "版本管理" : "变更记录"}</h2>
+              <p id="version-workspace-subtitle" class="model-workspace-subtitle">${escapeHtml(model.name)}：${isVersions ? "仅进行版本对比，可选择历史版本并回滚为新版本。" : "按版本发布、状态调整与配置修改记录模型变更。"}</p>
+            </div>
+            <div class="model-workspace-actions">
+              <div class="model-version-tabs">
+                <button id="version-tab-compare" class="model-version-tab ${isVersions ? "active" : ""}" type="button" data-action="workspace-tab" data-target-view="versions">版本对比</button>
+                <button id="version-tab-records" class="model-version-tab ${isVersions ? "" : "active"}" type="button" data-action="workspace-tab" data-target-view="changes">变更记录</button>
+              </div>
+            </div>
+          </div>
+          <div class="model-workspace-body">
+            ${isVersions ? renderCompareWorkspace(model, logs) : renderRecordWorkspace(model, logs)}
+          </div>
+        </section>
+      `;
+    }
+
+    function nextVersion(version = "v1.0.0") {
+      const match = String(version).match(/^(v?)(\d+)\.(\d+)\.(\d+)$/i);
+      if (!match) return "v1.0.1";
+      return `${match[1] || "v"}${match[2]}.${match[3]}.${Number(match[4]) + 1}`;
+    }
+
+    function showModelSubpage(type, model) {
+      state.selectedModelId = model?.id || "";
+      els.filterBar.classList.add("hidden");
+      els.layout.classList.add("hidden");
+      els.subpage.innerHTML = subpageTable(type, model);
+      els.subpage.classList.remove("hidden");
+      els.subpage.dataset.view = type;
+    }
+
+    function showModelList() {
+      state.selectedModelId = "";
+      els.subpage.classList.add("hidden");
+      els.subpage.innerHTML = "";
+      els.filterBar.classList.remove("hidden");
+      els.layout.classList.remove("hidden");
+    }
+
+    function navigateModelPage(pageName, model) {
+      closeDetail();
+      showModelSubpage(pageName === "版本管理" ? "versions" : "changes", model);
+      window.parent?.postMessage?.({
+        type: "model-location",
+        pageName,
+        title: pageName,
+        modelId: model?.id || "",
+        modelName: model?.name || ""
+      }, "*");
+    }
+
+    function closeDetail() {
+      els.detail.classList.add("hidden");
+      els.detail.classList.remove("flex");
+    }
+
+    function findModelFromEvent(event) {
+      const row = event.target.closest("tr[data-model-id]");
+      return row ? models.find(model => String(model.id) === String(row.dataset.modelId)) : null;
+    }
+
+    function updateModelStatus(model) {
+      const nextStatus = model.status === "停用" ? "启用" : "停用";
+      const next = { ...model.raw, status: nextStatus };
+      if (Mock.updateAccountingModel) Mock.updateAccountingModel(model.id, next);
+      else if (Mock.upsertAccountingModel) Mock.upsertAccountingModel(next);
+      else {
+        const index = (Mock.AccountingModels || []).findIndex(item => item.id === model.id);
+        if (index >= 0) Mock.AccountingModels[index] = next;
+        Mock.saveState?.();
+      }
+      refresh();
+    }
+
+    function deleteModel(model) {
+      if (!window.confirm(`确认删除“${model.name}”？`)) return;
+      if (Mock.removeAccountingModel) Mock.removeAccountingModel(model.id);
+      else {
+        Mock.AccountingModels = (Mock.AccountingModels || []).filter(item => item.id !== model.id);
+        Mock.saveState?.();
+      }
+      refresh();
+    }
+
+    function refresh() {
+      loadModels();
+      setupFilterOptions();
+      renderTree();
+      renderRows();
+    }
+
+    function jumpToInputPage() {
+      const pageCount = Math.max(1, Math.ceil(getFilteredModels().length / state.pageSize));
+      state.page = Math.min(pageCount, Math.max(1, Number.parseInt(els.pageJump.value, 10) || 1));
+      renderRows();
+    }
+
+    els.search.addEventListener("input", event => { state.keyword = event.target.value.trim(); state.page = 1; renderRows(); });
+    els.scope.addEventListener("change", event => { state.scope = event.target.value; state.page = 1; renderRows(); });
+    els.reset.addEventListener("click", () => {
+      state.keyword = "";
+      state.scope = "全部";
+      state.status = "全部";
+      state.treeFilter = null;
+      state.page = 1;
+      els.search.value = "";
+      els.scope.value = "全部";
+      renderTree();
+      renderRows();
+    });
+    els.add.addEventListener("click", () => openForm(null));
+    els.pageSize.addEventListener("change", event => { state.pageSize = Number(event.target.value) || 10; state.page = 1; renderRows(); });
+    els.pageJump.addEventListener("change", jumpToInputPage);
+    els.pageJump.addEventListener("keydown", event => { if (event.key === "Enter") jumpToInputPage(); });
+    els.pager.addEventListener("click", event => {
+      const button = event.target.closest("button[data-page]");
+      if (!button || button.disabled) return;
+      const pageCount = Math.max(1, Math.ceil(getFilteredModels().length / state.pageSize));
+      if (button.dataset.page === "prev") state.page = Math.max(1, state.page - 1);
+      else if (button.dataset.page === "next") state.page = Math.min(pageCount, state.page + 1);
+      else state.page = Number(button.dataset.page);
+      renderRows();
+    });
+    els.tree.addEventListener("click", event => {
+      const node = event.target.closest("[data-tree-key]");
+      if (!node) return;
+      const childList = node.nextElementSibling?.tagName === "UL" ? node.nextElementSibling : null;
+      if (childList) {
+        childList.classList.toggle("hidden");
+        if (node.dataset.treeId) {
+          if (childList.classList.contains("hidden")) state.expandedTree.delete(node.dataset.treeId);
+          else state.expandedTree.add(node.dataset.treeId);
+        }
+      }
+      state.treeFilter = { key: node.dataset.treeKey, value: node.dataset.treeValue };
+      state.page = 1;
+      renderTree();
+      renderRows();
+    });
+    els.tbody.addEventListener("click", event => {
+      const actionNode = event.target.closest("[data-action]");
+      if (!actionNode) return;
+      const model = findModelFromEvent(event);
+      if (!model) return;
+      const action = actionNode.dataset.action;
+      if (action === "detail") showDetail(model);
+      if (action === "edit") openForm(model);
+      if (action === "toggle-status") updateModelStatus(model);
+      if (action === "delete") deleteModel(model);
+      if (action === "more") actionNode.nextElementSibling?.classList.toggle("hidden");
+      if (action === "versions") navigateModelPage("版本管理", model);
+      if (action === "changes") navigateModelPage("变更记录", model);
+    });
+    els.subpage.addEventListener("click", event => {
+      if (event.target.closest("[data-action='back-list']")) {
+        showModelList();
+        window.parent?.postMessage?.({ type: "model-location", pageName: "", title: "" }, "*");
+        return;
+      }
+      const tab = event.target.closest("[data-action='workspace-tab']");
+      if (tab) {
+        const model = models.find(item => String(item.id) === String(state.selectedModelId));
+        if (!model) return;
+        const nextView = tab.dataset.targetView === "changes" ? "changes" : "versions";
+        showModelSubpage(nextView, model);
+        window.parent?.postMessage?.({ type: "model-location", pageName: nextView === "versions" ? "版本管理" : "变更记录", title: nextView === "versions" ? "版本管理" : "变更记录" }, "*");
+        return;
+      }
+      if (event.target.closest("[data-action='toggle-publish']")) {
+        els.subpage.querySelector("#version-publish-panel")?.classList.toggle("hidden");
+      }
+    });
+    document.addEventListener("click", event => {
+      if (!event.target.closest("[data-action='more']")) document.querySelectorAll(".eco-dropdown-menu").forEach(menu => menu.classList.add("hidden"));
+    });
+    document.querySelectorAll("[data-close-modal]").forEach(node => node.addEventListener("click", closeForm));
+    document.querySelectorAll("[data-close-detail]").forEach(node => node.addEventListener("click", closeDetail));
+    byId("model-form-save").addEventListener("click", saveForm);
+    byId("model-form-scope").addEventListener("change", event => {
+      fillSelect(byId("model-form-category"), categoryOptions(event.target.value), categoryOptions(event.target.value)[0]?.value || "");
+    });
+    byId("model-form-method").addEventListener("change", event => {
+      byId("model-form-formula").value = formulaByMethod(event.target.value);
+    });
+    window.addEventListener("message", event => {
+      if (event.data?.type === "model-navigate" && event.data.view === "list") {
+        closeDetail();
+        showModelList();
+      }
+    });
+    window.addEventListener("carbon-mock-updated", refresh);
+
+    if (!sharedReady) {
+      els.tbody.innerHTML = `<tr><td class="model-empty-cell" colspan="8">共享模型数据未加载，请确认 shared-mock-data.js 与 model.html 位于同一目录。</td></tr>`;
+      return;
+    }
+    refresh();
+  })();
+  </script>
+</body>
+</html>

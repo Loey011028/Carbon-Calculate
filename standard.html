@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>标准管理</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="./eco-admin-theme.css" rel="stylesheet"/>
+  <script src="./shared-mock-data.js"></script>
+  <style>
+    .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;line-height:1}
+    html,body{height:100%}
+    .standard-shell{height:100vh;min-height:0;display:flex;flex-direction:column}
+    .standard-content{height:100%;flex:1;min-height:0;display:flex;flex-direction:column;padding:16px 18px 18px;overflow:hidden}
+    .standard-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
+    .standard-table-card{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+    .standard-table-area{flex:1;min-height:0;overflow:auto;border:0!important;border-radius:0!important;box-shadow:none!important}
+    .standard-file-box{border:2px dashed var(--eco-line-strong);background:var(--eco-sage-100);border-radius:20px}
+    .standard-file-box:focus-within{box-shadow:0 0 0 4px rgba(111,150,55,.14);border-color:var(--eco-green-500)}
+    .standard-pdf-frame{width:100%;height:62vh;min-height:420px;border:1px solid var(--eco-line);border-radius:16px;background:var(--eco-paper)}
+    @media (max-width: 900px){.standard-content{padding:16px;overflow:auto}.standard-summary-grid{grid-template-columns:1fr}.standard-table-card{min-height:560px}}
+  </style>
+</head>
+<body class="eco-page text-on-surface font-body-md overflow-hidden">
+<main class="eco-app-shell standard-shell">
+  <div class="standard-content">
+    <section class="standard-summary-grid shrink-0">
+      <div class="eco-stat-card">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="eco-stat-label">默认启用标准</div>
+            <div id="enabled-standard-name" class="eco-section-title mt-2 truncate">-</div>
+          </div>
+          <span class="eco-icon-tile material-symbols-outlined">verified</span>
+        </div>
+      </div>
+      <div class="eco-stat-card">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="eco-stat-label">标准文件数量</div>
+            <div id="standard-count" class="eco-stat-value mt-2">0</div>
+          </div>
+          <span class="eco-icon-tile material-symbols-outlined">folder_managed</span>
+        </div>
+      </div>
+      <div class="eco-stat-card">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="eco-stat-label">最近上传</div>
+            <div id="latest-standard-time" class="eco-section-title mt-2">-</div>
+          </div>
+          <span class="eco-icon-tile material-symbols-outlined">upload_file</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="eco-filter-bar shrink-0 overflow-x-auto whitespace-nowrap mb-4">
+      <label class="eco-filter-label"><span class="eco-form-label">标准名称：</span><input id="standard-search-input" class="eco-input eco-filter-input" placeholder="请输入标准名称" type="text"/></label>
+      <label class="eco-filter-label"><span class="eco-form-label">状态：</span><select id="standard-status-filter" class="eco-select eco-filter-select-sm"><option value="">全部</option><option value="enabled">启用</option><option value="disabled">未启用</option></select></label>
+      <button id="standard-reset-btn" class="eco-btn eco-btn-secondary eco-btn-sm shrink-0 whitespace-nowrap" type="button">重置</button>
+      <button id="add-standard-btn" class="eco-btn eco-btn-primary eco-filter-spacer shrink-0 whitespace-nowrap" type="button"><span class="material-symbols-outlined text-sm">add</span>新增标准</button>
+    </section>
+
+    <section class="eco-card standard-table-card">
+      <div class="px-5 py-4 border-b eco-divider flex items-center justify-between">
+        <h3 class="eco-section-title">统一标准列表</h3>
+        <span class="eco-muted-text">仅一个标准文件可作为默认启用文件</span>
+      </div>
+      <div class="eco-table-wrap standard-table-area">
+        <table class="eco-table table-fixed">
+          <thead>
+            <tr>
+              <th class="w-[23%] eco-table-head-text">标准名称</th>
+              <th class="w-[22%] eco-table-head-text">标准文件</th>
+              <th class="w-[12%] eco-table-head-text">状态</th>
+              <th class="w-[18%] eco-table-head-text">上传时间</th>
+              <th class="w-[15%] eco-table-head-text">备注说明</th>
+              <th class="w-[10%] eco-table-head-text text-center">操作</th>
+            </tr>
+          </thead>
+          <tbody id="standard-table-body"></tbody>
+        </table>
+      </div>
+      <div class="eco-pagination">
+        <div id="standard-pagination-summary" class="eco-pagination-summary">共 0 条</div>
+        <div class="eco-pagination-controls">
+          <button id="standard-pagination-prev" class="eco-btn eco-btn-secondary eco-btn-square-sm" type="button"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+          <div id="standard-pagination-pages" class="eco-pagination-pages"></div>
+          <button id="standard-pagination-next" class="eco-btn eco-btn-secondary eco-btn-square-sm" type="button"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+          <select id="standard-pagination-size" class="eco-select eco-page-size">
+            <option value="5">5 条/页</option>
+            <option value="10">10 条/页</option>
+            <option value="20">20 条/页</option>
+          </select>
+          <input id="standard-pagination-jump" class="eco-input eco-page-jump" min="1" type="number" value="1"/>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div id="standard-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="eco-card w-[720px] max-w-[94vw] max-h-[90vh] flex flex-col overflow-hidden">
+    <div class="shrink-0 p-6 border-b eco-divider flex items-center justify-between">
+      <h2 class="eco-section-title">新增标准</h2>
+      <button id="close-standard-modal" type="button" class="text-outline hover:text-on-surface"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto p-6 space-y-5">
+      <section class="eco-form-card p-4">
+        <h3 class="eco-form-heading mb-4">标准信息</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="eco-field">
+            <label class="eco-form-label">标准名称 <span class="text-error">*</span></label>
+            <input id="standard-name-input" class="eco-input h-11" placeholder="请输入标准名称" type="text"/>
+          </div>
+          <div class="eco-field">
+            <label class="eco-form-label">是否默认启用</label>
+            <select id="standard-enabled-input" class="eco-select h-11">
+              <option value="false">否</option>
+              <option value="true">是</option>
+            </select>
+          </div>
+          <div class="eco-field col-span-2">
+            <label class="eco-form-label">上传标准文件 <span class="text-error">*</span></label>
+            <label class="standard-file-box flex flex-col items-center justify-center p-8 cursor-pointer text-center">
+              <span class="material-symbols-outlined text-4xl text-outline mb-3">cloud_upload</span>
+              <span id="standard-file-title" class="eco-upload-title">点击上传相关标准文件</span>
+              <span id="standard-file-desc" class="eco-upload-desc mt-1">支持 PDF、Word、Excel、图片等标准文件</span>
+              <input id="standard-file-input" class="hidden" type="file"/>
+            </label>
+          </div>
+          <div class="eco-field col-span-2">
+            <label class="eco-form-label">备注说明</label>
+            <textarea id="standard-remark-input" class="eco-textarea" placeholder="请输入标准来源、适用范围或版本说明"></textarea>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="shrink-0 p-6 border-t eco-divider flex justify-end gap-3">
+      <button id="cancel-standard-modal" type="button" class="eco-btn eco-btn-secondary">取消</button>
+      <button id="save-standard-btn" type="button" class="eco-btn eco-btn-primary">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="standard-view-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="eco-card w-[1040px] max-w-[96vw] max-h-[92vh] overflow-hidden flex flex-col">
+    <div class="px-6 py-4 border-b eco-divider flex items-center justify-between">
+      <h2 class="eco-section-title">标准文件查看</h2>
+      <button data-close-view type="button" class="text-outline hover:text-on-surface"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div id="standard-view-body" class="p-6 space-y-4 overflow-y-auto"></div>
+    <div class="px-6 py-4 border-t eco-divider flex justify-end">
+      <button data-close-view type="button" class="eco-btn eco-btn-primary">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const storageKey="carbon-standard-management-v1";
+const defaultStandards=[{id:"std-iso-14064-1-2018",name:"ISO 14064-1:2018 Greenhouse gases - Part 1",code:"ISO 14064-1:2018",issuer:"ISO",year:"2018",type:"组织层面温室气体量化与报告标准",fileName:"ISO 14064-1:2018 official standard page",fileType:"text/html",fileSize:0,uploadedAt:"2026-07-21 00:00",remark:"ISO 官方标准记录页。ISO 正文为授权标准，系统维护官方来源链接，不内置未授权 PDF。",enabled:true,builtIn:true,dataUrl:"",fileUrl:"https://www.iso.org/standard/66453.html",referenceUrl:"https://www.iso.org/standard/66453.html"},{id:"std-iso-14064-3-2019",name:"ISO 14064-3:2019 Greenhouse gases - Part 3",code:"ISO 14064-3:2019",issuer:"ISO",year:"2019",type:"温室气体声明审定与核证规范",fileName:"ISO 14064-3:2019 official standard page",fileType:"text/html",fileSize:0,uploadedAt:"2026-07-21 00:00",remark:"ISO 官方标准记录页。ISO 正文为授权标准，系统维护官方来源链接，不内置未授权 PDF。",enabled:false,builtIn:true,dataUrl:"",fileUrl:"https://www.iso.org/standard/66455.html",referenceUrl:"https://www.iso.org/standard/66455.html"},{id:"std-ghgp-corporate-revised",name:"GHG Protocol Corporate Accounting and Reporting Standard",code:"GHG-PROTOCOL-CORPORATE-REVISED",issuer:"World Resources Institute / WBCSD",year:"2004",type:"企业温室气体核算与报告标准",fileName:"ghg-protocol-revised.pdf",fileType:"application/pdf",fileSize:0,uploadedAt:"2026-07-21 00:00",remark:"GHG Protocol 官方企业核算与报告标准 PDF。",enabled:false,builtIn:true,dataUrl:"",fileUrl:"https://ghgprotocol.org/sites/default/files/standards/ghg-protocol-revised.pdf",referenceUrl:"https://ghgprotocol.org/corporate-standard"},{id:"std-ghgp-scope-2-guidance",name:"GHG Protocol Scope 2 Guidance",code:"GHG-PROTOCOL-SCOPE-2-GUIDANCE",issuer:"World Resources Institute",year:"2015",type:"范围二核算指南",fileName:"ghg-protocol-scope-2-guidance.pdf",fileType:"application/pdf",fileSize:0,uploadedAt:"2026-07-21 00:00",remark:"GHG Protocol 官方范围二核算指南 PDF。",enabled:false,builtIn:true,dataUrl:"",fileUrl:"https://ghgprotocol.org/sites/default/files/standards/ghg-protocol-scope-2-guidance.pdf",referenceUrl:"https://ghgprotocol.org/scope-2-guidance"},{id:"std-ghgp-scope-3-standard",name:"GHG Protocol Corporate Value Chain (Scope 3) Standard",code:"GHG-PROTOCOL-SCOPE-3-STANDARD",issuer:"World Resources Institute / WBCSD",year:"2011",type:"范围三价值链核算与报告标准",fileName:"Corporate-Value-Chain-Accounting-Reporing-Standard_041613_2.pdf",fileType:"application/pdf",fileSize:0,uploadedAt:"2026-07-21 00:00",remark:"GHG Protocol 官方范围三价值链核算与报告标准 PDF。",enabled:false,builtIn:true,dataUrl:"",fileUrl:"https://ghgprotocol.org/sites/default/files/standards/Corporate-Value-Chain-Accounting-Reporing-Standard_041613_2.pdf",referenceUrl:"https://ghgprotocol.org/corporate-value-chain-scope-3-standard"}];
+const Mock=window.CarbonAccountingMock||{};
+const $=(id)=>document.getElementById(id);
+const esc=(v)=>String(v??"").replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let standards=loadStandards();
+let selectedFile=null,selectedFileDataUrl="";
+let currentPage=1,pageSize=5;
+
+function sharedStandards(){const rows=typeof Mock.getStandardFiles==="function"?Mock.getStandardFiles():Mock.StandardFiles;return Array.isArray(rows)&&rows.length?rows:defaultStandards}
+function loadStandards(){try{const base=sharedStandards(),saved=JSON.parse(localStorage.getItem(storageKey)||"[]");const merged=[...base,...saved.filter(x=>!base.some(d=>d.id===x.id))];return ensureSingleEnabled(merged)}catch(e){return ensureSingleEnabled(sharedStandards().slice())}}
+function syncStandardsToShared(){if(!Mock)return;standards=ensureSingleEnabled(standards);standards.forEach(item=>Mock.upsertStandardFile?.({...item}));Mock.StandardFiles=standards.map(item=>({...item}));Mock.saveState?.()}
+function saveStandards(){localStorage.setItem(storageKey,JSON.stringify(standards.filter(x=>!x.builtIn)));syncStandardsToShared()}
+function ensureSingleEnabled(rows){let enabledSeen=false;const normalized=rows.map((x,i)=>{const enabled=x.enabled===true&&!enabledSeen;if(enabled)enabledSeen=true;return{...x,enabled}});if(!enabledSeen&&normalized[0])normalized[0].enabled=true;return normalized}
+function fileSizeLabel(size){if(!size)return "内置文件";if(size<1024*1024)return Math.max(1,Math.round(size/1024))+" KB";return (size/1024/1024).toFixed(1)+" MB"}
+function isPdfStandard(item){return String(item?.fileType||"").includes("pdf")||/\.pdf$/i.test(String(item?.fileName||""))}
+function standardPreviewUrl(item){return item?.dataUrl||item?.fileUrl||""}
+function nowText(){const d=new Date(),pad=(n)=>String(n).padStart(2,"0");return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes())}
+function filteredStandards(){const q=$("standard-search-input").value.trim().toLowerCase(),status=$("standard-status-filter").value;return standards.filter(item=>(!q||item.name.toLowerCase().includes(q)||item.fileName.toLowerCase().includes(q))&&(!status||(status==="enabled"?item.enabled:!item.enabled)))}
+function renderSummary(){const enabled=standards.find(x=>x.enabled)||standards[0],latest=standards.slice().sort((a,b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)))[0];$("enabled-standard-name").textContent=enabled?.name||"-";$("standard-count").textContent=standards.length;$("latest-standard-time").textContent=latest?.uploadedAt||"-"}
+function pageBounds(total){const totalPages=Math.max(1,Math.ceil(total/pageSize));currentPage=Math.min(Math.max(1,currentPage),totalPages);return{totalPages,start:(currentPage-1)*pageSize,end:Math.min(total,currentPage*pageSize)}}
+function renderPagination(){const total=filteredStandards().length,{totalPages,start,end}=pageBounds(total),pages=[];for(let i=1;i<=totalPages;i++)pages.push('<button type="button" class="eco-btn '+(i===currentPage?"eco-btn-primary":"eco-btn-secondary")+' eco-btn-sm" data-page="'+i+'">'+i+'</button>');$("standard-pagination-summary").textContent=total?"共 "+total+" 条，显示 "+(start+1)+"-"+end+" 条":"共 0 条";$("standard-pagination-pages").innerHTML=pages.join("");$("standard-pagination-prev").disabled=currentPage<=1;$("standard-pagination-next").disabled=currentPage>=totalPages;$("standard-pagination-jump").value=currentPage}
+function renderTable(){const rows=filteredStandards(),bounds=pageBounds(rows.length),pageRows=rows.slice(bounds.start,bounds.end);$("standard-table-body").innerHTML=pageRows.length?pageRows.map(item=>'<tr><td><div class="eco-list-primary-text truncate">'+esc(item.name)+'</div></td><td><button type="button" class="eco-link-text" data-action="view" data-id="'+esc(item.id)+'">'+esc(item.fileName)+'</button><div class="eco-list-secondary-text">'+esc(fileSizeLabel(item.fileSize))+'</div></td><td><span class="eco-tag '+(item.enabled?"eco-tag-success":"eco-tag-muted")+'">'+(item.enabled?"默认启用":"未启用")+'</span></td><td class="eco-table-cell-text">'+esc(item.uploadedAt)+'</td><td class="eco-table-cell-text truncate" title="'+esc(item.remark||"-")+'">'+esc(item.remark||"-")+'</td><td><div class="eco-action-buttons"><button type="button" class="eco-btn eco-btn-secondary eco-action-btn" data-action="view" data-id="'+esc(item.id)+'">查看</button><button type="button" class="eco-btn eco-btn-secondary eco-action-btn" data-action="enable" data-id="'+esc(item.id)+'" '+(item.enabled?"disabled":"")+'>启用</button></div></td></tr>').join(""):'<tr><td colspan="6" class="py-10 text-center eco-muted-text">暂无匹配标准</td></tr>';renderSummary();renderPagination()}
+function resetForm(){selectedFile=null;selectedFileDataUrl="";$("standard-name-input").value="";$("standard-enabled-input").value="false";$("standard-file-input").value="";$("standard-remark-input").value="";$("standard-file-title").textContent="点击上传相关标准文件";$("standard-file-desc").textContent="支持 PDF、Word、Excel、图片等标准文件"}
+function setModalVisible(show){$("standard-modal").classList.toggle("hidden",!show);$("standard-modal").classList.toggle("flex",show);if(show)resetForm()}
+function toast(message){let t=document.getElementById("standard-toast");if(!t){t=document.createElement("div");t.id="standard-toast";t.className="fixed right-6 bottom-6 z-[90] bg-slate-900 text-white text-xs px-4 py-2 rounded shadow-lg transition-opacity";document.body.appendChild(t)}t.textContent=message;t.style.opacity="1";clearTimeout(t.__timer);t.__timer=setTimeout(()=>{t.style.opacity="0"},1600)}
+function saveStandard(){const name=$("standard-name-input").value.trim(),remark=$("standard-remark-input").value.trim(),enabled=$("standard-enabled-input").value==="true";if(!name)return toast("请输入标准名称");if(!selectedFile)return toast("请上传相关标准文件");if(enabled)standards=standards.map(x=>({...x,enabled:false}));standards.unshift({id:"std-"+Date.now(),name,fileName:selectedFile.name,fileType:selectedFile.type,fileSize:selectedFile.size,uploadedAt:nowText(),remark,enabled,builtIn:false,dataUrl:selectedFileDataUrl});standards=ensureSingleEnabled(standards);currentPage=1;saveStandards();setModalVisible(false);renderTable();toast("标准已保存")}
+function enableStandard(id){standards=standards.map(x=>({...x,enabled:x.id===id}));saveStandards();renderTable();toast("默认启用标准已更新")}
+function viewStandard(id){const item=standards.find(x=>x.id===id);if(!item)return;const body=$("standard-view-body"),previewUrl=standardPreviewUrl(item),pdfPreview=isPdfStandard(item)&&previewUrl;const detailHtml='<div class="grid grid-cols-2 gap-4"><div class="eco-detail-card"><div class="eco-detail-label">标准名称</div><div class="eco-detail-value">'+esc(item.name)+'</div></div><div class="eco-detail-card"><div class="eco-detail-label">文件名称</div><div class="eco-detail-value">'+esc(item.fileName)+'</div></div><div class="eco-detail-card"><div class="eco-detail-label">文件大小</div><div class="eco-detail-value">'+esc(fileSizeLabel(item.fileSize))+'</div></div><div class="eco-detail-card"><div class="eco-detail-label">状态</div><div class="eco-detail-value">'+(item.enabled?"默认启用":"未启用")+'</div></div></div><div class="eco-detail-card"><div class="eco-detail-label">备注说明</div><div class="eco-detail-value">'+esc(item.remark||"-")+'</div></div>';body.innerHTML=pdfPreview?detailHtml+'<iframe id="standard-pdf-preview" class="standard-pdf-frame" title="标准 PDF 内容预览" src="'+esc(previewUrl)+'"></iframe>':detailHtml+'<div id="standard-pdf-preview" class="standard-file-box p-8 text-center eco-muted-text">该文件不是 PDF，当前仅展示文件记录信息。</div>';$("standard-view-modal").classList.remove("hidden");$("standard-view-modal").classList.add("flex")}
+
+$("add-standard-btn").onclick=()=>setModalVisible(true);
+$("close-standard-modal").onclick=()=>setModalVisible(false);
+$("cancel-standard-modal").onclick=()=>setModalVisible(false);
+$("save-standard-btn").onclick=saveStandard;
+$("standard-file-input").onchange=()=>{const file=$("standard-file-input").files[0];if(!file)return;selectedFile=file;$("standard-file-title").textContent=file.name;$("standard-file-desc").textContent=fileSizeLabel(file.size);const reader=new FileReader();reader.onload=()=>{selectedFileDataUrl=String(reader.result||"")};reader.readAsDataURL(file)};
+$("standard-search-input").addEventListener("input",()=>{currentPage=1;renderTable()});
+$("standard-status-filter").addEventListener("change",()=>{currentPage=1;renderTable()});
+$("standard-reset-btn").onclick=()=>{$("standard-search-input").value="";$("standard-status-filter").value="";currentPage=1;renderTable()};
+$("standard-table-body").addEventListener("click",(e)=>{const btn=e.target.closest("[data-action]");if(!btn)return;if(btn.dataset.action==="enable")enableStandard(btn.dataset.id);if(btn.dataset.action==="view")viewStandard(btn.dataset.id)});
+$("standard-pagination-prev").onclick=()=>{currentPage-=1;renderTable()};
+$("standard-pagination-next").onclick=()=>{currentPage+=1;renderTable()};
+$("standard-pagination-pages").addEventListener("click",(e)=>{const btn=e.target.closest("[data-page]");if(!btn)return;currentPage=Number(btn.dataset.page)||1;renderTable()});
+$("standard-pagination-size").onchange=()=>{pageSize=Number($("standard-pagination-size").value)||5;currentPage=1;renderTable()};
+$("standard-pagination-jump").onchange=()=>{currentPage=Number($("standard-pagination-jump").value)||1;renderTable()};
+document.querySelectorAll("[data-close-view]").forEach(btn=>btn.onclick=()=>{$("standard-view-modal").classList.add("hidden");$("standard-view-modal").classList.remove("flex")});
+renderTable();
+</script>
+</body>
+</html>
