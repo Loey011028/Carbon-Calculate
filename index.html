@@ -4,11 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>碳核算管理平台 - 模块整合</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-  <link href="./eco-admin-theme.css" rel="stylesheet" />
   <script>
     tailwind.config = {
       theme: {
@@ -28,6 +23,11 @@
       }
     };
   </script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="./eco-admin-theme.css?v=20260722-shell2" rel="stylesheet" />
   <style>
     :root {
       --eco-green-950: #0f321f;
@@ -189,10 +189,6 @@
       transition: opacity 160ms ease;
     }
 
-    .frame-loading #content-frame {
-      opacity: 0.35;
-    }
-
     #loading-mask > div {
       border: 1px solid var(--eco-line) !important;
       border-radius: 999px !important;
@@ -286,6 +282,7 @@
   </div>
 
   <script>
+    const APP_VERSION = "20260722-shell2";
     const modules = {
       boundary: { title: "核算边界管理", url: "./boundary.html" },
       source: { title: "排放源管理", url: "./source.html" },
@@ -313,7 +310,7 @@
 
       frameShell.classList.add("frame-loading");
       loadingMask.classList.remove("hidden");
-      frame.src = module.url;
+      frame.src = `${module.url}?v=${APP_VERSION}`;
       history.replaceState(null, "", "#" + moduleKey);
     }
 
