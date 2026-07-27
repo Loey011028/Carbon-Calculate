@@ -1,4 +1,4 @@
-﻿(function (root) {
+(function (root) {
   const STORAGE_KEY = "carbon-accounting-mock-state-v7-boundary-source-model-match";
   const FACTOR_LIBRARY_VERSION = "emission-source-required-v2-standards";
   const ACTIVITY_RECORDS_VERSION = "datasource-excel-ledger-v2";
@@ -33,7 +33,8 @@
     process_emission: "工艺过程排放",
     fugitive_emission: "逸散排放",
     purchased_electricity: "外购电力",
-    purchased_heat_steam: "外购热力/蒸汽",
+    purchased_steam: "外购蒸汽",
+    purchased_heat: "外购热力",
     purchased_cooling: "外购制冷",
     purchased_goods_services: "类别1：购买的商品和服务",
     capital_goods: "类别2：资本品",
@@ -64,6 +65,7 @@
     office_living_electricity: "办公与生活用电",
     production_equipment_electricity: "生产设备用电",
     purchased_steam: "外购蒸汽",
+    purchased_heat: "外购热力",
     upstream_transport: "上游运输",
     employee_commuting_ledger: "员工通勤"
   };
@@ -86,10 +88,17 @@
           ]
         },
         {
-          category: "purchased_heat_steam",
-          categoryLabel: "外购热力/蒸汽",
+          category: "purchased_steam",
+          categoryLabel: "外购蒸汽",
           children: [
             { sourceType: "purchased_steam", sourceTypeLabel: "外购蒸汽" }
+          ]
+        },
+        {
+          category: "purchased_heat",
+          categoryLabel: "外购热力",
+          children: [
+            { sourceType: "purchased_heat", sourceTypeLabel: "外购热力" }
           ]
         }
       ]
@@ -461,7 +470,8 @@
     ],
     scope2: [
       { category: "purchased_electricity", categoryLabel: "外购电力", description: "企业购买并消耗的电力对应的能源间接排放。" },
-      { category: "purchased_heat_steam", categoryLabel: "外购热力/蒸汽", description: "企业购买并消耗的热力、热水或蒸汽对应的能源间接排放。" },
+      { category: "purchased_steam", categoryLabel: "外购蒸汽", description: "企业购买并消耗的蒸汽对应的能源间接排放。" },
+      { category: "purchased_heat", categoryLabel: "外购热力", description: "企业购买并消耗的热力、热水或集中供热对应的能源间接排放。" },
       { category: "purchased_cooling", categoryLabel: "外购制冷", description: "企业购买并消耗的冷量或集中制冷对应的能源间接排放。" }
     ],
     scope3: [
@@ -490,12 +500,12 @@
   ];
 
   const DataSources = [
-    { id: "ds-1", name: "办公楼总电表", type: "smart-meter", groupKey: "smart-meter", meterType: "electric", meterTypeLabel: "电表", unit: "kWh", activityDataType: "electricity_consumption", org: "华东园区", frequency: "自动拉取", status: "在线", time: "2026-06-29 10:30", meterName: "办公楼总电表", macAddress: "GW-HQ-01", meterSearchKeyword: "办公楼总电表 / GW-HQ-01" },
+    { id: "ds-1", name: "办公楼总电表", type: "smart-meter", groupKey: "smart-meter", meterType: "electric", meterTypeLabel: "电表", unit: "kWh", activityDataType: "electricity_consumption", org: "华东园区", frequency: "自动拉取", status: "在线", time: "2026-06-29 10:30", meterName: "办公楼总电表", pid: "PID-EM-001", macAddress: "GW-HQ-01", meterSearchKeyword: "办公楼总电表 / PID-EM-001 / GW-HQ-01" },
     { id: "ds-3", name: "R410A充注记录", type: "manual", groupKey: "manual", meterType: "refrigerant", meterTypeLabel: "制冷剂台账", unit: "kg", energyType: "R410A", energyUnit: "kg", energyAmount: 18.5, timeGranularity: "月", timeDimension: "2026-06", belongingSpace: "办公楼", activityDataType: "replenishment_amount", org: "华东园区", frequency: "手工录入", status: "在线", manualRows: [
       { energyAmount: 18.5, timeGranularity: "月", timeDimension: "2026-06", belongingSpace: "办公楼" },
       { energyAmount: 12, timeGranularity: "月", timeDimension: "2026-05", belongingSpace: "办公楼" }
     ] },
-    { id: "ds-6", name: "锅炉房天然气表", type: "smart-meter", groupKey: "smart-meter", meterType: "gas", meterTypeLabel: "燃气表", unit: "Nm³", activityDataType: "fuel_consumption", org: "华东园区", frequency: "自动拉取", status: "在线", time: "2026-07-15 09:20", meterName: "锅炉房天然气表", macAddress: "GW-BLR-01", meterSearchKeyword: "锅炉房天然气表 / GW-BLR-01" },
+    { id: "ds-6", name: "锅炉房天然气表", type: "smart-meter", groupKey: "smart-meter", meterType: "gas", meterTypeLabel: "燃气表", unit: "Nm³", activityDataType: "fuel_consumption", org: "华东园区", frequency: "自动拉取", status: "在线", time: "2026-07-15 09:20", meterName: "锅炉房天然气表", pid: "PID-GM-006", macAddress: "GW-BLR-01", meterSearchKeyword: "锅炉房天然气表 / PID-GM-006 / GW-BLR-01" },
     { id: "ds-10", name: "柴油加注手工台账", type: "manual", groupKey: "manual", meterType: "fuel-ledger", meterTypeLabel: "燃料台账", unit: "L", energyType: "柴油", energyUnit: "L", energyAmount: 320, timeGranularity: "日", timeDimension: "2026-06-29", belongingSpace: "仓储区", activityDataType: "fuel_consumption", org: "西北生产基地", frequency: "手工录入", status: "在线", manualRows: [
       { energyAmount: 320, timeGranularity: "日", timeDimension: "2026-06-29", belongingSpace: "仓储区" },
       { energyAmount: 280, timeGranularity: "日", timeDimension: "2026-06-22", belongingSpace: "仓储区" }
@@ -647,19 +657,34 @@
         ]
       }]
     },
-    purchased_heat_steam: {
-      category: "purchased_heat_steam",
-      activityDataType: "heat_steam_consumption",
-      activityDataTypeLabel: "外购热力/蒸汽量",
-      defaultUnit: "GJ",
+    purchased_steam: {
+      category: "purchased_steam",
+      activityDataType: "steam_consumption",
+      activityDataTypeLabel: "外购蒸汽量",
+      defaultUnit: "t",
       params: [{
         key: "energyType",
-        label: "能源类型",
+        label: "蒸汽类型",
         allowCustom: true,
         options: [
           { value: "steam", label: "蒸汽", unit: "t" },
-          { value: "hot_water", label: "热水", unit: "GJ" },
+          { value: "__custom__", label: "自定义" }
+        ]
+      }]
+    },
+    purchased_heat: {
+      category: "purchased_heat",
+      activityDataType: "heat_consumption",
+      activityDataTypeLabel: "外购热力量",
+      defaultUnit: "GJ",
+      params: [{
+        key: "energyType",
+        label: "热力类型",
+        allowCustom: true,
+        options: [
           { value: "heat", label: "热力", unit: "GJ" },
+          { value: "hot_water", label: "热水", unit: "GJ" },
+          { value: "district_heating", label: "集中供热", unit: "GJ" },
           { value: "__custom__", label: "自定义" }
         ]
       }]
@@ -1481,11 +1506,17 @@ const ModelStandardRules = {
     factorFields: ["categoryCode", "activityDataType", "standardId", "electricityRegion"],
     description: "外购电力按电网区域或电力因子口径匹配因子。"
   },
-  purchased_heat_steam: {
+  purchased_steam: {
     defaultStandardId: "std-ghgp-corporate-revised",
     activityDataType: "steam_consumption",
     factorFields: ["categoryCode", "activityDataType", "standardId", "energyType"],
-    description: "外购热力/蒸汽按能源类型匹配因子。"
+    description: "外购蒸汽按蒸汽类型匹配因子。"
+  },
+  purchased_heat: {
+    defaultStandardId: "std-ghgp-corporate-revised",
+    activityDataType: "heat_consumption",
+    factorFields: ["categoryCode", "activityDataType", "standardId", "energyType"],
+    description: "外购热力按热力类型匹配因子。"
   },
   purchased_cooling: {
     defaultStandardId: "std-ghgp-corporate-revised",
@@ -1684,8 +1715,9 @@ function getDefaultFactorMatchFields(categoryCode) {
     if (type === "smart-meter") {
       normalized.frequency = "自动拉取";
       normalized.meterName = normalized.meterName || normalized.name || "";
+      normalized.pid = normalized.pid || normalized.PID || normalized.productId || normalized.productID || normalized.productPid || "";
       normalized.macAddress = normalized.macAddress || normalized.mac || normalized.gateway || "";
-      normalized.meterSearchKeyword = normalized.meterSearchKeyword || [normalized.meterName, normalized.macAddress].filter(Boolean).join(" / ");
+      normalized.meterSearchKeyword = normalized.meterSearchKeyword || [normalized.meterName, normalized.pid, normalized.macAddress].filter(Boolean).join(" / ");
     }
 
     if (type === "manual") {
@@ -1840,8 +1872,7 @@ function matchModel(source, models = api.AccountingModels, period = "") {
   const inferredScope = source.scope || inferScopeByCategory(categoryCode, source.sourceType) || "";
   const periodValue = period || source.period || "";
 
-  return (
-    models.find((model) => {
+  const candidates = models.filter((model) => {
       if (!model || model.status === "停用") return false;
 
       const modelCategory = model.categoryCode || model.category || "";
@@ -1852,9 +1883,9 @@ function matchModel(source, models = api.AccountingModels, period = "") {
         modelCategory === categoryCode &&
         isModelPeriodMatched(model, periodValue)
       );
-    }) ||
-    null
-  );
+    });
+
+  return chooseCurrentVersion(candidates, periodValue) || candidates[0] || null;
 }
 
   function matchFactor(sourceOrModel, factors = api.EmissionFactors || api.FactorLibraryGroups) {
@@ -2257,7 +2288,7 @@ function refreshBoundaryClosureStatuses() {
 
     if (getEmissionGroupByCategory(categoryCode)?.groupCode) {
       if (["stationary_combustion", "mobile_combustion", "process_emission", "fugitive_emission"].includes(categoryCode)) return "scope1";
-      if (["purchased_electricity", "purchased_heat_steam", "purchased_cooling"].includes(categoryCode)) return "scope2";
+      if (["purchased_electricity", "purchased_steam", "purchased_heat", "purchased_cooling"].includes(categoryCode)) return "scope2";
       return "scope3";
     }
 
@@ -2506,6 +2537,7 @@ function refreshBoundaryClosureStatuses() {
   const expireDate = model.expireDate || model.expiredAt || "";
   const periodStart = model.periodStart || model.matchRule?.periodStart || String(effectiveDate).slice(0, 7);
   const periodEnd = model.periodEnd || model.matchRule?.periodEnd || String(expireDate || "").slice(0, 7);
+  const modelGroupId = model.modelGroupId || model.masterModelId || model.groupId || model.rootModelId || model.id || `amg-${inferredScope}-${categoryCode}-${standardId || "standard"}`;
 
   const factorMatchRule = {
     ...(model.factorMatchRule || {}),
@@ -2521,6 +2553,7 @@ function refreshBoundaryClosureStatuses() {
   return {
     ...model,
     id: model.id || `am-${Date.now()}`,
+    modelGroupId,
     scope: inferredScope,
     category: categoryCode,
     categoryCode,
@@ -3014,8 +3047,12 @@ function refreshBoundaryClosureStatuses() {
       return "用电量";
     }
 
+    if (source.activityDataType === "steam_consumption") {
+      return "蒸汽";
+    }
+
     if (source.activityDataType === "heat_consumption") {
-      return "热力/蒸汽";
+      return "热力";
     }
 
     return getActivityDataLabel(source.activityDataType) || "未配置";
@@ -3070,6 +3107,10 @@ function normalizeBoundaryCategory(boundaryCategory = {}) {
       ? Number(boundaryCategory.closureRate)
       : 0,
 
+    activityDataType: boundaryCategory.activityDataType || "",
+    activityDataTypeLabel: boundaryCategory.activityDataTypeLabel || boundaryCategory.activityDataLabel || "",
+    activityDataLabel: boundaryCategory.activityDataLabel || boundaryCategory.activityDataTypeLabel || "",
+
     description:
       boundaryCategory.description ||
       option.description ||
@@ -3105,7 +3146,7 @@ function normalizeBoundaryCategory(boundaryCategory = {}) {
     return { ok: true, item: normalized };
   }
 
-  function addCustomScope3BoundaryCategory(label, description = "") {
+  function addCustomScope3BoundaryCategory(label, description = "", activityOptions = {}) {
     const categoryLabel = String(label || "").trim();
     if (!categoryLabel) {
       return { ok: false, reason: "empty", message: "请输入范围三自定义类别名称。" };
@@ -3120,9 +3161,47 @@ function normalizeBoundaryCategory(boundaryCategory = {}) {
     CategoryLabelToCode[categoryLabel] = category;
     api.CategoryCodeToLabel[category] = categoryLabel;
     api.CategoryLabelToCode[categoryLabel] = category;
+    const activityDataTypeLabel = String(activityOptions.activityDataTypeLabel || activityOptions.activityDataLabel || "").trim();
+    const activityDataType = String(activityOptions.activityDataType || "").trim() || (activityDataTypeLabel ? makeCustomParamCode(activityDataTypeLabel).replace(/^custom_/, "custom_activity_") : "");
+   // 【修改】：动态读取用户输入的参数名称，无输入则兜底为 "具体类型"
+    const userParamLabel = String(activityOptions.paramLabel || activityOptions.customParamLabel || "").trim() || "具体类型";
+
+    if (activityDataTypeLabel) {
+      const currentSchemas = api.ActivityParamSchemas || {};
+      const currentSchema = currentSchemas[category] || {};
+      api.ActivityParamSchemas = {
+        ...currentSchemas,
+        [category]: {
+          ...currentSchema,
+          category,
+          activityDataType,
+          activityDataTypeLabel,
+          activityDataLabel: activityDataTypeLabel,
+          defaultUnit: activityOptions.defaultUnit || "",
+          params: [{
+            key: "customSpecificType",
+            label: userParamLabel, // 使用用户自定义的参数 label
+            allowCustom: true,
+            options: [{ value: "__custom__", label: "自定义" }]
+          }],
+          custom: true
+        }
+      };
+    }
+
     api.BoundaryCategoryOptions.scope3.push({ category, categoryLabel, description: description || `${categoryLabel}相关的范围三自定义间接排放类别。` });
-    return api.upsertBoundaryCategory({ scope: "scope3", category, categoryLabel, description, status: "启用" });
-  }
+    return api.upsertBoundaryCategory({ 
+        scope: "scope3", 
+        category, 
+        categoryLabel, 
+        description, 
+        status: "启用", 
+        activityDataType, 
+        activityDataTypeLabel, 
+        activityDataLabel: activityDataTypeLabel 
+    });
+}
+    
 
   function getBoundaryTree() {
     const scopeOrder = ["scope1", "scope2", "scope3"];
@@ -3146,6 +3225,12 @@ function normalizeBoundaryCategory(boundaryCategory = {}) {
 
 function getSourceCategoryTree() {
   const sourceCategoryMap = new Map();
+  const builtinGroupOrder = new Map(FactorBuiltinCategoryTree.map((group, index) => [group.groupCode, index]));
+  const builtinCategorySet = new Set(
+    FactorBuiltinCategoryTree.flatMap((group) =>
+      (group.children || []).map((category) => category.category || category.categoryCode)
+    )
+  );
 
   (api.EmissionSources || []).forEach((source) => {
     if (!source || source.status === "已删除" || source.status === "已归档") return;
@@ -3197,7 +3282,21 @@ function getSourceCategoryTree() {
     grouped.get(item.groupCode).categories.push(item);
   });
 
-  return Array.from(grouped.values());
+  return Array.from(grouped.values())
+    .sort((a, b) => {
+      const aOrder = builtinGroupOrder.has(a.groupCode) ? builtinGroupOrder.get(a.groupCode) : Number.MAX_SAFE_INTEGER;
+      const bOrder = builtinGroupOrder.has(b.groupCode) ? builtinGroupOrder.get(b.groupCode) : Number.MAX_SAFE_INTEGER;
+      return aOrder - bOrder;
+    })
+    .map((group) => ({
+      ...group,
+      categories: (group.categories || []).sort((a, b) => {
+        const aKnown = builtinCategorySet.has(a.categoryCode || a.category);
+        const bKnown = builtinCategorySet.has(b.categoryCode || b.category);
+        if (aKnown === bKnown) return 0;
+        return aKnown ? -1 : 1;
+      })
+    }));
 }
 
   function getSourceCategoryOptionsByGroup(groupCode) {
@@ -3224,6 +3323,9 @@ function getBoundaryCategoryOptionsForSourceForm() {
         category: categoryCode,
         categoryCode,
         categoryLabel: item.categoryLabel || CategoryCodeToLabel[categoryCode] || categoryCode,
+        activityDataType: item.activityDataType || "",
+        activityDataTypeLabel: item.activityDataTypeLabel || item.activityDataLabel || "",
+        activityDataLabel: item.activityDataLabel || item.activityDataTypeLabel || "",
         status: item.status || "待完善"
       };
     });
@@ -3891,6 +3993,31 @@ addGwpOperationLog,
     getActivityParamSchemas() {
       return clone(api.ActivityParamSchemas || {});
     },
+    upsertActivityParamSchema(category, schema = {}) {
+      const categoryCode = category || schema.category || "";
+      if (!categoryCode) return null;
+
+      const currentSchemas = api.ActivityParamSchemas || {};
+      const currentSchema = currentSchemas[categoryCode] || {};
+      const nextSchema = {
+        ...currentSchema,
+        ...schema,
+        category: categoryCode,
+        activityDataType: schema.activityDataType || currentSchema.activityDataType || "",
+        activityDataTypeLabel: schema.activityDataTypeLabel || schema.activityDataLabel || currentSchema.activityDataTypeLabel || "",
+        activityDataLabel: schema.activityDataLabel || schema.activityDataTypeLabel || currentSchema.activityDataLabel || "",
+        defaultUnit: schema.defaultUnit || currentSchema.defaultUnit || "",
+        params: mergeActivityParams(currentSchema.params || [], schema.params || []),
+        custom: schema.custom === true || currentSchema.custom === true
+      };
+
+      api.ActivityParamSchemas = {
+        ...currentSchemas,
+        [categoryCode]: nextSchema
+      };
+      api.saveState();
+      return clone(nextSchema);
+    },
     upsertActivityParamOption(category, paramKey, option = {}) {
       const categoryCode = category || "";
       const key = paramKey || "";
@@ -3991,6 +4118,8 @@ getLatestActivityRecordBySource(sourceOrId) {
     toCategoryCode(value) {
       return CategoryLabelToCode[value] || value || "stationary_combustion";
     },
+
+    normalizeAccountingModel,
 
     toSourceTypeLabel(value) {
       return SourceTypeCodeToLabel[value] || value || "—";
