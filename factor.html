@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="zh-CN"><head>
 <base href="./">
@@ -218,7 +218,6 @@
 <label class="eco-filter-label"><span class="eco-form-label">气体：</span><select class="eco-select eco-filter-select-sm" id="factor-search-gas"><option>全部</option><option>CO₂</option><option>CH₄</option><option>N₂O</option><option>R410A</option></select></label>
 <label class="eco-filter-label"><span class="eco-form-label">标准：</span><select class="eco-select eco-filter-select-sm" id="factor-search-standard"></select></label>
 <label class="eco-filter-label"><span class="eco-form-label">活动类型：</span><select class="eco-select eco-filter-select" id="factor-search-activity-type"></select></label>
-<label class="eco-filter-label"><span class="eco-form-label">状态：</span><select class="eco-select eco-filter-select-sm" id="factor-search-status"><option>全部</option><option>当前版本</option><option>历史版本</option><option>待生效</option><option>停用</option></select></label>
 <button class="eco-btn eco-btn-primary eco-btn-sm shrink-0 whitespace-nowrap" id="factor-search-btn" type="button"><span class="material-symbols-outlined text-sm">search</span>查询</button>
 <button class="eco-btn eco-btn-secondary eco-btn-sm shrink-0 whitespace-nowrap" id="factor-reset-btn" type="button">重置</button>
 <button class="eco-btn eco-btn-primary eco-filter-spacer shrink-0 whitespace-nowrap" id="add-factor-btn" type="button">新增因子</button>
@@ -235,7 +234,7 @@
 <h3 class="eco-section-title">因子列表</h3>
 </div>
 <div class="flex-1 flex flex-col overflow-hidden" id="factor-list-view">
-<div class="eco-table-wrap datasource-table-area"><table class="eco-table table-fixed factor-data-table"><thead><tr><th class="w-[24%] eco-table-head-text">名称</th><th class="w-[7%] eco-table-head-text text-center">类型</th><th class="w-[17%] eco-table-head-text text-center">活动数据类型</th><th class="w-[7%] eco-table-head-text text-center">引用因子数</th><th class="w-[21%] eco-table-head-text text-center">来源标准</th><th class="w-[9%] eco-table-head-text text-center">版本状态</th><th class="w-[15%] eco-table-head-text text-center">操作</th></tr></thead><tbody id="factor-table-body"></tbody></table></div>
+<div class="eco-table-wrap datasource-table-area"><table class="eco-table table-fixed factor-data-table"><thead><tr><th class="w-[21%] eco-table-head-text">名称</th><th class="w-[16%] eco-table-head-text text-center">活动数据类型</th><th class="w-[8%] eco-table-head-text text-center">引用因子数</th><th class="w-[28%] eco-table-head-text text-center">来源标准</th><th class="w-[16%] eco-table-head-text text-center">操作</th></tr></thead><tbody id="factor-table-body"></tbody></table></div>
 <div class="eco-pagination" data-purpose="factor-pagination">
 <div class="eco-pagination-summary" id="factor-count">共 0 条，显示 0-0 条</div>
 <div class="eco-pagination-controls">
@@ -277,15 +276,10 @@
   </div>
 </div>
 <div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block">默认GWP版本 <span class="text-error">*</span></label></div><select class="eco-select h-11 w-full" id="factor-gwp-version-input"></select></div>
-<div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block">活动数据类型 <span class="text-error">*</span></label></div><input
-  class="eco-input h-11 w-full"
-  id="form-activity-data-type"
-  readonly
-  type="text"
-/>
+<div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block">活动数据类型 <span class="text-error">*</span></label></div><select class="eco-select h-11 w-full" id="form-activity-data-type"></select>
 <input id="form-activity-data-type-value" type="hidden" /></div>
 </div></section>
-<section class="eco-form-card datasource-modal-section p-4" id="accounting-param-section"><h3 class="eco-form-heading mb-4">核算参数</h3><div class="eco-field" id="match-param-field">
+<section class="eco-form-card datasource-modal-section p-4" id="accounting-param-section"><h3 class="eco-form-heading mb-4">核算参数</h3><div class="space-y-4" id="match-param-field">
   <div class="grid grid-cols-2 gap-4" id="factor-accounting-params"></div>
   <p class="eco-helper-text mt-2">
     核算参数来自排放源活动数据配置，仅可选择，不在因子库中新增。
@@ -473,8 +467,7 @@ const categoryCategoryInput = document.getElementById('form-category-category');
   const factorFilters = {
     gas: "全部",
     standardId: "全部",
-    activityDataType: "全部",
-    versionStatus: "全部"
+    activityDataType: "全部"
   };
   const groupFilters = {
     standardId: "全部",
@@ -553,18 +546,6 @@ function activityLabel(value) {
   return getActivityOptions().find((item) => item.value === value)?.label || value;
 }
 
-function defaultActivityByCategory(categoryCode) {
-  return getActivitySchemaByCategory(categoryCode)?.activityDataType || "";
-}
-
-function syncActivityOptions(value = "") {
-  const schema = getActivitySchemaByCategory(categoryInput?.value || '');
-  const displayValue = schema?.activityDataTypeLabel || activityLabel(value || schema?.activityDataType) || value || '';
-  if (activityInput) activityInput.value = displayValue;
-  const hidden = document.getElementById('form-activity-data-type-value');
-  if (hidden) hidden.value = value || schema?.activityDataType || '';
-}
-
   function populateFilterOptions() {
     const standardOptions = `<option>全部</option>${standards.map((standard) => `<option value="${escapeHtml(standard.id)}">${escapeHtml(standard.name)}</option>`).join('')}`;
     const activityOptions = `<option>全部</option>${getActivityOptions().map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('')}`;
@@ -598,13 +579,64 @@ function getActivitySchemaByCategory(categoryCode) {
     || window.CarbonAccountingMock?.ActivityParamSchemas?.[schemaCategory]
     || null;
 }
+
+function getActivitySchemaByActivityType(activityDataType, categoryCode = "") {
+  if (!activityDataType) return null;
+  return Object.values(Mock.ActivityParamSchemas || {}).find((schema) => schema?.activityDataType === activityDataType)
+    || null;
+}
+
+function getFactorActivityOptionsByCategory(categoryCode) {
+  const sourceCategoryCode = resolveSourceCategoryCode(categoryCode);
+  const options = new Map();
+
+  (Mock.EmissionSources || []).forEach((source) => {
+    const sourceCategory = resolveSourceCategoryCode(source.categoryCode || source.category || "");
+    const activityDataType = source.activityDataType || "";
+    if (sourceCategory !== sourceCategoryCode || !activityDataType) return;
+    options.set(activityDataType, source.activityDataTypeLabel || source.activityDataLabel || activityLabel(activityDataType));
+  });
+
+  if (!options.size) {
+    const schema = getActivitySchemaByCategory(categoryCode);
+    if (schema?.activityDataType) {
+      options.set(schema.activityDataType, schema.activityDataTypeLabel || activityLabel(schema.activityDataType));
+    }
+  }
+
+  return Array.from(options, ([value, label]) => ({ value, label }));
+}
+
+function syncFactorActivityOptions(categoryCode, selectedValue = "") {
+  const typeInput = document.getElementById("form-activity-data-type");
+  const typeValueInput = document.getElementById("form-activity-data-type-value");
+  if (!typeInput) return "";
+
+  const options = getFactorActivityOptionsByCategory(categoryCode);
+  typeInput.innerHTML = options.length
+    ? options.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join("")
+    : `<option value="">该因子分类下暂无排放源活动数据类型</option>`;
+
+  typeInput.disabled = !options.length;
+  typeInput.value = options.some((option) => option.value === selectedValue)
+    ? selectedValue
+    : (options[0]?.value || "");
+  if (typeValueInput) typeValueInput.value = typeInput.value || "";
+
+  return typeInput.value || "";
+}
+
+function getActivitySchemaForSelectedType(categoryCode) {
+  return getActivitySchemaByActivityType(getCurrentActivityDataType(), categoryCode) || getActivitySchemaByCategory(categoryCode);
+}
 function getSchemaParams(categoryCode) {
-  const schema = getActivitySchemaByCategory(categoryCode);
+  const schema = getActivitySchemaForSelectedType(categoryCode);
   return Array.isArray(schema?.params) ? schema.params : [];
 }
 
 function getCurrentActivityDataType() {
-  return document.getElementById('form-activity-data-type-value')?.value || '';
+  const selectValue = document.getElementById('form-activity-data-type')?.value || '';
+  return selectValue || document.getElementById('form-activity-data-type-value')?.value || '';
 }
 
 function getCurrentAccountingParams() {
@@ -618,7 +650,7 @@ function getCurrentAccountingParams() {
   return params;
 }
 function renderFactorAccountingParams(categoryCode, values = {}) {
-  const schema = getActivitySchemaByCategory(categoryCode);
+  const schema = getActivitySchemaForSelectedType(categoryCode);
   const typeInput = document.getElementById("form-activity-data-type");
   const typeValueInput = document.getElementById("form-activity-data-type-value");
   const container = document.getElementById("factor-accounting-params");
@@ -638,12 +670,12 @@ function renderFactorAccountingParams(categoryCode, values = {}) {
     return;
   }
 
-if (typeInput) {
-  typeInput.value = schema.activityDataTypeLabel || activityLabel(schema.activityDataType) || schema.activityDataType || "";
+if (typeInput && schema.activityDataType) {
+  typeInput.value = schema.activityDataType;
 }
 
   if (typeValueInput) {
-    typeValueInput.value = schema.activityDataType || "";
+    typeValueInput.value = typeInput?.value || schema.activityDataType || "";
   }
 
   const params = Array.isArray(schema.params) ? schema.params : [];
@@ -893,6 +925,8 @@ function syncCategoryValue(values = {}) {
     categoryInput.value = categoryCode;
   }
 
+  syncFactorActivityOptions(categoryCode, values.activityDataType || getCurrentActivityDataType());
+
   const scopeLabel = inferScopeLabelByCategory(categoryCode);
   if (scopeInput) {
     scopeInput.value = scopeLabel;
@@ -980,7 +1014,9 @@ function findGwpVersionForItem(item = {}) {
 function normalizeFactorRecord(item = {}) {
   const categoryCode = inferFactorCategoryCode(item);
   const categoryNode = findCategoryNodeByCode(categoryCode);
-  const schema = getActivitySchemaByCategory(categoryCode);
+  const schema = item.activityDataType
+    ? getActivitySchemaByActivityType(item.activityDataType, categoryCode)
+    : getActivitySchemaByCategory(categoryCode);
   const matchParams = { ...(item.matchParams || {}) };
   const matchParamLabels = { ...(item.matchParamLabels || {}) };
   const gwpVersion = findGwpVersionForItem(item);
@@ -1035,7 +1071,7 @@ function hydrateGroupFactorIds() {
     if (Array.isArray(group.factorIds) && group.factorIds.length) return;
 
     const categoryCode = group.categoryCode || group.category;
-    const schema = getActivitySchemaByCategory(categoryCode);
+    const schema = getActivitySchemaByActivityType(group.activityDataType, categoryCode) || getActivitySchemaByCategory(categoryCode);
     const paramKeys = (schema?.params || []).map((param) => param.key);
 
     group.factorIds = factors
@@ -1134,10 +1170,10 @@ function sourceCategoryMatchesItem(item, categoryCode) {
   function visibleLibraryItems() {
     const referenced = referencedFactorIds();
     return [
-      ...factors
+      ...collapseFactorVersions(factors
         .filter((item) => !referenced.has(item.id))
-        .map((item) => ({ ...item, __kind: "factor" })),
-      ...groups.map((item) => ({ ...item, __kind: "group" }))
+        .map((item) => ({ ...item, __kind: "factor" }))),
+      ...collapseFactorVersions(groups.map((item) => ({ ...item, __kind: "group" })))
     ];
   }
 
@@ -1158,12 +1194,10 @@ function sourceCategoryMatchesItem(item, categoryCode) {
   }
   function matchesFactorFilters(item) {
     const gas = firstGas(item).gas;
-    const status = versionStatus(item);
     return matchesCategory(item) &&
       (factorFilters.gas === '全部' || gas === factorFilters.gas) &&
       (factorFilters.standardId === '全部' || item.standardId === factorFilters.standardId) &&
-      (factorFilters.activityDataType === '全部' || item.activityDataType === factorFilters.activityDataType) &&
-      (factorFilters.versionStatus === '全部' || status === factorFilters.versionStatus || item.status === factorFilters.versionStatus);
+      (factorFilters.activityDataType === '全部' || item.activityDataType === factorFilters.activityDataType);
   }
 
   function matchesGroupFilters(item) {
@@ -1228,7 +1262,7 @@ function sourceCategoryMatchesItem(item, categoryCode) {
     window.StandardFiles = standards;
   }
   function moreMenu() {
-    return `<div class="relative inline-block group/more"><button class="more-btn eco-link-text inline-flex items-center gap-0.5 focus:outline-none" type="button">更多<span class="material-symbols-outlined text-sm">arrow_drop_down</span></button><div class="more-dropdown eco-dropdown-menu hidden absolute right-0 mt-2 w-32 z-20 py-1"><button class="eco-dropdown-item" data-action="toggle-status" type="button">启用/停用</button><button class="eco-dropdown-item" data-action="version-management" type="button">版本管理</button><button class="eco-dropdown-item eco-dropdown-item-danger" data-action="delete-row" type="button">删除</button></div></div>`;
+    return `<div class="relative inline-block group/more"><button class="more-btn eco-link-text inline-flex items-center gap-0.5 focus:outline-none" type="button">更多<span class="material-symbols-outlined text-sm">arrow_drop_down</span></button><div class="more-dropdown eco-dropdown-menu hidden absolute right-0 mt-2 w-32 z-20 py-1"><button class="eco-dropdown-item" data-action="version-management" type="button">版本管理</button><button class="eco-dropdown-item eco-dropdown-item-danger" data-action="delete-row" type="button">删除</button></div></div>`;
   }
 
   function referencingGroupsCount(factor) {
@@ -1255,11 +1289,9 @@ function sourceCategoryMatchesItem(item, categoryCode) {
     factorBody.innerHTML = pageItems(factorList, factorPage).map((item) => {
       const isGroup = item.__kind === "group";
       const groupFactors = isGroup ? getGroupFactors(item) : [];
-      const kindLabel = isGroup ? "因子组" : "单因子";
-      const kindClass = isGroup ? "factor-type-group" : "factor-type-single";
       const referenceCount = isGroup ? groupFactors.length : 1;
-      return `<tr class="eco-table-row" data-kind="${escapeHtml(item.__kind)}" data-id="${escapeHtml(item.id)}"><td><button class="eco-list-primary-text view-row" type="button">${escapeHtml(item.name)}</button></td><td class="eco-table-cell-text text-center"><span class="eco-tag factor-type-tag ${escapeHtml(kindClass)}">${escapeHtml(kindLabel)}</span></td><td class="eco-table-cell-text text-center">${escapeHtml(activityLabel(item.activityDataType))}</td><td class="eco-table-number-text text-center">${escapeHtml(referenceCount)}</td><td class="eco-table-cell-text text-center">${standardBadge(item.standardId)}</td><td class="eco-table-cell-text text-center">${statusBadge(versionStatus(item))}</td><td class="text-center"><div class="eco-action-buttons factor-action-buttons"><button class="eco-btn eco-btn-secondary eco-action-btn factor-pill-btn eco-btn-sm view-row" type="button"><span class="eco-btn-label-sm">查看</span></button><button class="eco-btn eco-btn-secondary eco-action-btn factor-pill-btn eco-btn-sm edit-row" type="button"><span class="eco-btn-label-sm">编辑</span></button>${moreMenu()}</div></td></tr>`;
-    }).join('') || `<tr><td colspan="7"><div class="eco-empty-state"><div class="eco-empty-title">暂无匹配的因子数据</div><div class="eco-empty-desc">调整筛选条件后再试</div></div></td></tr>`;
+      return `<tr class="eco-table-row" data-kind="${escapeHtml(item.__kind)}" data-id="${escapeHtml(item.id)}"><td><button class="eco-list-primary-text view-row" type="button">${escapeHtml(item.name)}</button></td><td class="eco-table-cell-text text-center">${escapeHtml(activityLabel(item.activityDataType))}</td><td class="eco-table-number-text text-center">${escapeHtml(referenceCount)}</td><td class="eco-table-cell-text text-center">${standardBadge(item.standardId)}</td><td class="text-center"><div class="eco-action-buttons factor-action-buttons"><button class="eco-btn eco-btn-secondary eco-action-btn factor-pill-btn eco-btn-sm view-row" type="button"><span class="eco-btn-label-sm">查看</span></button><button class="eco-btn eco-btn-secondary eco-action-btn factor-pill-btn eco-btn-sm edit-row" type="button"><span class="eco-btn-label-sm">编辑</span></button>${moreMenu()}</div></td></tr>`;
+    }).join('') || `<tr><td colspan="5"><div class="eco-empty-state"><div class="eco-empty-title">暂无匹配的因子数据</div><div class="eco-empty-desc">调整筛选条件后再试</div></div></td></tr>`;
     const startItem = factorList.length ? (factorPage - 1) * pageSize + 1 : 0;
     const endItem = factorList.length ? Math.min(factorList.length, factorPage * pageSize) : 0;
     const pageCount = totalPages(factorList);
@@ -1309,25 +1341,13 @@ function sourceCategoryMatchesItem(item, categoryCode) {
   function selectedFactorIds() {
     return [...(factorIdsInput?.selectedOptions || [])].map((option) => option.value);
   }
-function getCurrentActivityDataType() {
-  return document.getElementById('form-activity-data-type-value')?.value || '';
-}
-
-function getCurrentAccountingParams() {
-  const params = {};
-  document.querySelectorAll('.factor-accounting-param').forEach((select) => {
-    const key = select.dataset.paramKey;
-    if (key && select.value) params[key] = select.value;
-  });
-  return params;
-}
   function factorMatchesGroupCandidate(factor, group = {}) {
     const categoryCode = group.categoryCode || categoryInput.value;
     const standardId = group.standardId || resolveFormStandardId(findItem(kindInput.value, idInput.value));
     const activityDataType = group.activityDataType || getCurrentActivityDataType();
 const currentParams = group.matchParams || getCurrentAccountingParams();
 
-const schema = getActivitySchemaByCategory(categoryCode);
+const schema = getActivitySchemaByActivityType(activityDataType, categoryCode) || getActivitySchemaByCategory(categoryCode);
 const paramKeys = Array.isArray(schema?.params)
   ? schema.params.map((param) => param.key)
   : [];
@@ -1345,13 +1365,6 @@ return factor.id !== group.id &&
   paramsMatched &&
   !isDisabledStatus(factor.status) &&
   versionStatus(factor) !== '历史版本';
-    return factor.id !== group.id &&
-      factor.categoryCode === categoryCode &&
-      factor.activityDataType === activityDataType &&
-      factor.standardId === standardId &&
-      (factor[config.key] || factor.matchParams?.[config.key] || '') === matchValue &&
-      !isDisabledStatus(factor.status) &&
-      versionStatus(factor) !== '历史版本';
   }
 
   function renderFactorCandidates(selectedIds = []) {
@@ -1381,7 +1394,7 @@ function buildFactorKey(item = {}) {
   const region = item.region || "";
   const unit = item.unit || firstGas(item).unit || "";
 
-  const schema = getActivitySchemaByCategory(categoryCode);
+  const schema = getActivitySchemaByActivityType(activityDataType, categoryCode) || getActivitySchemaByCategory(categoryCode);
   const paramPart = (schema?.params || [])
     .map((param) => {
       const value = item[param.key] || item.matchParams?.[param.key] || "";
@@ -1392,12 +1405,64 @@ function buildFactorKey(item = {}) {
   return [categoryCode, activityDataType, standardId, paramPart, region, unit].join("|");
 }
 
+function buildFactorIdentityKey(item = {}) {
+  const categoryCode = item.categoryCode || item.category || "";
+  const activityDataType = item.activityDataType || "";
+  const schema = getActivitySchemaByActivityType(activityDataType, categoryCode) || getActivitySchemaByCategory(categoryCode);
+  const paramPart = (schema?.params || [])
+    .map((param) => {
+      const value = item[param.key] || item.matchParams?.[param.key] || "";
+      return `${param.key}:${value}`;
+    })
+    .join(";");
+
+  return [categoryCode, activityDataType, paramPart].join("|");
+}
+
+function selectDisplayVersion(versions = []) {
+  const today = todayString();
+  const scoreVersion = (item) => {
+    const effectiveDate = item.effectiveDate || item.startDate || "";
+    const expireDate = item.expireDate || item.endDate || "";
+    const inDateRange = effectiveDate && effectiveDate <= today && (!expireDate || expireDate >= today);
+    if (versionStatus(item) === "当前版本" || inDateRange) return 0;
+    if (versionStatus(item) === "待生效" || (effectiveDate && effectiveDate > today)) return 1;
+    return 2;
+  };
+
+  return [...versions].sort((a, b) => {
+    const scoreDiff = scoreVersion(a) - scoreVersion(b);
+    if (scoreDiff) return scoreDiff;
+    const bDate = b.effectiveDate || b.startDate || "";
+    const aDate = a.effectiveDate || a.startDate || "";
+    return String(bDate).localeCompare(String(aDate));
+  })[0] || null;
+}
+
+function collapseFactorVersions(items = []) {
+  const buckets = new Map();
+  items.forEach((item) => {
+    const key = buildFactorIdentityKey(item);
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(item);
+  });
+
+  return Array.from(buckets.values()).map((versions) => {
+    const current = selectDisplayVersion(versions) || versions[0];
+    return {
+      ...current,
+      __versionIds: versions.map((item) => item.id),
+      __versionCount: versions.length
+    };
+  });
+}
+
   function getLocalFactorVersions(kind, item) {
     const list = kind === "group" ? groups : factors;
-    const key = Mock.buildFactorVersionKey?.(item) || buildFactorKey(item);
+    const key = buildFactorIdentityKey(item);
     return list
       .filter((row) => {
-        const rowKey = Mock.buildFactorVersionKey?.(row) || buildFactorKey(row);
+        const rowKey = buildFactorIdentityKey(row);
         return rowKey === key;
       })
       .sort((a, b) => String(b.effectiveDate || b.startDate || "").localeCompare(String(a.effectiveDate || a.startDate || "")));
@@ -1411,85 +1476,69 @@ function buildFactorKey(item = {}) {
 
   function renderVersionCard(kind, version) {
     const status = Mock.getFactorVersionStatus?.(version) || versionStatus(version);
-    const statusClass = status === "当前版本"
-      ? "bg-primary-container text-on-primary-container"
-      : status === "待生效"
-        ? "bg-orange-50 text-orange-600"
-        : "bg-surface-variant text-on-surface-variant";
+    const effectiveText = version.effectiveDate || version.startDate || "-";
+    const expireText = version.expireDate || version.endDate || "长期有效";
 
     return `
-    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
-      <div class="flex items-center justify-between mb-md">
-        <div>
-          <div class="flex items-center gap-3">
-            <span class="font-title-lg text-title-lg text-on-surface">${escapeHtml(version.version || "-")}</span>
-            <span class="text-body-sm text-on-surface-variant">生效日期：${escapeHtml(version.effectiveDate || version.startDate || "-")}</span>
+    <article class="eco-card datasource-modal-section p-4 space-y-4">
+      <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="eco-section-title">${escapeHtml(version.version || "-")}</span>
+            ${statusBadge(status)}
           </div>
-          <div class="text-xs text-on-surface-variant mt-1">
-            失效日期：${escapeHtml(version.expireDate || version.endDate || "长期有效")}
-          </div>
+          <div class="eco-helper-text mt-1 truncate">${escapeHtml(version.name || "")}</div>
         </div>
-        <span class="px-2 py-0.5 rounded ${statusClass} text-[11px] font-bold">${escapeHtml(status)}</span>
+        <span class="material-symbols-outlined text-outline shrink-0">history</span>
       </div>
-
-      <div class="text-xs text-on-surface-variant mb-md">
-        ${escapeHtml(version.name || "")}
+      <div class="grid grid-cols-2 gap-3">
+        <div class="border-b border-dashed eco-divider pb-2">
+          <div class="eco-form-label">生效日期</div>
+          <div class="eco-table-cell-text mt-1">${escapeHtml(effectiveText)}</div>
+        </div>
+        <div class="border-b border-dashed eco-divider pb-2">
+          <div class="eco-form-label">失效日期</div>
+          <div class="eco-table-cell-text mt-1">${escapeHtml(expireText)}</div>
+        </div>
       </div>
-
-      <div class="flex gap-2 border-t border-outline-variant pt-md">
-        <button class="flex-1 py-1.5 border border-outline text-on-surface-variant rounded-lg hover:bg-surface-container-high" data-version-action="view" data-kind="${kind}" data-id="${escapeHtml(version.id)}">查看</button>
-        <button class="flex-1 py-1.5 border border-outline text-on-surface-variant rounded-lg hover:bg-surface-container-high" data-version-action="edit" data-kind="${kind}" data-id="${escapeHtml(version.id)}">编辑</button>
-        <button class="flex-1 py-1.5 bg-secondary-container text-on-secondary-container rounded-lg hover:opacity-90" data-version-action="new-version" data-kind="${kind}" data-id="${escapeHtml(version.id)}">另存新版</button>
+      <div class="eco-action-buttons factor-version-actions border-t eco-divider pt-3">
+        <button class="eco-btn eco-btn-secondary eco-btn-sm factor-version-action-btn" data-version-action="view" data-kind="${kind}" data-id="${escapeHtml(version.id)}" type="button">查看</button>
+        <button class="eco-btn eco-btn-secondary eco-btn-sm factor-version-action-btn" data-version-action="edit" data-kind="${kind}" data-id="${escapeHtml(version.id)}" type="button">编辑</button>
+        <button class="eco-btn eco-btn-primary eco-btn-sm factor-version-action-btn" data-version-action="new-version" data-kind="${kind}" data-id="${escapeHtml(version.id)}" type="button">另存新版</button>
       </div>
-    </div>
+    </article>
   `;
   }
 
   function renderVersionDrawer(kind, item) {
-    const versions = Mock.getFactorVersions?.(kind, item) || getLocalFactorVersions(kind, item);
+    const versions = getLocalFactorVersions(kind, item);
     const content = document.getElementById("version-drawer-content");
     if (!content) return;
 
     const title = item.name || (kind === "group" ? "因子组版本管理" : "因子版本管理");
 
     content.innerHTML = `
-    <div class="h-full bg-white shadow-2xl flex flex-col">
-      <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
+    <div class="h-full bg-surface-container-lowest shadow-2xl flex flex-col">
+      <div class="px-6 py-4 border-b eco-divider bg-surface-container-low flex items-center justify-between">
         <div>
-          <div class="text-base font-bold text-on-surface">${escapeHtml(title)}</div>
-          <div class="text-xs text-on-surface-variant mt-1">${kind === "group" ? "因子组" : "因子"}版本管理</div>
+          <h2 class="eco-section-title">${escapeHtml(title)}</h2>
+          <div class="eco-helper-text mt-1">${kind === "group" ? "因子组" : "因子"}版本管理</div>
         </div>
-        <button id="version-drawer-close" class="text-gray-400 hover:text-gray-600">
+        <button id="version-drawer-close" class="eco-btn eco-btn-secondary eco-btn-square-sm" type="button" title="关闭">
           <span class="material-symbols-outlined text-2xl">close</span>
         </button>
       </div>
 
-      <div class="p-lg border-b border-outline-variant bg-surface-container-lowest">
-        <button id="version-create-new-btn" class="w-full py-2 bg-primary text-white rounded text-sm font-medium">
-          另存为新版本
-        </button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto custom-scrollbar p-lg space-y-md">
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
         ${versions.length ? versions.map((version) => renderVersionCard(kind, version)).join("") : `
-          <div class="text-center text-gray-400 py-12">暂无版本记录</div>
+          <div class="eco-empty-state"><div class="eco-empty-title">暂无版本记录</div><div class="eco-empty-desc">添加新版本后会自动启用</div></div>
         `}
       </div>
 
-      <div class="px-lg py-md border-t border-outline-variant bg-surface-container-low">
-        <button class="w-full py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:shadow-md transition-all" id="finish-viewing-btn">
-          完成查看
-        </button>
-      </div>
     </div>
   `;
 
     document.getElementById("version-drawer-close")?.addEventListener("click", closeVersionDrawer);
-    document.getElementById("finish-viewing-btn")?.addEventListener("click", closeVersionDrawer);
-    document.getElementById("version-create-new-btn")?.addEventListener("click", () => {
-      closeVersionDrawer();
-      openForm(kind, "new-version", item);
-    });
   }
 
   function openVersionDrawer(kind, item) {
@@ -1528,6 +1577,22 @@ function buildFactorKey(item = {}) {
 
   window.closeVersionDrawer = closeVersionDrawer;
   window.openVersionDrawer = openVersionDrawer;
+
+  function setIdentityFieldsLocked(locked) {
+    [categoryGroupInput, categoryCategoryInput, activityInput].forEach((input) => {
+      if (!input) return;
+      input.disabled = locked;
+      input.classList.toggle("opacity-70", locked);
+      input.title = locked ? "该字段属于因子主档匹配条件，编辑版本时不可修改" : "";
+    });
+
+    document.querySelectorAll(".factor-accounting-param").forEach((input) => {
+      input.disabled = locked;
+      input.classList.toggle("opacity-70", locked);
+      input.title = locked ? "核算参数属于因子主档匹配条件，编辑版本时不可修改" : "";
+    });
+  }
+
   function fillForm(kind, mode, item) {
     kindInput.value = kind;
     modeInput.value = mode;
@@ -1556,7 +1621,9 @@ groupFactorSection.classList.add('hidden');
     nameInput.value = item?.name || '';
     codeInput.value = item?.code || '';
   syncCategorySelector(item?.categoryCode || item?.category || 'stationary_combustion');
+syncFactorActivityOptions(categoryInput.value, item?.activityDataType || '');
 renderFactorAccountingParams(categoryInput.value, item?.matchParams || item || {});
+setIdentityFieldsLocked(isEdit || isNewVersion);
 syncStandardOptions(item?.standardId);
     const resolvedStandardId = resolveFormStandardId(item || {});
     renderGwpVersionOptions(item?.gwpVersionId || '');
@@ -1786,8 +1853,6 @@ matchParamLabels,
   document.getElementById('factor-form-close-x').addEventListener('click', closeForm);
   categoryGroupInput?.addEventListener('change', () => {
   refreshCategoryOptions('');
-  const categoryCode = categoryCategoryInput?.value || '';
-  renderFactorAccountingParams(categoryCode);
   syncEcoSelects(modal);
 });
 
@@ -1795,7 +1860,12 @@ categoryCategoryInput?.addEventListener('change', () => {
   const categoryCode = categoryCategoryInput.value;
   if (categoryInput) categoryInput.value = categoryCode;
   syncCategoryValue();
-  renderFactorAccountingParams(categoryCode);
+  syncEcoSelects(modal);
+});
+activityInput?.addEventListener('change', () => {
+  const typeValueInput = document.getElementById('form-activity-data-type-value');
+  if (typeValueInput) typeValueInput.value = activityInput.value || '';
+  renderFactorAccountingParams(categoryInput?.value || '', {});
   syncEcoSelects(modal);
 });
   document.getElementById('detail-modal-close').addEventListener('click', closeDetail);
@@ -1812,14 +1882,12 @@ categoryCategoryInput?.addEventListener('change', () => {
     factorFilters.gas = document.getElementById('factor-search-gas').value;
     factorFilters.standardId = document.getElementById('factor-search-standard').value;
     factorFilters.activityDataType = document.getElementById('factor-search-activity-type').value;
-    factorFilters.versionStatus = document.getElementById('factor-search-status').value;
     factorPage = 1;
     renderFactorTable();
   });
   document.getElementById('factor-reset-btn').addEventListener('click', () => {
-    Object.assign(factorFilters, { gas: "全部", standardId: "全部", activityDataType: "全部", versionStatus: "全部" });
+    Object.assign(factorFilters, { gas: "全部", standardId: "全部", activityDataType: "全部" });
     document.getElementById('factor-search-gas').value = "全部";
-    document.getElementById('factor-search-status').value = "全部";
     factorPage = 1;
     renderFactorTable();
   });
@@ -1897,14 +1965,6 @@ document.getElementById('factor-accounting-params')?.addEventListener('change', 
         const id = row?.dataset.id;
         const targetItem = findItem(kind, id);
         openVersionDrawer(kind, targetItem);
-        event.stopPropagation();
-        return;
-      }
-      if (rowAction.dataset.action === 'toggle-status') {
-        const nextStatus = item.status === '启用' ? '停用' : '启用';
-        item.status = nextStatus;
-        syncFactorLibraryState();
-        render();
         event.stopPropagation();
         return;
       }
