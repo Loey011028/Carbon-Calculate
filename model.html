@@ -56,6 +56,82 @@
       font-weight: 650;
       text-align: center;
     }
+
+    #model-version-management-container {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+    }
+
+    #model-version-drawer-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(2px);
+      transition: opacity 0.3s ease;
+    }
+
+    #model-version-drawer-content {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 480px;
+      max-width: calc(100vw - 24px);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--eco-surface, var(--surface-container-lowest, #ffffff));
+      border-left: 1px solid var(--eco-border, var(--outline-variant, #d8decf));
+      box-shadow: -16px 0 40px rgba(15, 23, 42, 0.18);
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+      pointer-events: auto;
+    }
+
+    #model-version-drawer-content.model-version-drawer-open {
+      transform: translateX(0);
+    }
+
+    .model-version-drawer-shell {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--eco-surface, var(--surface-container-lowest, #ffffff));
+    }
+
+    .model-version-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--eco-border, var(--outline-variant, #d8decf));
+      background: var(--eco-surface-muted, var(--surface-container-low, #f7faf4));
+    }
+
+    .model-version-drawer-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .model-theme .factor-version-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .model-theme .factor-version-action-btn {
+      width: 100% !important;
+      height: 40px !important;
+      min-height: 40px !important;
+      border-radius: 999px !important;
+      padding: 0 14px !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      white-space: nowrap;
+    }
+
   </style>
 </head>
 <body class="eco-page model-theme">
@@ -169,8 +245,7 @@
             <div class="eco-field">
               <label class="eco-form-label">状态</label>
               <select id="model-form-status" class="eco-select h-11 w-full">
-                <option value="草稿">草稿</option>
-                <option value="启用">生效</option>
+                <option value="启用">启用</option>
                 <option value="停用">停用</option>
               </select>
             </div>
@@ -178,8 +253,13 @@
               <label class="eco-form-label">生效时间</label>
               <input id="model-form-effective" class="eco-input h-11 w-full" type="date"/>
             </div>
-            <div class="eco-field">
+            <div class="eco-field eco-expire-field model-expire-field">
               <label class="eco-form-label">失效时间</label>
+              <label id="model-form-never-expire-option" class="eco-never-expire-option model-never-expire-option">
+                <input id="model-form-never-expire" class="eco-never-expire-input model-never-expire-input" type="checkbox"/>
+                <span class="eco-never-expire-check model-never-expire-check" aria-hidden="true"></span>
+                <span>永不失效</span>
+              </label>
               <input id="model-form-expire" class="eco-input h-11 w-full" type="date"/>
             </div>
           </div>
@@ -214,7 +294,8 @@
       </div>
       <div class="px-6 py-4 border-t eco-divider flex justify-end gap-3">
         <button class="eco-btn eco-btn-secondary" type="button" data-close-modal>取消</button>
-        <button id="model-form-save" class="eco-btn eco-btn-primary" type="button">保存</button>
+        <button id="model-form-save-new-version" class="eco-btn eco-btn-secondary" type="button">另存为新版本</button>
+        <button id="model-form-save-current" class="eco-btn eco-btn-primary" type="button">保存为当前版本</button>
       </div>
     </div>
   </div>
@@ -231,6 +312,28 @@
       <div id="model-detail-body" class="flex-1 overflow-y-auto p-6"></div>
       <div class="px-6 py-4 border-t eco-divider flex justify-end gap-3">
         <button class="eco-btn eco-btn-secondary" type="button" data-close-detail>关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pointer-events-none" id="model-version-management-container">
+    <div class="opacity-0 pointer-events-none" id="model-version-drawer-overlay"></div>
+    <div id="model-version-drawer-content"></div>
+  </div>
+
+  <div id="model-notice-modal" class="fixed inset-0 z-[90] hidden items-center justify-center px-4">
+    <div class="absolute inset-0 bg-black/45 backdrop-blur-sm" data-close-notice></div>
+    <div class="eco-card relative w-full max-w-md overflow-hidden">
+      <div class="px-6 py-4 border-b eco-divider flex items-center gap-3">
+        <span id="model-notice-icon" class="material-symbols-outlined text-primary">info</span>
+        <h3 id="model-notice-title" class="eco-section-title">提示</h3>
+      </div>
+      <div class="px-6 py-5">
+        <p id="model-notice-message" class="eco-list-secondary-text whitespace-normal leading-relaxed"></p>
+      </div>
+      <div class="px-6 py-4 border-t eco-divider flex justify-end gap-3">
+        <button id="model-notice-cancel" class="eco-btn eco-btn-secondary hidden" type="button">取消</button>
+        <button id="model-notice-ok" class="eco-btn eco-btn-primary" type="button">知道了</button>
       </div>
     </div>
   </div>
@@ -273,9 +376,18 @@
       modal: byId("model-form-modal"),
       detail: byId("model-detail-popup"),
       detailTitle: byId("model-detail-title"),
-      detailBody: byId("model-detail-body")
+      detailBody: byId("model-detail-body"),
+      notice: byId("model-notice-modal"),
+      noticeTitle: byId("model-notice-title"),
+      noticeMessage: byId("model-notice-message"),
+      noticeIcon: byId("model-notice-icon"),
+      noticeOk: byId("model-notice-ok"),
+      noticeCancel: byId("model-notice-cancel")
     };
 
+    let noticeConfirmHandler = null;
+
+    let allModels = [];
     let models = [];
 
     function scopeLabel(scope) {
@@ -319,6 +431,7 @@
       return {
         raw,
         id: raw.id,
+        modelGroupId: raw.modelGroupId || raw.masterModelId || raw.groupId || raw.rootModelId || raw.id,
         name: raw.name || `${categoryLabel(raw.category || raw.categoryCode)}核算模型`,
         scope: raw.scope || "",
         category: raw.category || raw.categoryCode || "",
@@ -339,9 +452,34 @@
       };
     }
 
+    function isVersionApplicable(model = {}, period = todayString()) {
+      if (model.status === "停用") return false;
+      const start = normalizeDate(model.effectiveAt || model.raw?.effectiveDate || model.raw?.periodStart);
+      const end = normalizeDate(model.expiredAt || model.raw?.expireDate || model.raw?.periodEnd);
+      if (start && start > period) return false;
+      if (end && end < period) return false;
+      return true;
+    }
+
+    function pickDisplayVersion(versions = []) {
+      const today = todayString();
+      const applicable = versions
+        .filter(model => isVersionApplicable(model, today))
+        .sort((a, b) => String(b.effectiveAt || "").localeCompare(String(a.effectiveAt || "")));
+      if (applicable.length) return applicable[0];
+      return [...versions].sort((a, b) => String(b.effectiveAt || "").localeCompare(String(a.effectiveAt || "")))[0] || null;
+    }
+
     function loadModels() {
       const source = Mock.getAccountingModels?.() || Mock.AccountingModels || [];
-      models = source.map(normalizeModel);
+      allModels = source.map(normalizeModel);
+      const groups = new Map();
+      allModels.forEach(model => {
+        const key = model.modelGroupId || model.id;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(model);
+      });
+      models = Array.from(groups.values()).map(pickDisplayVersion).filter(Boolean);
     }
 
     function modelTree() {
@@ -382,6 +520,17 @@
       return `eco-status-toggle ${status === "停用" ? "eco-status-toggle-off" : "eco-status-toggle-on"}`;
     }
 
+    function renderStatusCell(model) {
+      if (["待生效", "已失效"].includes(model.status)) {
+        return `<span class="${statusClass(model.status)}">${escapeHtml(model.status)}</span>`;
+      }
+      return `
+        <button class="${statusToggleClass(model.status)}" type="button" data-action="toggle-status" title="${model.status === "停用" ? "启用模型" : "停用模型"}" aria-label="${model.status === "停用" ? "启用模型" : "停用模型"}">
+          <span class="eco-status-toggle-track"><span class="eco-status-toggle-thumb"></span></span>
+        </button>
+      `;
+    }
+
     function renderRows() {
       const filtered = getFilteredModels();
       const pageCount = Math.max(1, Math.ceil(filtered.length / state.pageSize));
@@ -397,19 +546,17 @@
           <td><span class="eco-table-cell-text">${escapeHtml(model.method)}</span></td>
           <td><span class="eco-table-cell-text">${escapeHtml(model.version)}</span></td>
           <td>
-            <button class="${statusToggleClass(model.status)}" type="button" data-action="toggle-status" title="${model.status === "停用" ? "启用模型" : "停用模型"}" aria-label="${model.status === "停用" ? "启用模型" : "停用模型"}">
-              <span class="eco-status-toggle-track"><span class="eco-status-toggle-thumb"></span></span>
-            </button>
+            ${renderStatusCell(model)}
           </td>
-          <td>
-            <div class="eco-action-buttons justify-start">
-              <button class="eco-link-text" type="button" data-action="detail">详情</button>
-              <button class="eco-link-text" type="button" data-action="edit">编辑</button>
-              <div class="inline-block relative">
-                <button class="eco-link-text flex items-center gap-1" type="button" data-action="more">
-                  <span>更多</span><span class="material-symbols-outlined text-sm">arrow_drop_down</span>
+          <td class="text-center">
+            <div class="eco-action-buttons factor-action-buttons">
+              <button class="eco-btn eco-btn-secondary eco-action-btn eco-btn-sm" type="button" data-action="detail"><span class="eco-btn-label-sm">详情</span></button>
+              <button class="eco-btn eco-btn-secondary eco-action-btn eco-btn-sm" type="button" data-action="edit"><span class="eco-btn-label-sm">编辑</span></button>
+              <div class="relative inline-block group/more">
+                <button class="more-btn eco-link-text inline-flex items-center gap-0.5 focus:outline-none" type="button" data-action="more">
+                  更多<span class="material-symbols-outlined text-sm">arrow_drop_down</span>
                 </button>
-                <div class="eco-dropdown-menu hidden absolute right-0 mt-2 w-36 z-50 py-1">
+                <div class="more-dropdown eco-dropdown-menu hidden absolute right-0 mt-2 w-32 z-20 py-1">
                   <button class="eco-dropdown-item" type="button" data-action="versions">版本管理</button>
                   <button class="eco-dropdown-item" type="button" data-action="changes">变更记录</button>
                   <button class="eco-dropdown-item eco-dropdown-item-danger" type="button" data-action="delete">删除</button>
@@ -481,6 +628,18 @@
       return (group?.children || []).map(category => ({ value: category.category, label: category.categoryLabel || categoryLabel(category.category) }));
     }
 
+    function syncExpireControls() {
+      const neverExpire = byId("model-form-never-expire").checked;
+      const expireInput = byId("model-form-expire");
+      expireInput.disabled = neverExpire;
+      if (neverExpire) expireInput.value = "";
+      byId("model-form-never-expire-option").classList.toggle("checked", neverExpire);
+    }
+
+    function applyMethodFormula(method) {
+      byId("model-form-formula").value = formulaByMethod(method);
+    }
+
     function openForm(model = null) {
       state.editingId = model?.id || null;
       byId("model-form-title").textContent = model ? "编辑当前版本" : "新增核算模型";
@@ -492,13 +651,19 @@
       fillSelect(byId("model-form-standard"), standardOptions(), raw.standardId || raw.factorMatchRule?.standardId || "");
       byId("model-form-name").value = raw.name || "";
       byId("model-form-version").value = raw.version || "v1.0.0";
-      byId("model-form-status").value = raw.status === "停用" ? "停用" : raw.status === "草稿" ? "草稿" : "启用";
+      byId("model-form-status").value = raw.status === "停用" ? "停用" : "启用";
       byId("model-form-effective").value = normalizeDate(raw.effectiveDate || raw.effectiveAt) || "";
-      byId("model-form-expire").value = normalizeDate(raw.expireDate || raw.expiredAt) || "";
-      byId("model-form-method").value = raw.method || "排放因子法";
-      byId("model-form-formula").value = raw.formula || formulaByMethod(raw.method);
+      const expireDate = normalizeDate(raw.expireDate || raw.expiredAt);
+      byId("model-form-expire").value = expireDate || "";
+      byId("model-form-never-expire").checked = !expireDate;
+      syncExpireControls();
+      const selectedMethod = raw.method || "排放因子法";
+      byId("model-form-method").value = selectedMethod;
+      applyMethodFormula(selectedMethod);
       byId("model-form-unit").value = raw.unit || "tCO2e";
       byId("model-form-change").value = model ? `修改当前版本 ${raw.version || "v1.0.0"} 的配置。` : "";
+      byId("model-form-save-current").textContent = model ? "保存为当前版本" : "保存";
+      byId("model-form-save-new-version").classList.toggle("hidden", !model);
       els.modal.classList.remove("hidden");
       els.modal.classList.add("flex");
     }
@@ -509,6 +674,34 @@
       state.editingId = null;
     }
 
+    function closeModelNotice() {
+      els.notice.classList.add("hidden");
+      els.notice.classList.remove("flex");
+      noticeConfirmHandler = null;
+    }
+
+    function showModelNotice(message, title = "提示") {
+      noticeConfirmHandler = null;
+      els.noticeTitle.textContent = title;
+      els.noticeMessage.textContent = message;
+      els.noticeIcon.textContent = "info";
+      els.noticeCancel.classList.add("hidden");
+      els.noticeOk.textContent = "知道了";
+      els.notice.classList.remove("hidden");
+      els.notice.classList.add("flex");
+    }
+
+    function showModelConfirm(message, onConfirm, title = "确认操作") {
+      noticeConfirmHandler = onConfirm;
+      els.noticeTitle.textContent = title;
+      els.noticeMessage.textContent = message;
+      els.noticeIcon.textContent = "warning";
+      els.noticeCancel.classList.remove("hidden");
+      els.noticeOk.textContent = "确认删除";
+      els.notice.classList.remove("hidden");
+      els.notice.classList.add("flex");
+    }
+
     function readFormPayload() {
       const scope = byId("model-form-scope").value;
       const category = byId("model-form-category").value;
@@ -516,7 +709,7 @@
       const standard = standardFor({ standardId });
       const method = byId("model-form-method").value || "排放因子法";
       const effectiveDate = byId("model-form-effective").value || todayString();
-      const expireDate = byId("model-form-expire").value || "";
+      const expireDate = byId("model-form-never-expire").checked ? "" : byId("model-form-expire").value || "";
       return {
         name: byId("model-form-name").value.trim() || `${categoryLabel(category)}核算模型`,
         version: byId("model-form-version").value.trim() || "v1.0.0",
@@ -541,26 +734,111 @@
       };
     }
 
-    function saveForm() {
+    function modelStandardId(model = {}) {
+      return model.standardId || model.factorMatchRule?.standardId || "";
+    }
+
+    function validateFormPayload(payload) {
+      if (payload.expireDate && payload.effectiveDate && payload.expireDate < payload.effectiveDate) {
+        return "失效日期不能早于生效日期。";
+      }
+      return "";
+    }
+
+    function dateStart(value) {
+      return normalizeDate(value) || "0000-01-01";
+    }
+
+    function dateEnd(value) {
+      return normalizeDate(value) || "9999-12-31";
+    }
+
+    function previousDate(value) {
+      const date = new Date(`${normalizeDate(value)}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return "";
+      date.setDate(date.getDate() - 1);
+      return date.toISOString().slice(0, 10);
+    }
+
+    function hasOverlappingPeriod(left = {}, right = {}) {
+      const leftStart = dateStart(left.effectiveDate || left.effectiveAt || left.periodStart);
+      const leftEnd = dateEnd(left.expireDate || left.expiredAt || left.periodEnd);
+      const rightStart = dateStart(right.effectiveDate || right.effectiveAt || right.periodStart);
+      const rightEnd = dateEnd(right.expireDate || right.expiredAt || right.periodEnd);
+      return leftStart <= rightEnd && rightStart <= leftEnd;
+    }
+
+    function modelGroupIdOf(item = {}) {
+      return item.modelGroupId || item.masterModelId || item.groupId || item.rootModelId || item.id || "";
+    }
+
+    function findConflictingModel(payload, excludeId = "") {
+      const excludeGroupId = arguments[2] || "";
+      if (!payload.standardId) return null;
+      return (Mock.AccountingModels || []).find(item =>
+        String(item.id || "") !== String(excludeId || "") &&
+        (!excludeGroupId || String(modelGroupIdOf(item)) !== String(excludeGroupId)) &&
+        item.status !== "停用" &&
+        payload.status !== "停用" &&
+        item.scope === payload.scope &&
+        item.category === payload.category &&
+        modelStandardId(item) === payload.standardId &&
+        hasOverlappingPeriod(item, payload)
+      ) || null;
+    }
+
+    function saveForm(mode = "current") {
       const current = state.editingId ? (Mock.AccountingModels || []).find(item => item.id === state.editingId) : null;
       const formPayload = readFormPayload();
+      const validationMessage = validateFormPayload(formPayload);
+      if (validationMessage) {
+        showModelNotice(validationMessage);
+        return;
+      }
+      const currentGroupId = modelGroupIdOf(current || {});
+      const conflict = findConflictingModel(formPayload, current?.id || "", mode === "new-version" ? currentGroupId : "");
+      if (conflict) {
+        showModelNotice(`同一时间同一分类同一标准只能存在一个模型：${conflict.name || "已有模型"} 已占用该配置。`);
+        return;
+      }
+      const nextModelVersion = mode === "new-version" && current ? nextVersion(current?.version || formPayload.version) : formPayload.version;
+      formPayload.version = nextModelVersion;
       const previousLogs = Array.isArray(current?.changeLog) ? current.changeLog : [];
       const changeEntry = {
         version: formPayload.version,
         operator: "当前用户",
         date: todayString(),
         status: "当前版本",
-        description: formPayload.changeDescription
+        description: mode === "new-version"
+          ? formPayload.changeDescription || `另存为新版本 ${formPayload.version}。`
+          : formPayload.changeDescription
       };
+      const isNewVersion = mode === "new-version" && current;
+      const nextId = isNewVersion ? `${currentGroupId || current.id}-${Date.now()}` : (state.editingId || `am-${Date.now()}`);
       const payload = {
         ...(current || {}),
         ...formPayload,
-        id: state.editingId || `am-${Date.now()}`,
+        id: nextId,
+        modelGroupId: currentGroupId || state.editingId || nextId,
         type: current?.type || "自定义模型",
         changeLog: [changeEntry, ...previousLogs.map(log => ({ ...log, status: log.status === "当前版本" ? "历史版本" : log.status }))]
       };
       delete payload.changeDescription;
-      if (Mock.updateAccountingModel && current) Mock.updateAccountingModel(payload.id, payload);
+
+      if (isNewVersion) {
+        const clippedExpireDate = previousDate(formPayload.effectiveDate);
+        const clippedCurrent = {
+          ...current,
+          modelGroupId: currentGroupId || current.id,
+          expireDate: clippedExpireDate,
+          periodEnd: clippedExpireDate.slice(0, 7),
+          changeLog: previousLogs.map(log => ({ ...log, status: log.status === "当前版本" ? "历史版本" : log.status }))
+        };
+        if (Mock.updateAccountingModel) Mock.updateAccountingModel(current.id, clippedCurrent);
+        else if (Mock.upsertAccountingModel) Mock.upsertAccountingModel(clippedCurrent);
+      }
+
+      if (Mock.updateAccountingModel && current && !isNewVersion) Mock.updateAccountingModel(payload.id, payload);
       else if (Mock.upsertAccountingModel) Mock.upsertAccountingModel(payload);
       else {
         Mock.AccountingModels = Mock.AccountingModels || [];
@@ -621,6 +899,21 @@
     }
 
     function versionRows(model) {
+      const groupId = model?.modelGroupId || model?.id || "";
+      const groupVersions = allModels
+        .filter(item => String(item.modelGroupId || item.id) === String(groupId))
+        .sort((a, b) => String(b.effectiveAt || "").localeCompare(String(a.effectiveAt || "")));
+      if (groupVersions.length > 1) {
+        return groupVersions.map((versionModel, index) => ({
+          version: versionModel.version,
+          operator: versionModel.raw?.operator || "系统",
+          date: versionModel.effectiveAt,
+          status: index === 0 && isVersionApplicable(versionModel) ? "当前版本" : versionModel.status,
+          description: versionModel.raw?.changeLog?.[0]?.description || versionModel.raw?.description || "保存模型配置。",
+          rawModel: versionModel.raw,
+          normalizedModel: versionModel
+        }));
+      }
       const seen = new Set();
       return changeLogs(model).filter(log => {
         if (seen.has(log.version)) return false;
@@ -629,125 +922,152 @@
       });
     }
 
+    function versionBadge(index, status = "") {
+      const text = status || (index ? "历史版本" : "当前版本");
+      const active = text === "当前版本" || text === "启用";
+      return `<span class="${active ? "eco-status-badge eco-status-active" : "eco-status-badge eco-status-disabled"}">${escapeHtml(text)}</span>`;
+    }
+
+    function renderModelVersionCard(model, log, index) {
+      const cardModel = log.normalizedModel || model;
+      const snapshot = snapshotForVersion(cardModel, log, index);
+      return `
+        <article class="eco-card datasource-modal-section p-4 space-y-4">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="eco-section-title">${escapeHtml(snapshot.version || "-")}</span>
+                ${versionBadge(index, log.status)}
+              </div>
+              <div class="eco-helper-text mt-1 truncate">${escapeHtml(model.name || "")}</div>
+            </div>
+            <span class="material-symbols-outlined text-outline shrink-0">history</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="border-b border-dashed eco-divider pb-2">
+              <div class="eco-form-label">生效日期</div>
+              <div class="eco-table-cell-text mt-1">${escapeHtml(snapshot.effectiveAt || "-")}</div>
+            </div>
+            <div class="border-b border-dashed eco-divider pb-2">
+              <div class="eco-form-label">失效日期</div>
+              <div class="eco-table-cell-text mt-1">${escapeHtml(snapshot.expiredAt || "长期有效")}</div>
+            </div>
+          </div>
+          <div class="eco-list-secondary-text whitespace-normal">${escapeHtml(log.description || "保存模型配置。")}</div>
+          <div class="eco-action-buttons factor-version-actions border-t eco-divider pt-3">
+            <button class="eco-btn eco-btn-secondary eco-btn-sm factor-version-action-btn" data-model-version-action="view" data-index="${index}" type="button">查看</button>
+            <button class="eco-btn eco-btn-secondary eco-btn-sm factor-version-action-btn" data-model-version-action="edit" data-index="${index}" type="button">编辑</button>
+            <button class="eco-btn eco-btn-primary eco-btn-sm factor-version-action-btn" data-model-version-action="new-version" data-index="${index}" type="button">另存新版</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderModelVersionDrawer(model) {
+      const content = byId("model-version-drawer-content");
+      if (!content || !model) return;
+      const logs = versionRows(model);
+      content.innerHTML = `
+        <div class="model-version-drawer-shell">
+          <div class="model-version-drawer-header">
+            <div class="min-w-0">
+              <h2 class="eco-section-title truncate">${escapeHtml(model.name || "核算模型")}</h2>
+              <div class="eco-helper-text mt-1">模型版本管理</div>
+            </div>
+            <button id="model-version-drawer-close" class="eco-btn eco-btn-secondary eco-btn-square-sm" type="button" title="关闭">
+              <span class="material-symbols-outlined text-2xl">close</span>
+            </button>
+          </div>
+          <div class="model-version-drawer-body custom-scrollbar space-y-4">
+            ${logs.length ? logs.map((log, index) => renderModelVersionCard(model, log, index)).join("") : `
+              <div class="eco-empty-state"><div class="eco-empty-title">暂无版本记录</div><div class="eco-empty-desc">保存或另存新版后会生成版本记录</div></div>
+            `}
+          </div>
+        </div>
+      `;
+      byId("model-version-drawer-close")?.addEventListener("click", closeModelVersionDrawer);
+    }
+
+    function openModelVersionDrawer(model) {
+      if (!model) return;
+      state.selectedModelId = model.id;
+      closeDetail();
+      renderModelVersionDrawer(model);
+      byId("model-version-management-container")?.classList.remove("pointer-events-none");
+      byId("model-version-drawer-overlay")?.classList.remove("pointer-events-none", "opacity-0");
+      byId("model-version-drawer-overlay")?.classList.add("opacity-100");
+      byId("model-version-drawer-content")?.classList.add("model-version-drawer-open");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModelVersionDrawer(immediate = false) {
+      byId("model-version-drawer-overlay")?.classList.add("opacity-0");
+      byId("model-version-drawer-overlay")?.classList.remove("opacity-100");
+      byId("model-version-drawer-content")?.classList.remove("model-version-drawer-open");
+
+      const releaseDrawer = () => {
+        byId("model-version-management-container")?.classList.add("pointer-events-none");
+        byId("model-version-drawer-overlay")?.classList.add("pointer-events-none");
+        document.body.style.overflow = "";
+      };
+      if (immediate) releaseDrawer();
+      else setTimeout(releaseDrawer, 300);
+    }
+
+    function showModelVersionDetail(model, log, index) {
+      const snapshot = snapshotForVersion(model, log, index);
+      openInfoModal("模型版本详情", `
+        <section class="eco-form-card p-4">
+          <h4 class="eco-form-heading mb-4">${escapeHtml(snapshot.version)} 版本信息</h4>
+          <div class="grid grid-cols-2 gap-y-3 gap-x-8">
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">模型名称：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.name)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">版本状态：</span><span class="eco-detail-value mt-0 flex-1">${index ? "历史版本" : "当前版本"}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算范围：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.scopeLabel)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">排放类别：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.categoryLabel)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算方法：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.method)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算单位：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.unit)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">生效时间：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.effectiveAt)}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">失效时间：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.expiredAt)}</span></div>
+            <div class="flex col-span-2"><span class="eco-detail-label w-24 shrink-0">引用标准：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.standard)}</span></div>
+            <div class="flex col-span-2"><span class="eco-detail-label w-24 shrink-0">计算公式：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.formula)}</span></div>
+            <div class="flex col-span-2"><span class="eco-detail-label w-24 shrink-0">变更说明：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.description)}</span></div>
+          </div>
+        </section>
+      `);
+    }
+
     function snapshotForVersion(model, log, index) {
+      const versionModel = log.rawModel ? normalizeModel(log.rawModel) : model;
       const versionOffset = index ? index : 0;
-      const categoryLabelText = model.categoryLabel || categoryLabel(model.category);
-      const raw = model.raw || {};
+      const categoryLabelText = versionModel.categoryLabel || categoryLabel(versionModel.category);
+      const raw = versionModel.raw || {};
       const standard = standardFor(raw);
       const standardCode = raw.standardCode || standard?.code || "STD_NDRC_GHG_GUIDE";
       const standardAttachment = raw.standardAttachment?.name || raw.standardFileName || raw.attachmentName || `${standardCode}.pdf`;
       const factorName = raw.factorName || raw.factorGroupName || raw.factorSetName || "天然气锅炉燃烧因子组";
       return {
-        name: model.name,
-        version: log.version || model.version,
-        status: model.status === "停用" ? "停用" : "启用",
-        standard: model.standard,
+        name: versionModel.name,
+        version: log.version || versionModel.version,
+        status: versionModel.status === "停用" ? "停用" : "启用",
+        standard: versionModel.standard,
         standardCode,
         standardAttachment,
-        scopeLabel: model.scopeLabel,
+        scopeLabel: versionModel.scopeLabel,
         categoryLabel: categoryLabelText,
-        method: model.method,
-        formula: model.formula,
-        unit: model.unit,
-        measureUnit: model.measureUnit || raw.measureUnit || raw.activityDataType || "Nm³",
-        precision: model.precision || raw.precision || "小数点后 4 位",
+        method: versionModel.method,
+        formula: versionModel.formula,
+        unit: versionModel.unit,
+        measureUnit: versionModel.measureUnit || raw.measureUnit || raw.activityDataType || "Nm³",
+        precision: versionModel.precision || raw.precision || "小数点后 4 位",
         factorName,
         activityDataType: raw.activityDataType || raw.factorMatchRule?.activityDataType || "fuel_consumption",
         matchType: raw.matchType || raw.factorType || "因子组",
         gwpVersion: raw.gwpVersionCode || raw.gwpVersion || raw.gwp || "AR6",
-        effectiveAt: log.date || model.effectiveAt,
-        expiredAt: index ? log.date || model.effectiveAt : model.expiredAt,
+        effectiveAt: versionModel.effectiveAt || log.date,
+        expiredAt: versionModel.expiredAt || "长期有效",
         score: Math.max(82, 96 - versionOffset * 4),
         description: log.description
       };
-    }
-
-    function compareRows(current, history) {
-      return [
-        ["模型名称", current.name, history.name],
-        ["模型版本", current.version, history.version],
-        ["生效时间", current.effectiveAt, history.effectiveAt],
-        ["失效时间", current.expiredAt, history.expiredAt],
-        ["状态", current.status, history.status],
-        ["核算方法", current.method, history.method],
-        ["核算单位", current.unit, history.unit],
-        ["计量单位", current.measureUnit, history.measureUnit],
-        ["计算公式", current.formula, history.formula],
-        ["计算精度", current.precision, history.precision],
-        ["引用标准", current.standard, history.standard],
-        ["标准编号", current.standardCode, history.standardCode],
-        ["标准附件", current.standardAttachment, history.standardAttachment, "file"],
-        ["核算范围", current.scopeLabel, history.scopeLabel],
-        ["排放类别", current.categoryLabel, history.categoryLabel]
-      ];
-    }
-
-    function renderCompareWorkspace(model, logs) {
-      const current = snapshotForVersion(model, logs[0], 0);
-      const history = snapshotForVersion(model, logs[1] || logs[0], logs[1] ? 1 : 0);
-      const rows = compareRows(current, history);
-      const changed = rows.filter(([, left, right]) => String(left || "") !== String(right || "")).length;
-      const score = changed ? Math.max(80, 100 - changed * 5) : 100;
-      const historyOptions = logs.slice(1).map((log, index) => `<option value="${index + 1}">${escapeHtml(log.version)} ${escapeHtml(log.date || "")}</option>`).join("") || `<option value="0">暂无可对比版本</option>`;
-      const renderValue = (value, type) => {
-        if (type === "file") {
-          return `<a class="model-compare-link" href="javascript:void(0)"><span class="material-symbols-outlined">download</span>${escapeHtml(value || "-")}</a>`;
-        }
-        return escapeHtml(value || "-");
-      };
-      return `
-        <div class="model-original-compare-layout">
-          <section class="model-compare-table-card">
-              <table class="model-compare-table">
-                <thead>
-                  <tr>
-                    <th>属性</th>
-                    <th>
-                      <div class="model-compare-head-title">当前生效版本 (${escapeHtml(current.version)})</div>
-                      <span class="model-current-badge">当前启用</span>
-                    </th>
-                    <th>
-                      <div class="model-compare-head-title">当前版本 (${escapeHtml(history.version)})</div>
-                      <select id="version-history-select" class="eco-select eco-control-sm model-history-select">
-                        ${historyOptions}
-                      </select>
-                      <button id="version-rollback-selected" class="eco-btn eco-btn-primary eco-btn-sm model-rollback-button" type="button" ${logs.length > 1 ? "" : "disabled"}>回滚到该版本</button>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${rows.map(([label, left, right, type]) => {
-                    return `<tr>
-                      <td class="model-compare-label eco-table-head-text">${escapeHtml(label)}</td>
-                      <td class="model-compare-current eco-list-primary-text">${renderValue(left, type)}</td>
-                      <td class="model-compare-history eco-table-cell-text">${renderValue(right, type)}</td>
-                    </tr>`;
-                  }).join("")}
-                </tbody>
-              </table>
-          </section>
-          <aside class="model-compare-side">
-            <section class="model-side-card">
-              <h3>版本影响分析</h3>
-              <div class="model-impact-count"><strong>${changed}</strong><span>项</span><em>配置项变化</em></div>
-              <p>${changed ? "当前版本与所选历史版本存在配置差异。" : "当前版本与所选历史版本配置基本一致。"}</p>
-              <div class="model-score-row"><span>模型合规性评分</span><strong>${score}%</strong></div>
-              <div class="model-score-track"><span style="width:${score}%"></span></div>
-            </section>
-            <section class="model-side-card">
-              <h3>核心变更日志</h3>
-              <div class="model-core-log">
-                <span class="model-log-dot"></span>
-                <div>
-                  <strong>${escapeHtml(logs[0]?.version || model.version)}</strong>
-                  <p>${escapeHtml(logs[0]?.description || "初始化共享模型配置。")}</p>
-                  <em>${escapeHtml(logs[0]?.date || model.effectiveAt)} <span>|</span> 当前版本</em>
-                </div>
-              </div>
-            </section>
-          </aside>
-        </div>
-      `;
     }
 
     function renderRecordWorkspace(model, logs) {
@@ -787,7 +1107,6 @@
 
     function subpageTable(type, model) {
       const logs = changeLogs(model);
-      const isVersions = type === "versions";
       return `
         <section id="embedded-version-workspace" class="eco-card model-version-workspace">
           <div class="model-workspace-header">
@@ -796,18 +1115,12 @@
                 <span class="material-symbols-outlined text-sm">arrow_back</span>
                 <span>返回</span>
               </button>
-              <h2 id="version-workspace-title" class="model-workspace-title">${isVersions ? "版本管理" : "变更记录"}</h2>
-              <p id="version-workspace-subtitle" class="model-workspace-subtitle">${escapeHtml(model.name)}：${isVersions ? "仅进行版本对比，可选择历史版本并回滚为新版本。" : "按版本发布、状态调整与配置修改记录模型变更。"}</p>
-            </div>
-            <div class="model-workspace-actions">
-              <div class="model-version-tabs">
-                <button id="version-tab-compare" class="model-version-tab ${isVersions ? "active" : ""}" type="button" data-action="workspace-tab" data-target-view="versions">版本对比</button>
-                <button id="version-tab-records" class="model-version-tab ${isVersions ? "" : "active"}" type="button" data-action="workspace-tab" data-target-view="changes">变更记录</button>
-              </div>
+              <h2 id="version-workspace-title" class="model-workspace-title">变更记录</h2>
+              <p id="version-workspace-subtitle" class="model-workspace-subtitle">${escapeHtml(model.name)}：按版本发布、状态调整与配置修改记录模型变更。</p>
             </div>
           </div>
           <div class="model-workspace-body">
-            ${isVersions ? renderCompareWorkspace(model, logs) : renderRecordWorkspace(model, logs)}
+            ${renderRecordWorkspace(model, logs)}
           </div>
         </section>
       `;
@@ -838,7 +1151,11 @@
 
     function navigateModelPage(pageName, model) {
       closeDetail();
-      showModelSubpage(pageName === "版本管理" ? "versions" : "changes", model);
+      if (pageName === "版本管理") {
+        openModelVersionDrawer(model);
+        return;
+      }
+      showModelSubpage("changes", model);
       window.parent?.postMessage?.({
         type: "model-location",
         pageName,
@@ -872,13 +1189,14 @@
     }
 
     function deleteModel(model) {
-      if (!window.confirm(`确认删除“${model.name}”？`)) return;
-      if (Mock.removeAccountingModel) Mock.removeAccountingModel(model.id);
-      else {
-        Mock.AccountingModels = (Mock.AccountingModels || []).filter(item => item.id !== model.id);
-        Mock.saveState?.();
-      }
-      refresh();
+      showModelConfirm(`确认删除“${model.name}”？删除后该模型版本将从列表中移除。`, () => {
+        if (Mock.removeAccountingModel) Mock.removeAccountingModel(model.id);
+        else {
+          Mock.AccountingModels = (Mock.AccountingModels || []).filter(item => item.id !== model.id);
+          Mock.saveState?.();
+        }
+        refresh();
+      }, "确认删除");
     }
 
     function refresh() {
@@ -947,8 +1265,41 @@
       if (action === "toggle-status") updateModelStatus(model);
       if (action === "delete") deleteModel(model);
       if (action === "more") actionNode.nextElementSibling?.classList.toggle("hidden");
-      if (action === "versions") navigateModelPage("版本管理", model);
+      if (action === "versions") openModelVersionDrawer(model);
       if (action === "changes") navigateModelPage("变更记录", model);
+    });
+    byId("model-version-management-container")?.addEventListener("click", event => {
+      if (event.target.closest("#model-version-drawer-overlay")) {
+        closeModelVersionDrawer();
+        return;
+      }
+      const actionNode = event.target.closest("[data-model-version-action]");
+      if (!actionNode) return;
+      const model = models.find(item => String(item.id) === String(state.selectedModelId));
+      if (!model) return;
+      const logs = versionRows(model);
+      const index = Number(actionNode.dataset.index || 0);
+      const log = logs[index] || logs[0] || {};
+      const action = actionNode.dataset.modelVersionAction;
+      if (action === "view") {
+        showModelVersionDetail(model, log, index);
+        return;
+      }
+      if (action === "edit") {
+        closeModelVersionDrawer(true);
+        const targetModel = log.rawModel ? normalizeModel(log.rawModel) : model;
+        openForm(targetModel);
+        byId("model-form-version").value = log.version || targetModel.version;
+        byId("model-form-change").value = `修改 ${log.version || targetModel.version} 版本配置。`;
+        return;
+      }
+      if (action === "new-version") {
+        closeModelVersionDrawer(true);
+        const targetModel = log.rawModel ? normalizeModel(log.rawModel) : model;
+        openForm(targetModel);
+        byId("model-form-version").value = nextVersion(log.version || targetModel.version);
+        byId("model-form-change").value = `基于 ${log.version || targetModel.version} 另存为新版本。`;
+      }
     });
     els.subpage.addEventListener("click", event => {
       if (event.target.closest("[data-action='back-list']")) {
@@ -974,12 +1325,21 @@
     });
     document.querySelectorAll("[data-close-modal]").forEach(node => node.addEventListener("click", closeForm));
     document.querySelectorAll("[data-close-detail]").forEach(node => node.addEventListener("click", closeDetail));
-    byId("model-form-save").addEventListener("click", saveForm);
+    document.querySelectorAll("[data-close-notice]").forEach(node => node.addEventListener("click", closeModelNotice));
+    els.noticeCancel.addEventListener("click", closeModelNotice);
+    els.noticeOk.addEventListener("click", () => {
+      const handler = noticeConfirmHandler;
+      closeModelNotice();
+      if (handler) handler();
+    });
+    byId("model-form-save-current").addEventListener("click", () => saveForm("current"));
+    byId("model-form-save-new-version").addEventListener("click", () => saveForm("new-version"));
+    byId("model-form-never-expire").addEventListener("change", syncExpireControls);
     byId("model-form-scope").addEventListener("change", event => {
       fillSelect(byId("model-form-category"), categoryOptions(event.target.value), categoryOptions(event.target.value)[0]?.value || "");
     });
     byId("model-form-method").addEventListener("change", event => {
-      byId("model-form-formula").value = formulaByMethod(event.target.value);
+      applyMethodFormula(event.target.value);
     });
     window.addEventListener("message", event => {
       if (event.data?.type === "model-navigate" && event.data.view === "list") {
