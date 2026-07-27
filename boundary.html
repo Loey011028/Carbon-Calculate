@@ -1,4 +1,4 @@
-﻿<html lang="zh-CN"><head>
+<html lang="zh-CN"><head>
 
 <style data-integrated-cleanup>
   html,
@@ -484,8 +484,7 @@
 <div class="boundary-tabs" id="detail-tabs">
 <button class="boundary-tab tab-trigger active" data-tab="content-basic-info">基础信息</button>
 <button class="boundary-tab tab-trigger" data-tab="content-data-source">数据来源</button>
-<button class="boundary-tab tab-trigger" data-tab="content-related-devices">关联设备</button>
-<button class="boundary-tab tab-trigger" data-tab="content-operation-log">操作日志</button>
+<button class="boundary-tab tab-trigger" data-tab="content-related-devices">关联智能表计</button>
 </div>
 <!-- Tab Content Container -->
 <div class="boundary-pane-scroll" id="tab-content-container">
@@ -610,15 +609,15 @@
 <!-- 3. Related Devices Tab -->
 <div class="tab-pane space-y-6" id="content-related-devices">
 <div class="flex items-center justify-between">
-<h3 class="eco-form-heading">关联设备清单</h3>
+<h3 class="eco-form-heading">关联智能表计清单</h3>
 </div>
 <div class="eco-table-wrap boundary-table-area">
 <table class="eco-table eco-fixed-table">
 <thead>
 <tr>
 <th class="px-6 py-3 text-left font-medium text-gray-500">数据源名称</th>
-<th class="px-6 py-3 text-left font-medium text-gray-500">设备名称</th>
-<th class="px-6 py-3 text-left font-medium text-gray-500">设备编号</th>
+<th class="px-6 py-3 text-left font-medium text-gray-500">表计名称</th>
+<th class="px-6 py-3 text-left font-medium text-gray-500">PID</th>
 <th class="px-6 py-3 text-left font-medium text-gray-500">MAC地址</th>
 <th class="px-6 py-3 text-left font-medium text-gray-500">安装位置</th>
 <th class="px-6 py-3 text-left font-medium text-gray-500">通信状态</th>
@@ -626,19 +625,18 @@
 </thead>
 <tbody>
 <tr>
-<td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">天然气流量计 NG-001</td>
-<td class="px-6 py-4 whitespace-nowrap text-gray-500">智能流量计-F01</td>
-<td class="px-6 py-4 whitespace-nowrap text-gray-500">-</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">锅炉房天然气表</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">智能流量计-F01</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500 font-mono">PID-GM-006</td>
 <td class="px-6 py-4 whitespace-nowrap text-gray-500 text-xs font-mono">-</td>
-<td class="px-6 py-4 whitespace-nowrap text-gray-500">1号车间-A区</td>
+<td class="px-6 py-4 whitespace-nowrap text-gray-500">动力站</td>
 <td class="px-6 py-4 whitespace-nowrap"><span class="eco-tag eco-tag-success">在线</span></td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<!-- 5. Operation Log Tab -->
-<div class="tab-pane space-y-6" id="content-operation-log"><div class="flex items-center justify-between mb-4"><h3 class="eco-form-heading">操作变更日志</h3><button class="eco-btn eco-btn-secondary eco-btn-sm"><span class="material-symbols-outlined text-sm">download</span>导出日志</button></div><div class="eco-table-wrap boundary-table-area"><table class="eco-table eco-fixed-table"><thead><tr><th>操作人</th><th>操作时间</th><th>操作类型</th><th>操作内容/变更详情</th></tr></thead><tbody><tr><td class="font-medium">张三</td><td class="font-mono">2024-05-20 14:21:33</td><td>修改核算模型</td><td>将固定燃烧模型由默认改为行业标准V2.0</td></tr><tr><td class="font-medium">李四</td><td class="font-mono">2024-05-18 09:15:00</td><td>状态变更</td><td>由于设备维护，暂时禁用该核算项</td></tr><tr><td class="font-medium">王五</td><td class="font-mono">2024-05-15 16:30:22</td><td>新增数据源</td><td>关联新安装的智能流量计-F01</td></tr><tr><td class="font-medium">管理员</td><td class="font-mono">2024-05-10 11:05:45</td><td>权限调整</td><td>更新该模块权限配置</td></tr><tr><td class="font-medium">系统任务</td><td class="font-mono">2024-05-01 00:00:01</td><td>数据校验</td><td>月度数据自动审计完成，发现2条异常记录</td></tr></tbody></table></div></div></div></div></div></main></div></div>
+</div></div></div></main></div></div>
 <div class="fixed inset-0 bg-black/50 z-[100] hidden items-center justify-center px-4" id="boundary-modal">
 <div class="eco-card w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
 <div class="px-6 py-4 border-b eco-divider flex items-center justify-between">
@@ -671,6 +669,18 @@
 </div>
 <div class="flex flex-wrap gap-2 min-h-8 mt-3" id="custom-boundary-category-list"></div>
 <p class="text-xs text-gray-400 mt-2">标准 15 类无法覆盖的特殊价值链活动，可在这里补充；保存后会作为范围三二级类别显示。</p>
+</div>
+<label class="eco-form-label pt-2">活动数据类型 <span class="text-red-500">*</span></label>
+<div>
+<input class="eco-input h-11 w-full" id="new-boundary-activity-data-type" readonly type="text"/>
+<p class="text-xs text-gray-500 mt-2" id="new-boundary-activity-data-type-desc">活动数据类型按所属类别自动带出；范围三自定义类别可自行设置。</p>
+</div>
+<div class="hidden col-span-2 grid grid-cols-[120px_1fr] gap-x-6 items-start" id="custom-param-field-panel">
+  <label class="eco-form-label pt-2">核算参数名称</label>
+  <div>
+    <input class="eco-input h-11 w-full" id="new-boundary-custom-param-label" placeholder="例如：物料类型、服务类型、车辆类型" type="text"/>
+    <p class="text-xs text-gray-500 mt-2">用于在排放源表单中展示该类别的下拉筛选参数字段（选填，默认为“具体类型”）。</p>
+  </div>
 </div>
 <label class="eco-form-label pt-2">排放源类型 <span class="text-red-500">*</span></label>
 <div>
@@ -888,7 +898,8 @@
             ],
             scope2: [
                 { category: '外购电力', description: '企业购买并消耗的电力对应的能源间接排放。' },
-                { category: '外购热力/蒸汽', description: '企业购买并消耗的热力、热水或蒸汽对应的能源间接排放。' },
+                { category: '外购蒸汽', description: '企业购买并消耗的蒸汽对应的能源间接排放。' },
+                { category: '外购热力', description: '企业购买并消耗的热力或供暖对应的能源间接排放。' },
                 { category: '外购制冷', description: '企业购买并消耗的冷量或集中制冷对应的能源间接排放。' }
             ],
             scope3: [
@@ -1034,7 +1045,8 @@
             '工艺过程排放': ['化学反应排放', '煅烧/分解排放', '冶炼/还原过程排放'],
             '逸散排放': ['制冷剂泄漏', '燃气系统泄漏', '含氟气体泄漏'],
             '外购电力': ['生产设备用电', '动力系统用电', '建筑与照明用电', '办公与生活用电'],
-            '外购热力/蒸汽': ['外购蒸汽', '外购热水', '集中供热'],
+            '外购蒸汽': ['外购蒸汽'],
+            '外购热力': ['外购热水', '集中供热'],
             '外购制冷': ['集中供冷', '建筑空调用冷']
         };
         officialDefinitions.scope3.forEach(item => {
@@ -1415,6 +1427,43 @@ qualityMeta,
   });
 }
 
+function sharedBoundaryCategoryToBoundaryItem(category) {
+  const Mock = window.CarbonAccountingMock;
+  const categoryCode = category.categoryCode || category.category || "";
+  const categoryLabel = category.categoryLabel || Mock?.toCategoryLabel?.(categoryCode) || categoryCode;
+  return {
+    id: category.id || `bc-${category.scope}-${categoryCode}`.replace(/[^a-zA-Z0-9_-]+/g, "-"),
+    sharedBoundaryId: category.id || "",
+    scope: category.scope,
+    name: categoryLabel,
+    category: categoryLabel,
+    categoryCode,
+    description: category.description || `${categoryLabel}相关的核算边界类别。`,
+    owner: category.scope === "scope2" ? "能源管理员" : "管理员",
+    sourceType: category.scope === "scope1" ? "内部排放" : category.scope === "scope2" ? "能源间接排放" : "其他间接排放",
+    status: category.status || "启用",
+    statusVisible: category.statusVisible !== false,
+    updatedAt: "2026-06-29 10:35:00",
+    sources: [],
+    modelCount: 0,
+    quality: null,
+    activityDataType: category.activityDataType || "",
+    activityDataTypeLabel: category.activityDataTypeLabel || category.activityDataLabel || "",
+    activityDataLabel: category.activityDataLabel || category.activityDataTypeLabel || "",
+    isCustom: category.scope === "scope3" && String(categoryCode).startsWith("custom_scope3_")
+  };
+}
+
+function mergeSharedBoundaryCategories(items) {
+  const Mock = window.CarbonAccountingMock;
+  const existingKeys = new Set(items.map(item => `${item.scope}|${item.categoryCode || Mock?.toCategoryCode?.(item.category) || item.category}`));
+  const missingSharedItems = (Mock?.BoundaryCategories || [])
+    .filter(category => category.scope === 'scope3' && category.included !== false && category.status !== '停用')
+    .filter(category => !existingKeys.has(`${category.scope}|${category.categoryCode || category.category}`))
+    .map(sharedBoundaryCategoryToBoundaryItem);
+  return [...items, ...missingSharedItems];
+}
+
   function syncBoundarySourcesFromSharedDatabase(items) {
   const Mock = window.CarbonAccountingMock;
   const sharedSources = Mock?.EmissionSources || [];
@@ -1565,7 +1614,7 @@ qualityMeta,
                 quality: 66
             }
         ];
-        boundaryItems = syncBoundarySourcesFromSharedDatabase(buildBoundaryItemsFromDatasources(datasourceBoundarySeed));
+        boundaryItems = syncBoundarySourcesFromSharedDatabase(mergeSharedBoundaryCategories(buildBoundaryItemsFromDatasources(datasourceBoundarySeed)));
         boundaryItems.forEach(item => {
             item.sources = item.sources.map((source, index) => ({
                 ...source,
@@ -1576,8 +1625,7 @@ qualityMeta,
         const expandedCategories = {};
         let activeBoundaryId = boundaryItems[0]?.id || '';
         let activeDeviceId = '';
-        let operationLogPage = 1;
-        let operationLogPageSize = 10;
+        let lastPersistedBoundarySnapshot = "";
 
         const treeContainer = document.getElementById('boundary-tree');
         const searchInput = document.getElementById('boundary-search');
@@ -1587,7 +1635,6 @@ qualityMeta,
         const deleteButton = document.getElementById('delete-boundary');
         const dataSourcePane = document.getElementById('content-data-source');
         const relatedDevicesPane = document.getElementById('content-related-devices');
-        const operationLogPane = document.getElementById('content-operation-log');
         const modal = document.getElementById('boundary-modal');
         const deleteConfirmModal = document.getElementById('delete-confirm-modal');
         const deleteConfirmForm = document.getElementById('delete-confirm-form');
@@ -1962,8 +2009,8 @@ return {
   if (Array.isArray(sourceDevices) && sourceDevices.length) {
     return sourceDatasources.flatMap(datasource => sourceDevices.map(device => ({
       datasourceName: datasource.name || '-',
-      name: device.name || device.deviceName || datasource.meterName || datasource.name || '-',
-      code: device.code || device.deviceCode || device.no || device.id || '-',
+      name: device.meterName || device.name || device.deviceName || datasource.meterName || datasource.name || '-',
+      pid: device.pid || device.PID || device.productId || device.productID || device.productPid || datasource.pid || datasource.PID || datasource.productId || datasource.productID || datasource.productPid || '-',
       mac: device.mac || device.macAddress || device.MAC || datasource.macAddress || datasource.mac || datasource.gateway || '-',
       location: device.location || device.installLocation || datasource.location || datasource.org || source.location || source.position || '-',
       status: meterStatusText(device.status || device.communicationStatus || datasource.status)
@@ -1973,7 +2020,7 @@ return {
   return sourceDatasources.map(datasource => ({
       datasourceName: datasource.name || '-',
       name: datasource.meterName || datasource.deviceName || datasource.name || '-',
-      code: source.deviceCode || source.equipmentCode || source.meterCode || source.code || '-',
+      pid: datasource.pid || datasource.PID || datasource.productId || datasource.productID || datasource.productPid || source.pid || source.PID || source.productId || source.productID || '-',
       mac: datasource.macAddress || datasource.mac || datasource.gateway || source.mac || source.macAddress || '-',
       location: datasource.location || datasource.installLocation || datasource.org || source.location || source.position || '-',
       status: meterStatusText(datasource.status)
@@ -1993,7 +2040,7 @@ function deviceStatusHtml(status) {
 
 relatedDevicesPane.innerHTML = `
   <div class="flex items-center justify-between">
-    <h3 class="eco-form-heading">关联设备清单</h3>
+    <h3 class="eco-form-heading">关联智能表计清单</h3>
   </div>
 
   <div class="eco-table-wrap boundary-table-area">
@@ -2001,8 +2048,8 @@ relatedDevicesPane.innerHTML = `
       <thead>
         <tr>
           <th>数据源名称</th>
-          <th>设备名称</th>
-          <th>设备编号</th>
+          <th>表计名称</th>
+          <th>PID</th>
           <th>MAC地址</th>
           <th>安装位置</th>
           <th>通信状态</th>
@@ -2015,7 +2062,7 @@ relatedDevicesPane.innerHTML = `
               <tr>
                 <td class="whitespace-nowrap font-medium">${escapeHtml(device.datasourceName || '-')}</td>
                 <td class="whitespace-nowrap">${escapeHtml(device.name || '-')}</td>
-                <td class="whitespace-nowrap">${escapeHtml(device.code || '-')}</td>
+                <td class="whitespace-nowrap font-mono">${escapeHtml(device.pid || '-')}</td>
                 <td class="whitespace-nowrap font-mono">${escapeHtml(device.mac || '-')}</td>
                 <td class="whitespace-nowrap">${escapeHtml(device.location || '-')}</td>
                 <td class="whitespace-nowrap">${deviceStatusHtml(device.status)}</td>
@@ -2023,7 +2070,7 @@ relatedDevicesPane.innerHTML = `
             `).join('')
             : `<tr>
                 <td class="text-center" colspan="6">
-                  当前二级分类下暂无关联设备，请先在排放源或数据源中绑定设备。
+                  当前二级分类下暂无关联智能表计，请先在排放源或数据源中绑定智能表计。
                 </td>
               </tr>`
         }
@@ -2031,58 +2078,6 @@ relatedDevicesPane.innerHTML = `
     </table>
   </div>
 `;
-            const logRows = [
-                { user: '张三', time: '2024-05-20 14:21:33', type: '修改核算模型', detail: `${displayName}核算模型更新为${ctx.configured ? '行业标准V2.0' : '待配置状态'}` },
-                { user: '李四', time: '2024-05-18 09:15:00', type: '状态变更', detail: `${displayName}状态同步为${activeDevice ? activeDevice.status : item.status}` },
-                { user: '王五', time: '2024-05-15 16:30:22', type: '新增数据源', detail: `关联${relatedDeviceRows[0]?.name || displayName}` },
-                { user: '管理员', time: '2024-05-10 11:05:45', type: '权限调整', detail: '更新该模块权限配置' },
-                { user: '系统任务', time: '2024-05-01 00:00:01', type: '数据校验', detail: `${displayName}月度数据自动审计完成，发现${ctx.configured ? '2' : '0'}条异常记录` },
-                { user: '赵六', time: '2024-04-26 13:40:12', type: '数据源复核', detail: `${displayName}完成数据来源一致性复核` },
-                { user: '钱七', time: '2024-04-22 10:18:39', type: '边界确认', detail: `确认${displayName}纳入当前核算边界` },
-                { user: '系统任务', time: '2024-04-18 02:30:00', type: '闭环校验', detail: `${displayName}自动校验闭环配置` },
-                { user: '管理员', time: '2024-04-12 15:22:48', type: '初始化', detail: `创建${displayName}基础配置` }
-            ];
-            renderOperationLogPane(logRows);
-        }
-
-        function renderOperationLogPane(logRows) {
-            const pageCount = Math.max(1, Math.ceil(logRows.length / operationLogPageSize));
-            operationLogPage = Math.min(Math.max(1, operationLogPage), pageCount);
-            const start = (operationLogPage - 1) * operationLogPageSize;
-            const visibleRows = logRows.slice(start, start + operationLogPageSize);
-            const pageButtons = Array.from({ length: pageCount }, (_, index) => {
-                const page = index + 1;
-                return `<button class="eco-btn eco-btn-secondary eco-btn-xs ${page === operationLogPage ? 'tree-item-active' : ''}" data-log-page="${page}" type="button">${page}</button>`;
-            }).join('');
-
-            operationLogPane.innerHTML = `
-                <div class="h-full min-h-[520px] flex flex-col">
-                <div class="flex items-center justify-between mb-4 shrink-0">
-                    <h3 class="eco-form-heading">操作变更日志</h3>
-                    <button class="eco-btn eco-btn-secondary eco-btn-sm"><span class="material-symbols-outlined">download</span>导出日志</button>
-                </div>
-                <div class="eco-table-wrap boundary-table-area boundary-operation-log-table-area flex-1 min-h-[360px]">
-                    <table class="eco-table eco-fixed-table">
-                        <thead><tr><th>操作人</th><th>操作时间</th><th>操作类型</th><th>操作内容/变更详情</th></tr></thead>
-                        <tbody>${visibleRows.map(row => `<tr><td class="whitespace-nowrap font-medium">${row.user}</td><td class="whitespace-nowrap font-mono">${row.time}</td><td class="whitespace-nowrap">${row.type}</td><td>${row.detail}</td></tr>`).join('')}</tbody>
-                    </table>
-                </div>
-                <div class="flex items-center justify-between gap-3 pt-4 text-xs text-gray-500 shrink-0">
-                    <span>共 ${logRows.length} 条，第 ${operationLogPage} / ${pageCount} 页</span>
-                    <div class="flex items-center gap-2">
-                        <button class="eco-btn eco-btn-secondary eco-btn-xs" data-log-page-action="prev" type="button" ${operationLogPage === 1 ? 'disabled' : ''}>上一页</button>
-                        ${pageButtons}
-                        <button class="eco-btn eco-btn-secondary eco-btn-xs" data-log-page-action="next" type="button" ${operationLogPage === pageCount ? 'disabled' : ''}>下一页</button>
-                        <select class="eco-select eco-page-size" data-log-page-size>
-                            <option value="10" ${operationLogPageSize === 10 ? 'selected' : ''}>10 条/页</option>
-                            <option value="20" ${operationLogPageSize === 20 ? 'selected' : ''}>20 条/页</option>
-                            <option value="50" ${operationLogPageSize === 50 ? 'selected' : ''}>50 条/页</option>
-                        </select>
-                    </div>
-                </div>
-                </div>
-            `;
-            window.syncEcoSelects?.(operationLogPane);
         }
 
         function filteredItems(scope) {
@@ -2187,6 +2182,24 @@ relatedDevicesPane.innerHTML = `
   const Mock = window.CarbonAccountingMock;
   if (!Mock?.BoundaryCategories) return;
 
+  const normalizePersistedRow = item => ({
+    id: item.id || "",
+    scope: item.scope || "",
+    category: item.category || item.categoryCode || "",
+    categoryCode: item.categoryCode || item.category || "",
+    categoryLabel: item.categoryLabel || "",
+    included: item.included !== false,
+    status: item.status || "待完善",
+    statusVisible: item.statusVisible !== false,
+    closureStatus: item.closureStatus || "",
+    closureStage: item.closureStage || "",
+    closureReason: item.closureReason || "",
+    closureRate: Number(item.closureRate || 0),
+    activityDataType: item.activityDataType || "",
+    activityDataTypeLabel: item.activityDataTypeLabel || item.activityDataLabel || "",
+    activityDataLabel: item.activityDataLabel || item.activityDataTypeLabel || "",
+    description: item.description || ""
+  });
   const rows = boundaryItems.map(item => {
     const categoryCode =
       item.categoryCode ||
@@ -2207,9 +2220,21 @@ relatedDevicesPane.innerHTML = `
       closureStage: item.closureStage || "",
       closureReason: item.closureReason || "",
       closureRate: item.closureRate || 0,
+      activityDataType: item.activityDataType || "",
+      activityDataTypeLabel: item.activityDataTypeLabel || item.activityDataLabel || "",
+      activityDataLabel: item.activityDataLabel || item.activityDataTypeLabel || "",
       description: item.description || ""
     };
   });
+
+  const nextSnapshot = JSON.stringify(rows);
+  if (nextSnapshot === lastPersistedBoundarySnapshot) return;
+  const currentSnapshot = JSON.stringify((Mock.BoundaryCategories || []).map(normalizePersistedRow));
+  if (nextSnapshot === currentSnapshot) {
+    lastPersistedBoundarySnapshot = nextSnapshot;
+    return;
+  }
+  lastPersistedBoundarySnapshot = nextSnapshot;
 
   Mock.BoundaryCategories.splice(0, Mock.BoundaryCategories.length, ...rows);
 
@@ -2311,10 +2336,19 @@ function removeSharedEmissionSource(sourceId) {
             const now = new Date();
             const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
             const isCustomCategoryMode = scope === 'scope3' && categorySelect.value === '__custom_scope3_category__';
+            const activityDataTypeLabel = activityDataTypeInput.value.trim();
+    const customParamLabel = document.getElementById('new-boundary-custom-param-label')?.value.trim() || '具体类型';
             if (isCustomCategoryMode) {
                 const categories = getModalCustomCategories();
+                
                 if (!categories.length) {
                     window.alert('请先添加范围三自定义类别。');
+                    return;
+                }
+                
+                if (!activityDataTypeLabel) {
+                    window.alert('请先设置范围三自定义类别的活动数据类型。');
+                    activityDataTypeInput.focus();
                     return;
                 }
                 const duplicates = categories.filter(category => boundaryItems.some(item => item.scope === 'scope3' && item.category === category));
@@ -2328,28 +2362,39 @@ function removeSharedEmissionSource(sourceId) {
                     window.alert(`“${duplicates[0]}”已在范围三下添加，不能重复添加。`);
                     return;
                 }
-                categories.forEach((category, index) => {
-                    const item = {
-                        id: `scope3-custom-${Date.now()}-${index}`,
-                        scope: 'scope3',
-                        name: category,
-                        category,
-                        description: `${category}相关的范围三自定义间接排放类别。`,
-                        owner: '管理员',
-                        sourceType: '其他间接排放',
-                        status: '启用',
-                        updatedAt: timestamp,
-                        sources: [],
-                        modelCount: 0,
-                        quality: 75,
-                        isCustom: true
-                    };
+         categories.forEach((category, index) => {
+            const item = {
+                id: `scope3-custom-${Date.now()}-${index}`,
+                scope: 'scope3',
+                name: category,
+                category,
+                description: `${category}相关的范围三自定义间接排放类别。`,
+                owner: '管理员',
+                status: '启用',
+                updatedAt: timestamp,
+                sources: [],
+                isCustom: true
+            };
+
+            // 【修改】：传入 customParamLabel
+            const persisted = persistBoundaryCategoryWithActivity(item, activityDataTypeLabel, customParamLabel);
+                    if (persisted?.ok && persisted.item) {
+                        item.sharedBoundaryId = persisted.item.id || item.id;
+                        item.categoryCode = persisted.item.categoryCode || persisted.item.category || item.category;
+                        item.category = persisted.item.categoryLabel || item.category;
+                        item.name = persisted.item.categoryLabel || item.name;
+                        item.activityDataType = persisted.item.activityDataType || makeCustomActivityDataTypeCode(activityDataTypeLabel);
+                        item.activityDataTypeLabel = persisted.item.activityDataTypeLabel || activityDataTypeLabel;
+                        item.activityDataLabel = persisted.item.activityDataLabel || activityDataTypeLabel;
+                    }
                     boundaryItems.push(item);
                     activeBoundaryId = item.id;
                 });
                 activeDeviceId = '';
                 expandedScopes.scope3 = true;
                 nameInput.value = '';
+                activityDataTypeInput.value = '';
+                activityDataTypeInput.dataset.activityDataType = '';
                 customList.innerHTML = '<span class="text-xs text-gray-400 py-1">尚未添加自定义类别</span>';
                 syncAll();
                 closeModal();
@@ -2386,6 +2431,7 @@ function removeSharedEmissionSource(sourceId) {
                     quality: 75
                 };
                 boundaryItems.push(item);
+                persistBoundaryCategoryWithActivity(item);
                 activeBoundaryId = item.id;
                 activeDeviceId = '';
                 expandedScopes.scope3 = true;
@@ -2424,6 +2470,7 @@ function removeSharedEmissionSource(sourceId) {
                 quality: 75
             };
             boundaryItems.push(targetCategory);
+            persistBoundaryCategoryWithActivity(targetCategory);
             activeBoundaryId = targetCategory.id;
             activeDeviceId = '';
             expandedScopes[scope] = true;
@@ -2459,6 +2506,95 @@ function removeSharedEmissionSource(sourceId) {
         const customPanel = document.getElementById('custom-boundary-category-panel');
         const categoryDesc = document.getElementById('new-boundary-category-desc');
         const customList = document.getElementById('custom-boundary-category-list');
+        const activityDataTypeInput = document.getElementById('new-boundary-activity-data-type');
+        const activityDataTypeDesc = document.getElementById('new-boundary-activity-data-type-desc');
+
+        function makeCustomActivityDataTypeCode(label) {
+            const base = String(label || '')
+                .trim()
+                .replace(/\s+/g, '_')
+                .replace(/[^\w\u4e00-\u9fa5-]/g, '')
+                .slice(0, 32);
+            return `custom_activity_${base || Date.now()}`;
+        }
+
+        function activitySchemaForCategory(category) {
+            const Mock = window.CarbonAccountingMock;
+            const categoryCode = Mock?.toCategoryCode?.(category) || category;
+            return Mock?.getActivityParamSchema?.(categoryCode) || Mock?.getActivityParamSchema?.(category) || null;
+        }
+
+       // 修改 boundary.html 中的 syncModalCategoryMode 或 syncActivityDataTypeField
+function syncActivityDataTypeField(category, customMode = false) {
+    const customParamPanel = document.getElementById('custom-param-field-panel');
+    const customParamInput = document.getElementById('new-boundary-custom-param-label');
+    
+    activityDataTypeInput.readOnly = !customMode;
+    activityDataTypeInput.placeholder = customMode ? '例如：外包服务活动量、第三方检测次数' : '';
+    
+    // 控制新增的参数字段面板显隐
+    if (customParamPanel) {
+        customParamPanel.classList.toggle('hidden', !customMode);
+    }
+
+    if (customMode) {
+        activityDataTypeInput.value = '';
+        activityDataTypeInput.dataset.activityDataType = '';
+        if (customParamInput) customParamInput.value = ''; // 清空自定义参数框
+        activityDataTypeDesc.innerText = '保存后，排放源会按该活动数据类型展示对应的核算参数配置。';
+        return;
+    }
+    
+    const schema = activitySchemaForCategory(category);
+    activityDataTypeInput.value = schema?.activityDataTypeLabel || '未配置';
+    activityDataTypeInput.dataset.activityDataType = schema?.activityDataType || '';
+    activityDataTypeDesc.innerText = schema ? '该类型来自当前所属类别的活动数据规则。' : '当前类别尚未配置活动数据类型。';
+}
+
+        function persistBoundaryCategoryWithActivity(item, activityDataTypeLabel = '', customParamLabel = '') {
+    const Mock = window.CarbonAccountingMock;
+    const categoryCode = Mock?.toCategoryCode?.(item.category) || item.categoryCode || item.category;
+    const label = String(activityDataTypeLabel || '').trim();
+    const paramLabel = String(customParamLabel || '').trim() || '具体类型';
+    const activityDataType = label ? makeCustomActivityDataTypeCode(label) : '';
+
+    if (item.scope === 'scope3' && label && typeof Mock?.addCustomScope3BoundaryCategory === 'function') {
+        return Mock.addCustomScope3BoundaryCategory(item.name || item.category, item.description, {
+            activityDataType,
+            activityDataTypeLabel: label,
+            activityDataLabel: label,
+            // 【新增】：将自定义参数字段名称传给 Mock
+            paramLabel: paramLabel
+        });
+    }
+            if (label) {
+                Mock?.upsertActivityParamSchema?.(categoryCode, {
+                    category: categoryCode,
+                    activityDataType,
+                    activityDataTypeLabel: label,
+                    activityDataLabel: label,
+                    params: [{
+                        key: 'customSpecificType',
+                        label: '具体类型',
+                        allowCustom: true,
+                        options: [{ value: '__custom__', label: '自定义' }]
+                    }],
+                    custom: true
+                });
+            }
+            Mock?.upsertBoundaryCategory?.({
+                scope: item.scope,
+                category: categoryCode,
+                categoryLabel: item.name || item.category,
+                description: item.description,
+                status: item.status || '启用',
+                activityDataType,
+                activityDataTypeLabel: label,
+                activityDataLabel: label
+            });
+            window.dispatchEvent(new Event('carbon-mock-updated'));
+            return { ok: true, item };
+        }
 
         function syncCustomSourceNameField() {
             customNameLabel.classList.add('hidden');
@@ -2513,6 +2649,7 @@ function removeSharedEmissionSource(sourceId) {
             sourceTypePanel.classList.add('hidden');
             const selected = modalCategories.find(item => item.category === officialSelect.value);
             categoryDesc.innerText = isCustomCategoryAction ? '输入新的范围三二级类别，保存后会与标准类别并列显示。' : selected?.description || '';
+            syncActivityDataTypeField(officialSelect.value, isCustomCategoryAction);
             fillSourceTypeOptions();
             syncCustomSourceNameField();
         }
@@ -2548,6 +2685,8 @@ function removeSharedEmissionSource(sourceId) {
             sourceTypeSelect.value = '';
             customNameInput.value = '';
             customInput.value = '';
+            activityDataTypeInput.value = '';
+            activityDataTypeInput.dataset.activityDataType = '';
             customList.innerHTML = '<span class="text-xs text-gray-400 py-1">尚未添加自定义类别</span>';
             fillModalCategories();
         }
@@ -2564,6 +2703,9 @@ function removeSharedEmissionSource(sourceId) {
         scopeSelect.addEventListener('change', fillModalCategories);
         officialSelect.addEventListener('change', () => {
             syncModalCategoryMode();
+        });
+        activityDataTypeInput.addEventListener('input', () => {
+            activityDataTypeInput.dataset.activityDataType = makeCustomActivityDataTypeCode(activityDataTypeInput.value);
         });
         sourceTypeSelect.addEventListener('change', syncCustomSourceNameField);
         addCategoryButton.addEventListener('click', addModalCustomCategory);
@@ -2593,7 +2735,6 @@ function removeSharedEmissionSource(sourceId) {
                 const id = categoryButton.dataset.categoryToggle;
                 activeBoundaryId = id;
                 activeDeviceId = '';
-                operationLogPage = 1;
                 expandedCategories[id] = expandedCategories[id] === false;
                 syncAll();
                 return;
@@ -2602,30 +2743,9 @@ function removeSharedEmissionSource(sourceId) {
             if (deviceButton) {
                 activeBoundaryId = deviceButton.dataset.parentId;
                 activeDeviceId = deviceButton.dataset.deviceId;
-                operationLogPage = 1;
                 expandedCategories[activeBoundaryId] = true;
                 syncAll();
             }
-        });
-        operationLogPane.addEventListener('click', event => {
-            const pageButton = event.target.closest('[data-log-page]');
-            const actionButton = event.target.closest('[data-log-page-action]');
-            if (!pageButton && !actionButton) return;
-            if (pageButton) {
-                operationLogPage = Number(pageButton.dataset.logPage) || 1;
-            } else if (actionButton.dataset.logPageAction === 'prev') {
-                operationLogPage -= 1;
-            } else if (actionButton.dataset.logPageAction === 'next') {
-                operationLogPage += 1;
-            }
-            renderDetail();
-        });
-        operationLogPane.addEventListener('change', event => {
-            const sizeSelect = event.target.closest('[data-log-page-size]');
-            if (!sizeSelect) return;
-            operationLogPageSize = Math.max(10, Number(sizeSelect.value) || 10);
-            operationLogPage = 1;
-            renderDetail();
         });
         searchInput.addEventListener('input', renderTree);
         deleteButton.addEventListener('click', openDeleteModal);
@@ -2643,7 +2763,9 @@ function removeSharedEmissionSource(sourceId) {
 <script data-source-binding-override>
 (function () {
   window.addEventListener('storage', event => {
-    if (event.key === window.CarbonAccountingMock?.STORAGE_KEY) location.reload();
+    if (event.key === window.CarbonAccountingMock?.STORAGE_KEY) {
+      window.dispatchEvent(new Event('carbon-mock-updated'));
+    }
   });
 })();
 </script>
