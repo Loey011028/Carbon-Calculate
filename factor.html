@@ -266,7 +266,6 @@
 <section class="eco-form-card datasource-modal-section p-4"><h3 class="eco-form-heading mb-4">基本信息</h3><div class="grid grid-cols-2 gap-4">
 <div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block" id="name-label">因子名称 <span class="text-error">*</span></label></div><input class="eco-input h-11 w-full" id="form-name" placeholder="请输入因子名称" type="text"/></div>
 <div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block">版本号</label></div><input class="eco-input h-11 w-full" id="form-version" placeholder="V1.0" type="text"/></div>
-<div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block" id="code-label">因子编码</label></div><input class="eco-input h-11 w-full" id="form-code" placeholder="自动生成" type="text"/></div>
 <div class="eco-field col-span-2">
   <div class="flex h-7 items-start"><label class="eco-form-label block">因子分类 <span class="text-error">*</span></label></div>
   <input id="form-category" type="hidden"/>
@@ -442,7 +441,6 @@
   const modeInput = document.getElementById('factor-form-mode');
   const idInput = document.getElementById('factor-form-id');
   const nameInput = document.getElementById('form-name');
-  const codeInput = document.getElementById('form-code');
   const categoryInput = document.getElementById('form-category');
 const categoryGroupInput = document.getElementById('form-category-group');
 const categoryCategoryInput = document.getElementById('form-category-category');
@@ -462,7 +460,6 @@ const categoryCategoryInput = document.getElementById('form-category-category');
   const addGasBtn = document.getElementById('add-gas-row');
   const configActionHead = document.getElementById('config-action-head');
   const nameLabel = document.getElementById('name-label');
-  const codeLabel = document.getElementById('code-label');
   const endDateField = document.getElementById('end-date-field');
   const factorFilters = {
     gas: "全部",
@@ -758,7 +755,7 @@ function getMatchSummary(item = {}) {
 }
 
   function itemSearchText(item = {}) {
-    return [item.name, item.code, item.categoryLabel, item.category, item.standardName, standardLabel(item.standardId), item.source].filter(Boolean).join(' ').toLowerCase();
+    return [item.name, item.categoryLabel, item.category, item.standardName, standardLabel(item.standardId), item.source].filter(Boolean).join(' ').toLowerCase();
   }
 
   function getGwpVersions() {
@@ -1093,7 +1090,7 @@ function hydrateGroupFactorIds() {
 }
 
   function itemText(item) {
-    return [item.name, item.code, item.category, item.source, item.scope].filter(Boolean).join(' ');
+    return [item.name, item.category, item.source, item.scope].filter(Boolean).join(' ');
   }
 
   function itemMatchesTokens(item, tokens = []) {
@@ -1604,9 +1601,7 @@ function collapseFactorVersions(items = []) {
       ? `另存为新版本 - ${isGroup ? "因子组" : "因子"}`
       : `${isEdit ? "编辑" : "新增"}${isGroup ? "因子组" : "因子"}`;
     nameLabel.innerHTML = `${isGroup ? '因子组名称' : '因子名称'}<span class="required-star">*</span>`;
-    codeLabel.textContent = isGroup ? '因子组编码' : '因子编码';
     nameInput.placeholder = isGroup ? '请输入因子组名称' : '请输入因子名称';
-    codeInput.placeholder = '自动生成';
     addGasBtn.classList.remove('hidden');
     configActionHead.classList.remove('hidden');
 
@@ -1619,7 +1614,6 @@ groupFactorSection.classList.add('hidden');
     document.getElementById("factor-form-save")?.classList.toggle("hidden", isNewVersion);
     document.getElementById("factor-form-save-new")?.classList.toggle("hidden", !isNewVersion && !isEdit);
     nameInput.value = item?.name || '';
-    codeInput.value = item?.code || '';
   syncCategorySelector(item?.categoryCode || item?.category || 'stationary_combustion');
 syncFactorActivityOptions(categoryInput.value, item?.activityDataType || '');
 renderFactorAccountingParams(categoryInput.value, item?.matchParams || item || {});
@@ -1653,6 +1647,7 @@ syncStandardOptions(item?.standardId);
   const kind = kindInput.value;
   const prefix = kind === 'group' ? 'FG' : 'EF';
   const list = kind === 'group' ? groups : factors;
+  const existingItem = list.find((item) => item.id === idInput.value);
   const serial = String(list.length + 1).padStart(3, '0');
   const gasFactors = collectGasFactors();
   const gasFactor = gasFactors[0] || { gas: 'CO₂', value: '0.00', unit: 'kgCO₂/Nm³' };
@@ -1684,7 +1679,7 @@ paramSelects.forEach((select) => {
   return {
     id: idInput.value || `${kind}-${Date.now()}`,
     name: nameInput.value.trim() || (kind === 'group' ? '未命名因子组' : '未命名因子'),
-    code: codeInput.value.trim() || `${prefix}_CUSTOM_${serial}`,
+    code: existingItem?.code || `${prefix}_CUSTOM_${serial}`,
 
     // 和 model 联动的核心字段
     category: categoryCode,
@@ -1817,7 +1812,6 @@ matchParamLabels,
     document.getElementById('detail-info-grid').innerHTML = [
       ['因子名称', item.name || '-'],
       ['版本号', item.version || '-'],
-      ['因子编码', item.code || '-'],
       ['因子分类', categoryLabel],
       ['类型', kind === 'group' ? '因子组' : '单因子'],
       ['活动数据类型', activityLabel(item.activityDataType)],
