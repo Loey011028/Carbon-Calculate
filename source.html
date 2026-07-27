@@ -152,7 +152,7 @@
 <div class="source-dashboard-layout">
 <!-- Left Panel: Classification -->
 <aside class="eco-tree-panel datasource-tree-panel">
-<h3 class="eco-section-title mb-4 border-b eco-divider pb-2">排放源分类</h3>
+<h3 class="eco-section-title mb-4 border-b eco-divider pb-2">排放源分类 <span class="ml-1" id="source-boundary-total">(0)</span></h3>
 <button class="eco-btn eco-btn-secondary eco-btn-sm w-full mb-3 justify-center" id="source-category-manage-button" type="button">
 <span class="material-symbols-outlined text-sm">playlist_add</span>管理分类
 </button>
@@ -1694,19 +1694,16 @@
   }
 
   function renderBoundaryTree() {
-    const allActive = !state.groupCode && !state.treeCategory && !state.treeStatus;
+    const totalBadge = document.getElementById('source-boundary-total');
+    if (totalBadge) totalBadge.innerText = `(${countSources()})`;
     treeContainer.innerHTML = `
-      <button class="eco-tree-item w-full text-sm whitespace-nowrap" aria-current="${allActive ? 'true' : 'false'}" data-tree-all type="button">
-        <span class="w-1.5 h-1.5 rounded-full mr-3" style="background:currentColor;"></span>
-        <span class="flex-1 text-left">全部排放源 (${countSources()})</span>
-      </button>
       ${getActualBoundaryTree().map((group, index) => {
         const categories = group.children || [];
         const groupCount = countSources(group.groupCode);
         const expanded = expandedBoundaryScopes[group.groupCode] !== false;
         const groupActive = state.groupCode === group.groupCode && !state.treeCategory && !state.treeStatus;
         return `
-        <div class="${index ? 'mt-2' : 'mt-3'}">
+        <div class="${index ? 'mt-2' : ''}">
           <button class="eco-tree-item eco-tree-group w-full cursor-pointer whitespace-nowrap" aria-current="${groupActive ? 'true' : 'false'}" data-tree-group="${group.groupCode}" data-scope-key="${group.groupCode}" type="button">
             <span class="material-symbols-outlined text-sm mr-2">${expanded ? 'expand_more' : 'chevron_right'}</span>
             <span class="flex-1 text-left">${escapeHtml(group.groupLabel)} (${groupCount})</span>
@@ -3209,12 +3206,6 @@ document.getElementById('source-category-select')?.addEventListener('change', ha
   });
 
   treePanel.addEventListener('click', event => {
-    const allButton = event.target.closest('[data-tree-all]');
-    if (allButton) {
-      Object.assign(state, { groupCode: '', treeScope: '', treeCategory: '', treeSourceType: '', treeSourceId: '', treeStatus: '', page: 1 });
-      closeDetailDrawer();
-      return;
-    }
     const categoryButton = event.target.closest('[data-tree-category]');
     if (categoryButton) {
       state.groupCode = categoryButton.dataset.treeGroup || '';
