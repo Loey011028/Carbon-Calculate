@@ -153,6 +153,9 @@
 <!-- Left Panel: Classification -->
 <aside class="eco-tree-panel datasource-tree-panel">
 <h3 class="eco-section-title mb-4 border-b eco-divider pb-2">排放源分类</h3>
+<button class="eco-btn eco-btn-secondary eco-btn-sm w-full mb-3 justify-center" id="source-category-manage-button" type="button">
+<span class="material-symbols-outlined text-sm">playlist_add</span>管理分类
+</button>
 <div class="space-y-1" id="source-boundary-tree"></div>
 </aside>
 <!-- Middle Panel: Data Table -->
@@ -209,6 +212,43 @@
 </main>
 </div>
 </div>
+<!-- Category Management Modal -->
+<div class="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center hidden" id="source-category-management-modal">
+<div class="eco-card w-full max-w-lg overflow-hidden">
+<div class="px-6 py-4 border-b eco-divider flex justify-between items-center">
+<h2 class="eco-section-title">管理排放源分类</h2>
+<button class="eco-btn eco-btn-secondary eco-btn-square-sm" id="source-category-management-close" type="button">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-6 space-y-5">
+<div class="eco-field">
+<label class="eco-form-label block mb-1">排放大类</label>
+<select class="eco-select h-11" id="source-managed-group-select"></select>
+</div>
+<div class="eco-field hidden" id="source-managed-group-custom-field">
+<label class="eco-form-label block mb-1">自定义排放大类名称</label>
+<input class="eco-input h-11" id="source-managed-group-custom-input" placeholder="请输入自定义排放大类名称" type="text">
+</div>
+<div class="eco-field">
+<label class="eco-form-label block mb-1">排放类别</label>
+<select class="eco-select h-11" id="source-managed-category-select"></select>
+</div>
+<div class="eco-field hidden" id="source-managed-category-custom-field">
+<label class="eco-form-label block mb-1">自定义排放类别名称</label>
+<input class="eco-input h-11" id="source-managed-category-custom-input" placeholder="请输入自定义排放类别名称" type="text">
+</div>
+<div class="eco-form-card p-3">
+<div class="eco-muted-text mb-2">当前分类</div>
+<div class="max-h-44 overflow-y-auto space-y-2 text-sm" id="source-managed-category-list"></div>
+</div>
+</div>
+<div class="px-6 py-4 border-t eco-divider flex justify-end gap-3">
+<button class="eco-btn eco-btn-secondary" id="source-category-management-cancel" type="button">取消</button>
+<button class="eco-btn eco-btn-primary" id="source-category-management-save" type="button">添加分类</button>
+</div>
+</div>
+</div>
 <!-- Edit Modal Overlay -->
 <div class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center hidden" id="edit-modal">
 <div class="eco-card w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -224,11 +264,12 @@
 <!-- Section 1: Basic Info -->
 <div class="mb-8">
 <h3 class="eco-form-heading mb-6">基础信息配置</h3>
-<div class="grid grid-cols-2 gap-6">
+<div class="space-y-6">
 <div class="eco-field">
 <label class="eco-form-label block mb-1">排放源名称</label>
 <input class="eco-input h-11" id="source-name-input" type="text" value="天然气锅炉">
 </div>
+<div class="grid grid-cols-2 gap-6" id="source-basic-category-row">
 <div class="eco-field">
   <label class="eco-form-label block mb-1">排放大类</label>
   <select class="eco-select h-11" id="source-group-select"></select>
@@ -239,6 +280,8 @@
 <select class="eco-select h-11" id="source-category-select"></select>
 <input class="eco-input h-11 hidden" id="source-custom-category-input" placeholder="请输入二级类别名称" type="text">
 </div>
+</div>
+<div class="grid grid-cols-2 gap-6" id="source-basic-boundary-row">
 <div class="eco-field">
 <label class="eco-form-label block mb-1">所属范围</label>
 <select class="eco-select h-11" id="source-scope-select"></select>
@@ -246,6 +289,7 @@
 <div class="eco-field">
 <label class="eco-form-label block mb-1">所属类别</label>
 <select class="eco-select h-11" id="source-belonging-category-select"></select>
+</div>
 </div>
 </div>
 <div class="eco-form-card mt-4 p-3">
@@ -256,16 +300,6 @@
   <h3 class="eco-form-heading mb-6">活动数据配置</h3>
 
   <div class="grid grid-cols-3 gap-6 mb-6">
-    <div class="eco-field">
-      <label class="eco-form-label block mb-1">活动数据类型</label>
-      <input
-        class="eco-input h-11"
-        id="source-activity-data-type-label"
-        readonly
-        type="text"
-      >
-    </div>
-
     <div class="contents" id="source-accounting-params"></div>
 
     <div class="eco-field">
@@ -296,6 +330,15 @@
 <label class="eco-form-label">选择数据源（支持多选）</label>
 <span class="eco-muted-text" id="source-datasource-count">已选择 0 个</span>
 </div>
+<div class="flex items-center gap-2">
+<label class="eco-filter-label flex-1 min-w-0">
+<span class="eco-form-label shrink-0">数据源名称：</span>
+<input class="eco-input h-10 w-full" id="source-datasource-name-filter" placeholder="请输入数据源名称筛选" type="text">
+</label>
+<button class="eco-btn eco-btn-primary eco-btn-sm h-10 shrink-0" id="source-datasource-name-search" type="button">
+<span class="material-symbols-outlined text-sm">search</span>搜索
+</button>
+</div>
 <div class="eco-table-wrap">
 <div class="grid gap-0 px-4 py-2 eco-muted-text border-b eco-divider" id="source-datasource-options-head">
 </div>
@@ -324,14 +367,25 @@
   const Mock = window.CarbonAccountingMock || {};
   const emissionCategoryTree = Mock.EmissionCategoryTree || [];
   const factorBuiltinCategoryTree = Mock.getFactorBuiltinCategoryTree?.() || Mock.FactorBuiltinCategoryTree || [];
+  var sourceManagedCategoryTree = [];
 
   function getGroupNode(groupCode) {
+    if (Array.isArray(sourceManagedCategoryTree)) {
+      const managedGroup = sourceManagedCategoryTree.find(group => group.groupCode === groupCode);
+      if (managedGroup) return managedGroup;
+    }
     return factorBuiltinCategoryTree.find(group => group.groupCode === groupCode)
       || emissionCategoryTree.find(group => group.groupCode === groupCode)
       || null;
   }
 
   function getCategoryNode(categoryCode) {
+    if (Array.isArray(sourceManagedCategoryTree)) {
+      for (const group of sourceManagedCategoryTree) {
+        const category = (group.children || []).find(item => item.category === categoryCode);
+        if (category) return { group, category };
+      }
+    }
     for (const group of factorBuiltinCategoryTree) {
       const category = (group.children || []).find(item => item.category === categoryCode);
       if (category) return { group, category };
@@ -415,7 +469,7 @@
     { name: '冷媒R410a泄漏', scope: '范围一', category: '逸散排放', status: '启用', dataSources: '0' },
     { name: '外购电力-办公楼', scope: '范围二', category: '外购电力', status: '启用', dataSources: '1', datasourceIds: ['ds-1'] },
     { name: '外购电力-生产线', scope: '范围二', category: '外购电力', status: '启用', dataSources: '1', datasourceIds: ['ds-2'] },
-    { name: '外购蒸汽-供热站', scope: '范围二', category: '外购热力/蒸汽', status: '启用', dataSources: '1', datasourceIds: ['ds-7'] },
+    { name: '外购蒸汽-供热站', scope: '范围二', category: '外购蒸汽', status: '启用', dataSources: '1', datasourceIds: ['ds-7'] },
     { name: '员工通勤', scope: '范围三', category: '类别7：员工通勤', status: '启用', dataSources: '1', datasourceIds: ['ds-9'] },
     { name: '上游运输', scope: '范围三', category: '类别4：上游运输和配送', status: '启用', dataSources: '1', datasourceIds: ['ds-4'] },
     { name: '办公废弃物处置', scope: '范围三', category: '类别5：运营产生的废弃物', status: '停用', dataSources: '0' },
@@ -425,6 +479,157 @@
  let emissionSourceData = (Mock.EmissionSources || []).map(sharedSourceToRow);
 
   const tableBody = document.querySelector('.eco-table tbody');
+  const sourceCategoryStorageKey = "carbon-source-selected-category-tree-v2";
+  const sourceManagedCategoryDeleteStorageKey = "carbon-source-deleted-category-tree-v1";
+  var sourceManagedCategoryDeletedKeys = [];
+
+  function buildSourceCategoryPresetTree() {
+    const baseTree = factorBuiltinCategoryTree.length
+      ? factorBuiltinCategoryTree
+      : (Mock.getSourceCategoryTree?.() || []).map(group => ({
+          groupCode: group.groupCode,
+          groupLabel: group.groupLabel,
+          children: group.categories || group.children || []
+        }));
+
+    return baseTree.map(group => ({
+      groupCode: group.groupCode,
+      groupLabel: group.groupLabel,
+      children: (group.children || group.categories || []).map(category => ({
+        category: category.categoryCode || category.category,
+        categoryCode: category.categoryCode || category.category,
+        categoryLabel: category.categoryLabel || category.label || category.category,
+        scope: category.scope || Mock.inferScopeByCategory?.(category.categoryCode || category.category) || "scope3",
+        scopeLabel: category.scopeLabel || Mock.toScopeLabel?.(category.scope || "scope3") || "范围三"
+      }))
+    }));
+  }
+
+  const sourceCategoryPresetTree = buildSourceCategoryPresetTree();
+
+  function readSourceManagedCategoryTree() {
+    try {
+      const parsed = JSON.parse(window.localStorage?.getItem(sourceCategoryStorageKey) || "null");
+      return Array.isArray(parsed) ? parsed : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function readSourceManagedCategoryDeletedKeys() {
+    try {
+      const parsed = JSON.parse(window.localStorage?.getItem(sourceManagedCategoryDeleteStorageKey) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function sourceManagedCategoryDeleteKey(groupCode, categoryCode = "") {
+    return categoryCode ? `${groupCode}|${categoryCode}` : `${groupCode}|*`;
+  }
+
+  function isSourceManagedCategoryDeleted(groupCode, categoryCode = "") {
+    return sourceManagedCategoryDeletedKeys.includes(sourceManagedCategoryDeleteKey(groupCode, ""))
+      || (categoryCode && sourceManagedCategoryDeletedKeys.includes(sourceManagedCategoryDeleteKey(groupCode, categoryCode)));
+  }
+
+  function rememberSourceManagedCategoryDeleted(groupCode, categoryCode = "") {
+    const key = sourceManagedCategoryDeleteKey(groupCode, categoryCode);
+    if (!sourceManagedCategoryDeletedKeys.includes(key)) sourceManagedCategoryDeletedKeys.push(key);
+    persistSourceManagedCategoryDeletedKeys();
+  }
+
+  function forgetSourceManagedCategoryDeleted(groupCode, categoryCode = "") {
+    const key = sourceManagedCategoryDeleteKey(groupCode, categoryCode);
+    sourceManagedCategoryDeletedKeys = sourceManagedCategoryDeletedKeys.filter(item => item !== key);
+    if (categoryCode) {
+      sourceManagedCategoryDeletedKeys = sourceManagedCategoryDeletedKeys.filter(item => item !== sourceManagedCategoryDeleteKey(groupCode, ""));
+    }
+    persistSourceManagedCategoryDeletedKeys();
+  }
+
+  function persistSourceManagedCategoryDeletedKeys() {
+    try {
+      window.localStorage?.setItem(sourceManagedCategoryDeleteStorageKey, JSON.stringify(sourceManagedCategoryDeletedKeys));
+    } catch (error) {
+      // Ignore storage failures in static demo mode.
+    }
+  }
+
+  function persistSourceManagedCategoryTree() {
+    try {
+      window.localStorage?.setItem(sourceCategoryStorageKey, JSON.stringify(sourceManagedCategoryTree));
+    } catch (error) {
+      // Ignore storage failures in static demo mode.
+    }
+  }
+
+  function mergeSourceManagedCategoryTrees(...trees) {
+    const map = new Map();
+    trees.flat().forEach(group => {
+      if (!group?.groupCode) return;
+      if (isSourceManagedCategoryDeleted(group.groupCode)) return;
+      if (!map.has(group.groupCode)) {
+        map.set(group.groupCode, {
+          groupCode: group.groupCode,
+          groupLabel: group.groupLabel || group.groupCode,
+          children: [],
+          isCustom: Boolean(group.isCustom)
+        });
+      }
+      const target = map.get(group.groupCode);
+      (group.children || []).forEach(category => {
+        const categoryCode = category.category || category.categoryCode;
+        if (!categoryCode || target.children.some(item => item.category === categoryCode)) return;
+        if (isSourceManagedCategoryDeleted(group.groupCode, categoryCode)) return;
+        target.children.push({
+          category: categoryCode,
+          categoryCode,
+          categoryLabel: category.categoryLabel || category.label || categoryCode,
+          scope: category.scope || Mock.inferScopeByCategory?.(categoryCode) || "scope3",
+          scopeLabel: category.scopeLabel || Mock.toScopeLabel?.(category.scope || "scope3") || "范围三",
+          isCustom: Boolean(category.isCustom)
+        });
+      });
+    });
+    return Array.from(map.values());
+  }
+
+  function collectExistingSourceCategoryTree() {
+    const map = new Map();
+    emissionSourceData.forEach(source => {
+      const categoryCode = source.categoryCode || source.category || "";
+      if (!categoryCode) return;
+      const categoryNode = getCategoryNode(categoryCode);
+      const groupCode = source.groupCode || categoryNode?.group?.groupCode || Mock.getEmissionGroupByCategory?.(categoryCode)?.groupCode || "";
+      const groupLabel = source.groupLabel || categoryNode?.group?.groupLabel || Mock.getEmissionGroupByCategory?.(categoryCode)?.groupLabel || groupCode;
+      if (!groupCode) return;
+      if (!map.has(groupCode)) {
+        map.set(groupCode, { groupCode, groupLabel, children: [], isCustom: !getGroupNode(groupCode) });
+      }
+      const group = map.get(groupCode);
+      if (group.children.some(category => category.category === categoryCode)) return;
+      group.children.push({
+        category: categoryCode,
+        categoryCode,
+        categoryLabel: source.categoryLabel || categoryNode?.category?.categoryLabel || source.category || categoryCode,
+        scope: source.scopeCode || Mock.toScopeCode?.(source.scope) || source.scope || Mock.inferScopeByCategory?.(categoryCode) || "scope3",
+        scopeLabel: source.scopeLabel || Mock.toScopeLabel?.(source.scopeCode || source.scope) || source.scope || "",
+        isCustom: !categoryNode?.category
+      });
+    });
+    return Array.from(map.values());
+  }
+
+  function buildSourceManagedCategoryTree() {
+    const savedTree = readSourceManagedCategoryTree();
+    return mergeSourceManagedCategoryTrees(savedTree || [], collectExistingSourceCategoryTree());
+  }
+
+  sourceManagedCategoryDeletedKeys = readSourceManagedCategoryDeletedKeys();
+  sourceManagedCategoryTree = buildSourceManagedCategoryTree();
+
   function buildDefaultDatasourceGroups() {
     const tree = Mock.getDataSourceCategoryTree?.() || Mock.DataSourceCategoryTree || [];
     return tree.map(group => ({
@@ -543,6 +748,7 @@
 
   syncEmissionDatasourceBindings();
   const sourceFormState = { mode: 'add', editingIndex: null, groupKey: 'smart-meter', selectedIds: [] };
+  let sourceDatasourceFilterText = '';
   const fallbackBoundaryScopeMeta = {
     scope1: { scope: '范围一', label: '范围一（直接排放）', shortLabel: '范围一', categoryStatus: '启用' },
     scope2: { scope: '范围二', label: '范围二（能源间接排放）', shortLabel: '范围二', categoryStatus: '启用' },
@@ -557,7 +763,7 @@
     ],
     scope2: [
       { category: '外购电力', status: '启用' },
-      { category: '外购热力/蒸汽', status: '启用' },
+      { category: '外购蒸汽', status: '启用' },
       { category: '外购制冷', status: '待启用' }
     ],
     scope3: [
@@ -618,13 +824,15 @@
   }
 
   function getActualBoundaryTree() {
-    const tree = Mock.getSourceCategoryTree?.() || [];
-    return tree.map(group => ({
+    return sourceManagedCategoryTree.map(group => ({
       groupCode: group.groupCode,
       groupLabel: group.groupLabel,
-      children: (group.categories || []).map(category => ({
+      children: (group.children || []).map(category => ({
         ...category,
-        children: category.sources || []
+        children: emissionSourceData.filter(source => {
+          const sourceGroupCode = source.groupCode || Mock.getEmissionGroupByCategory?.(source.categoryCode)?.groupCode || "";
+          return sourceGroupCode === group.groupCode && source.categoryCode === category.category;
+        })
       }))
     }));
   }
@@ -714,7 +922,7 @@
 
   function getGroupOptions() {
     return [
-      ...factorBuiltinCategoryTree.map(group => ({ value: group.groupCode, label: group.groupLabel })),
+      ...sourceManagedCategoryTree.map(group => ({ value: group.groupCode, label: group.groupLabel })),
       { value: "__custom__", label: "自定义大类" }
     ];
   }
@@ -724,10 +932,7 @@
       return [{ value: "__custom__", label: "自定义二级类别", isCustom: true }];
     }
 
-    const sharedOptions = Mock.getFactorCategoryOptionsByGroup?.(groupCode) || [];
-    const categories = sharedOptions.length
-      ? sharedOptions
-      : ((factorBuiltinCategoryTree.find(group => group.groupCode === groupCode)?.children || []));
+    const categories = sourceManagedCategoryTree.find(group => group.groupCode === groupCode)?.children || [];
 
     return [
       ...categories.map(category => ({
@@ -755,11 +960,11 @@
   }
 
   function isBuiltInGroupCode(groupCode) {
-    return factorBuiltinCategoryTree.some(group => group.groupCode === groupCode);
+    return sourceManagedCategoryTree.some(group => group.groupCode === groupCode);
   }
 
   function isBuiltInCategoryCode(categoryCode) {
-    return factorBuiltinCategoryTree.some(group =>
+    return sourceManagedCategoryTree.some(group =>
       (group.children || []).some(category => category.category === categoryCode)
     );
   }
@@ -780,6 +985,257 @@
       .replace(/[^\w\u4e00-\u9fa5-]/g, "")
       .slice(0, 24);
     return `custom_category_${base || Date.now()}`;
+  }
+
+  function getManagedGroupByCode(groupCode) {
+    return sourceManagedCategoryTree.find(group => group.groupCode === groupCode) || null;
+  }
+
+  function renderSourceManagedCategoryList() {
+    const list = document.getElementById("source-managed-category-list");
+    if (!list) return;
+    list.innerHTML = sourceManagedCategoryTree.map(group => `
+      <div class="rounded border border-slate-100 bg-white p-3">
+        <div class="flex items-center justify-between gap-3">
+          <div class="font-semibold text-slate-800 min-w-0 truncate">${escapeHtml(group.groupLabel)}</div>
+          <button class="eco-btn eco-btn-secondary eco-btn-square-sm shrink-0" data-source-managed-delete-group="${escapeHtml(group.groupCode)}" type="button" title="删除排放大类">
+            <span class="material-symbols-outlined text-sm">delete</span>
+          </button>
+        </div>
+        <div class="mt-2 space-y-2">
+          ${(group.children || []).map(category => `
+            <div class="flex items-center justify-between gap-3 rounded border border-slate-100 bg-slate-50 px-3 py-2">
+              <div class="min-w-0">
+                <div class="font-medium text-slate-700 truncate">${escapeHtml(category.categoryLabel)}</div>
+                <div class="eco-muted-text mt-0.5">${countSourcesByManagedCategory(group.groupCode, category.categoryCode || category.category)} 个排放源</div>
+              </div>
+              <button class="eco-btn eco-btn-secondary eco-btn-square-sm shrink-0" data-source-managed-delete-category="${escapeHtml(category.categoryCode || category.category)}" data-source-managed-delete-category-group="${escapeHtml(group.groupCode)}" type="button" title="删除排放类别">
+                <span class="material-symbols-outlined text-sm">delete</span>
+              </button>
+            </div>
+          `).join('') || '<span class="eco-muted-text">暂无类别</span>'}
+        </div>
+      </div>
+    `).join('');
+    list.querySelectorAll("[data-source-managed-delete-group]").forEach(button => {
+      button.addEventListener("click", () => deleteSourceManagedGroup(button.dataset.sourceManagedDeleteGroup || ""));
+    });
+    list.querySelectorAll("[data-source-managed-delete-category]").forEach(button => {
+      button.addEventListener("click", () => deleteSourceManagedCategory(
+        button.dataset.sourceManagedDeleteCategoryGroup || "",
+        button.dataset.sourceManagedDeleteCategory || ""
+      ));
+    });
+  }
+
+  function syncSourceCategoryManagementGroupField() {
+    const groupSelect = document.getElementById("source-managed-group-select");
+    const groupField = document.getElementById("source-managed-group-custom-field");
+    groupField?.classList.toggle("hidden", groupSelect?.value !== "__custom__");
+    fillSourceManagedCategoryOptions();
+  }
+
+  function fillSourceCategoryManagementGroups(selectedGroupCode = "") {
+    const select = document.getElementById("source-managed-group-select");
+    if (!select) return;
+    const presetOptions = sourceCategoryPresetTree.map(group => ({ value: group.groupCode, label: group.groupLabel }));
+    const managedCustomOptions = sourceManagedCategoryTree
+      .filter(group => !sourceCategoryPresetTree.some(preset => preset.groupCode === group.groupCode))
+      .map(group => ({ value: group.groupCode, label: group.groupLabel }));
+    fillValueSelect(select, [
+      ...presetOptions,
+      ...managedCustomOptions,
+      { value: "__custom__", label: "自定义排放大类" }
+    ]);
+    select.value = selectedGroupCode && [...presetOptions, ...managedCustomOptions].some(group => group.value === selectedGroupCode)
+      ? selectedGroupCode
+      : (sourceCategoryPresetTree[0]?.groupCode || "");
+    syncEcoSelects(select.parentElement || document);
+    syncSourceCategoryManagementGroupField();
+  }
+
+  function fillSourceManagedCategoryOptions() {
+    const groupSelect = document.getElementById("source-managed-group-select");
+    const categorySelect = document.getElementById("source-managed-category-select");
+    const categoryField = document.getElementById("source-managed-category-custom-field");
+    if (!groupSelect || !categorySelect) return;
+    const presetGroup = sourceCategoryPresetTree.find(item => item.groupCode === groupSelect.value);
+    const managedGroup = sourceManagedCategoryTree.find(item => item.groupCode === groupSelect.value);
+    const managedCustomGroup = Boolean(managedGroup?.isCustom && !presetGroup);
+    const customGroup = groupSelect.value === "__custom__" || managedCustomGroup;
+    const categoryOptions = customGroup
+      ? [{ value: "__custom__", label: "自定义排放类别" }]
+      : (presetGroup?.children || []).map(category => ({
+          value: category.category,
+          label: category.categoryLabel
+        }));
+    fillValueSelect(categorySelect, categoryOptions);
+    categorySelect.disabled = customGroup;
+    if (customGroup) categorySelect.value = "__custom__";
+    syncEcoSelects(categorySelect.parentElement || document);
+    categoryField?.classList.toggle("hidden", !customGroup && categorySelect.value !== "__custom__");
+  }
+
+  function openSourceCategoryManagementModal() {
+    fillSourceCategoryManagementGroups(state.groupCode || "");
+    document.getElementById("source-managed-group-custom-input").value = "";
+    document.getElementById("source-managed-category-custom-input").value = "";
+    renderSourceManagedCategoryList();
+    document.getElementById("source-category-management-modal")?.classList.remove("hidden");
+  }
+
+  function closeSourceCategoryManagementModal() {
+    document.getElementById("source-category-management-modal")?.classList.add("hidden");
+  }
+
+  function refreshSourceManagedCategoryViews(groupCode = "", categoryCode = "") {
+    persistSourceManagedCategoryTree();
+    if (groupCode) expandedBoundaryScopes[groupCode] = true;
+    state.groupCode = groupCode || state.groupCode;
+    state.treeCategory = categoryCode || state.treeCategory;
+    state.page = 1;
+    setupFilters();
+    renderBoundaryTree();
+    renderTable();
+    fillSourceCategoryManagementGroups(groupCode);
+    renderSourceManagedCategoryList();
+
+    if (!document.getElementById("edit-modal")?.classList.contains("hidden")) {
+      setupFormOptions(categoryCode || document.getElementById("source-category-select")?.value || "", groupCode || document.getElementById("source-group-select")?.value || "");
+    }
+  }
+
+  function resolveManagedGroupFromControls() {
+    const groupSelect = document.getElementById("source-managed-group-select");
+    const groupInput = document.getElementById("source-managed-group-custom-input");
+    const customGroup = groupSelect?.value === "__custom__";
+    const presetGroup = sourceCategoryPresetTree.find(item => item.groupCode === groupSelect?.value);
+    const managedGroup = sourceManagedCategoryTree.find(item => item.groupCode === groupSelect?.value);
+    const selectedGroup = presetGroup || managedGroup;
+    const groupLabel = customGroup ? (groupInput?.value.trim() || "") : (selectedGroup?.groupLabel || "");
+    const groupCode = customGroup ? makeCustomGroupCode(groupLabel) : (selectedGroup?.groupCode || "");
+    return { groupCode, groupLabel, isCustom: customGroup };
+  }
+
+  function saveSourceManagedGroup() {
+    const groupMeta = resolveManagedGroupFromControls();
+    if (!groupMeta.groupCode || !groupMeta.groupLabel) {
+      window.alert("请选择或输入要添加的排放大类。");
+      return;
+    }
+
+    if (getManagedGroupByCode(groupMeta.groupCode)) {
+      window.alert(`“${groupMeta.groupLabel}”已添加，不能重复添加。`);
+      return;
+    }
+
+    forgetSourceManagedCategoryDeleted(groupMeta.groupCode);
+    sourceManagedCategoryTree.push({
+      groupCode: groupMeta.groupCode,
+      groupLabel: groupMeta.groupLabel,
+      children: [],
+      isCustom: groupMeta.isCustom
+    });
+    refreshSourceManagedCategoryViews(groupMeta.groupCode);
+  }
+
+  function countSourcesByManagedCategory(groupCode, categoryCode = "") {
+    return emissionSourceData.filter(source => {
+      const sourceCategory = source.categoryCode || source.category || "";
+      const categoryNode = getCategoryNode(sourceCategory);
+      const sourceGroupCode = source.groupCode || categoryNode?.group?.groupCode || Mock.getEmissionGroupByCategory?.(sourceCategory)?.groupCode || "";
+      return sourceGroupCode === groupCode && (!categoryCode || sourceCategory === categoryCode);
+    }).length;
+  }
+
+  function deleteSourceManagedGroup(groupCode) {
+    const group = getManagedGroupByCode(groupCode);
+    if (!group) return;
+    const sourceCount = countSourcesByManagedCategory(groupCode);
+    if (sourceCount && !window.confirm(`该排放大类下已有 ${countSourcesByManagedCategory(groupCode)} 个排放源，删除后分类树中将不再显示该大类。是否确认删除？`)) return;
+    sourceManagedCategoryTree = sourceManagedCategoryTree.filter(item => item.groupCode !== groupCode);
+    rememberSourceManagedCategoryDeleted(groupCode);
+    if (state.groupCode === groupCode) {
+      state.groupCode = "";
+      state.treeCategory = "";
+    }
+    refreshSourceManagedCategoryViews("");
+  }
+
+  function deleteSourceManagedCategory(groupCode, categoryCode) {
+    const group = getManagedGroupByCode(groupCode);
+    if (!group || !categoryCode) return;
+    const sourceCount = countSourcesByManagedCategory(groupCode, categoryCode);
+    const category = (group.children || []).find(item => (item.categoryCode || item.category) === categoryCode);
+    const categoryLabel = category?.categoryLabel || categoryCode;
+    if (sourceCount && !window.confirm(`该排放分类「${categoryLabel}」下已有 ${countSourcesByManagedCategory(groupCode, categoryCode)} 个排放源，删除后分类树中将不再显示该分类。是否确认删除？`)) return;
+    group.children = (group.children || []).filter(item => (item.categoryCode || item.category) !== categoryCode);
+    rememberSourceManagedCategoryDeleted(groupCode, categoryCode);
+    if (state.groupCode === groupCode && state.treeCategory === categoryCode) {
+      state.treeCategory = "";
+    }
+    refreshSourceManagedCategoryViews(groupCode);
+  }
+
+  function saveSourceManagedCategory() {
+    const groupSelect = document.getElementById("source-managed-group-select");
+    const categorySelect = document.getElementById("source-managed-category-select");
+    const groupInput = document.getElementById("source-managed-group-custom-input");
+    const categoryInput = document.getElementById("source-managed-category-custom-input");
+    const customGroup = groupSelect?.value === "__custom__";
+    const customCategory = categorySelect?.value === "__custom__";
+    const presetGroup = sourceCategoryPresetTree.find(item => item.groupCode === groupSelect?.value);
+    const groupLabel = customGroup ? (groupInput?.value.trim() || "") : (presetGroup?.groupLabel || "");
+    const groupCode = customGroup ? makeCustomGroupCode(groupLabel) : (presetGroup?.groupCode || "");
+    const categoryLabel = customCategory ? (categoryInput?.value.trim() || "") : "";
+    const categoryCode = customCategory ? makeCustomCategoryCode(categoryLabel) : "";
+    const presetCategory = customCategory
+      ? {
+          category: categoryCode,
+          categoryCode,
+          categoryLabel,
+          scope: "scope3",
+          scopeLabel: Mock.toScopeLabel?.("scope3") || "范围三",
+          isCustom: true
+        }
+      : ((presetGroup?.children || []).find(item => item.category === categorySelect?.value));
+
+    if (!groupCode || !groupLabel || !presetCategory?.category || !presetCategory?.categoryLabel) {
+      window.alert("请选择要添加的排放大类和排放类别。");
+      return;
+    }
+
+    forgetSourceManagedCategoryDeleted(groupCode);
+    forgetSourceManagedCategoryDeleted(groupCode, presetCategory.category);
+    let group = getManagedGroupByCode(groupCode);
+    if (!group) {
+      group = {
+        groupCode,
+        groupLabel,
+        children: [],
+        isCustom: customGroup
+      };
+      sourceManagedCategoryTree.push(group);
+    }
+
+    if ((group.children || []).some(category => category.category === presetCategory.category)) {
+      window.alert(`“${presetCategory.categoryLabel}”已在${group.groupLabel}下添加，不能重复添加。`);
+      return;
+    }
+
+    group.children = group.children || [];
+    group.children.push({
+      ...presetCategory,
+      isCustom: Boolean(presetCategory.isCustom || customCategory)
+    });
+    Mock.upsertBoundaryCategory?.({
+      scope: presetCategory.scope || "scope3",
+      category: presetCategory.category,
+      categoryLabel: presetCategory.categoryLabel,
+      status: "启用",
+      description: customCategory ? "由排放源分类管理自定义新增。" : "由排放源分类管理添加。"
+    });
+    refreshSourceManagedCategoryViews(group.groupCode, presetCategory.category);
   }
 
   function makeCustomActivityDataTypeCode(label) {
@@ -904,6 +1360,29 @@
 
   function syncBoundaryFieldsByEmissionCategory(categoryCode = "", selectedBelongingCategory = "") {
     return syncBelongingCategoryByScope(selectedBelongingCategory);
+  }
+
+  function refreshSourceFormBoundaryOptions() {
+    const scopeSelect = document.getElementById("source-scope-select");
+    const belongingSelect = document.getElementById("source-belonging-category-select");
+    const selectedScope = scopeSelect?.value || scopeSelect?.dataset?.scopeCode || "";
+    const selectedBelongingCategory = belongingSelect?.value || "";
+    const nextScope = setupBoundaryScopeOptions(selectedScope);
+    setupBelongingCategoryOptions(selectedBelongingCategory, nextScope);
+  }
+
+  function syncSharedMockStateFromStorage() {
+    try {
+      const saved = JSON.parse(window.localStorage?.getItem(Mock.STORAGE_KEY) || "{}");
+      if (Array.isArray(saved.BoundaryCategories)) Mock.BoundaryCategories = saved.BoundaryCategories;
+      if (saved.BoundaryCategoryOptions) Mock.BoundaryCategoryOptions = saved.BoundaryCategoryOptions;
+      if (saved.ActivityParamSchemas) Mock.ActivityParamSchemas = {
+        ...(Mock.ActivityParamSchemas || {}),
+        ...saved.ActivityParamSchemas
+      };
+    } catch (error) {
+      console.warn("同步共享边界数据失败", error);
+    }
   }
 
   function updateSourceCategoryOptions(selectedCategory = "", groupCode = "") {
@@ -1140,7 +1619,8 @@
     if (!option) {
       option = new Option(label || fallbackLabel, code);
       option.dataset.custom = "true";
-      select.add(option, select.options.length);
+      const customOption = Array.from(select.options).find(item => item.value === "__custom__");
+      select.add(option, customOption ?? select.options.length);
     }
     option.textContent = label;
     select.value = code;
@@ -1785,19 +2265,8 @@
   }
 
   function syncActivityTypeFromSelectedDatasources() {
-    const activityInput = document.getElementById('source-activity-data-type-label');
-    if (!activityInput) return false;
     const belongingCategoryCode = getSelectedBelongingCategoryCode();
     const schema = getSourceActivityParamSchema(belongingCategoryCode);
-    const customScope3 = isCustomScope3BelongingCategory(belongingCategoryCode);
-    activityInput.readOnly = !customScope3;
-    if (customScope3) {
-      activityInput.placeholder = '请输入自定义活动数据类型';
-      return false;
-    }
-    activityInput.placeholder = '';
-    activityInput.value = schema?.activityDataTypeLabel || '未配置';
-    activityInput.dataset.activityDataType = schema?.activityDataType || '';
     return Boolean(schema);
   }
 
@@ -1949,6 +2418,7 @@
     box.querySelectorAll('[data-ds-group]').forEach(card => {
       card.addEventListener('click', () => {
         sourceFormState.groupKey = card.dataset.dsGroup;
+        clearDatasourceNameFilter();
         renderDatasourceSelector();
       });
     });
@@ -1962,6 +2432,22 @@
     if (!group.categories.some(category => category.key === categorySelect.dataset.selected)) categorySelect.dataset.selected = group.categories[0]?.key || '';
     categorySelect.value = categorySelect.dataset.selected;
     syncEcoSelects(categorySelect.parentElement || document);
+    renderDatasourceOptions();
+  }
+
+  function syncDatasourceNameFilterInput() {
+    const input = document.getElementById('source-datasource-name-filter');
+    if (input && input.value !== sourceDatasourceFilterText) input.value = sourceDatasourceFilterText;
+  }
+
+  function clearDatasourceNameFilter() {
+    sourceDatasourceFilterText = '';
+    syncDatasourceNameFilterInput();
+  }
+
+  function applyDatasourceNameFilter() {
+    const input = document.getElementById('source-datasource-name-filter');
+    sourceDatasourceFilterText = input?.value || '';
     renderDatasourceOptions();
   }
 
@@ -2070,9 +2556,14 @@
     const sortedSources = [...(category.sources || [])].sort((left, right) =>
       Number(sourceFormState.selectedIds.includes(right.id)) - Number(sourceFormState.selectedIds.includes(left.id))
     );
+    syncDatasourceNameFilterInput();
+    const filterText = sourceDatasourceFilterText.trim().toLowerCase();
+    const visibleSources = filterText
+      ? sortedSources.filter(source => source.name.toLowerCase().includes(filterText))
+      : sortedSources;
     head.className = `grid ${layout.headClass} gap-0 px-4 py-2 eco-muted-text border-b eco-divider`;
     head.innerHTML = layout.heads.map(text => `<span class="${text === '状态' ? 'justify-self-center text-center' : ''}">${escapeHtml(text)}</span>`).join('');
-    list.innerHTML = sortedSources.map(source => {
+    list.innerHTML = visibleSources.map(source => {
       const checked = sourceFormState.selectedIds.includes(source.id);
       const classify = datasourceClassificationStatus(source, ownerMap, checked);
       const disabled = classify.disabled;
@@ -2080,7 +2571,7 @@
         <input type="checkbox" class="disabled:opacity-40" value="${source.id}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''}>
         ${datasourceRowCells(source, groupKey, ownerMap, checked).join('')}
       </label>`;
-    }).join('') || '<div class="eco-empty-state">该类别下暂无数据源</div>';
+    }).join('') || `<div class="eco-empty-state">${filterText ? '未找到匹配的数据源' : '该类别下暂无数据源'}</div>`;
     list.querySelectorAll('input[type="checkbox"]').forEach(input => {
       input.addEventListener('change', () => {
         if (input.checked) {
@@ -2175,7 +2666,6 @@
 function renderAccountingParams(belongingCategoryCode, values = {}, labels = {}, options = {}) {
   const section = document.getElementById('source-accounting-params-section');
   const box = document.getElementById('source-accounting-params');
-  const activityInput = document.getElementById('source-activity-data-type-label');
   const unitInput = document.getElementById('source-unit-input');
 
   const customScope3 = isCustomScope3BelongingCategory(belongingCategoryCode);
@@ -2194,17 +2684,6 @@ function renderAccountingParams(belongingCategoryCode, values = {}, labels = {},
   } : null);
   const params = activeSchema?.params || [];
   const forceUnit = options.forceUnit === true;
-
-  if (activityInput) {
-    activityInput.readOnly = !customScope3;
-    activityInput.placeholder = customScope3 ? '请输入自定义活动数据类型' : '';
-    activityInput.value = customScope3
-      ? (options.activityDataTypeLabel || labels.activityDataType || activityInput.value || '')
-      : (activeSchema?.activityDataTypeLabel || '未配置');
-    activityInput.dataset.activityDataType = customScope3
-      ? (options.activityDataType || values.activityDataType || '')
-      : (activeSchema?.activityDataType || '');
-  }
 
   const firstParam = params[0];
   const firstOption = firstParam?.options?.find(option => option.value !== '__custom__');
@@ -2229,7 +2708,9 @@ function renderAccountingParams(belongingCategoryCode, values = {}, labels = {},
 
   box.innerHTML = params.map(param => {
     const options = param.options || [];
-    const current = values[param.key] || '';
+    const orderedOptions = [...options.filter(option => option.value !== '__custom__'), ...options.filter(option => option.value === '__custom__')];
+    const firstBuiltInOption = options.find(option => option.value !== '__custom__');
+    const current = values[param.key] || firstBuiltInOption?.value || '';
     const hasCurrentOption = options.some(option => option.value === current);
     const selectValue = hasCurrentOption ? current : (param.allowCustom ? '__custom__' : current);
     const customValue = hasCurrentOption
@@ -2240,7 +2721,7 @@ function renderAccountingParams(belongingCategoryCode, values = {}, labels = {},
       <label class="eco-form-label block mb-1">${escapeHtml(param.label || param.key)}</label>
       <select class="eco-select h-11"
               data-accounting-param-select="${escapeHtml(param.key)}">
-        ${options.map(option => `
+        ${orderedOptions.map(option => `
           <option value="${escapeHtml(option.value)}" ${option.value === selectValue ? 'selected' : ''}>
             ${escapeHtml(option.label || option.value)}
           </option>
@@ -2311,6 +2792,14 @@ function handleSourceCategoryChange() {
 
   renderAccountingParams(getSelectedBelongingCategoryCode(), {}, {}, { forceUnit: true });
 }
+
+function getAddSourceCategoryContext() {
+  return {
+    groupCode: state.groupCode || "",
+    categoryCode: state.treeCategory || ""
+  };
+}
+
 function openModal(mode = 'add', index = null) {
   refreshDatasourceCatalog();
 
@@ -2318,7 +2807,8 @@ function openModal(mode = 'add', index = null) {
   sourceFormState.editingIndex = index;
 
   const item = mode === 'edit' ? emissionSourceData[index] : null;
-  const selectedCategory = item?.categoryCode || state.treeCategory || '';
+  const addCategoryContext = mode === 'add' ? getAddSourceCategoryContext() : { groupCode: "", categoryCode: "" };
+  const selectedCategory = item?.categoryCode || addCategoryContext.categoryCode || '';
 
   document.getElementById('source-modal-title').innerText = mode === 'edit' ? '编辑排放源' : '新增排放源';
   document.getElementById('source-name-input').value = item?.name || '';
@@ -2326,7 +2816,7 @@ function openModal(mode = 'add', index = null) {
   document.getElementById('source-custom-group-input').value = mode === 'edit' ? (item?.groupLabel || '') : '';
 
   // 二级分类永远来自 boundary，不受能源大类影响
-  setupFormOptions(selectedCategory, item?.groupCode || state.groupCode || '');
+  setupFormOptions(selectedCategory, item?.groupCode || addCategoryContext.groupCode || '');
 
   renderAccountingParams(
     getSelectedBelongingCategoryCode(),
@@ -2343,6 +2833,7 @@ function openModal(mode = 'add', index = null) {
   document.getElementById('source-status-checkbox').checked = item ? item.status !== '停用' : true;
 
   sourceFormState.selectedIds = item ? seedDatasourceSelection(item) : [];
+  clearDatasourceNameFilter();
 
   const firstSelected = datasourceMap.get(sourceFormState.selectedIds[0]);
   sourceFormState.groupKey = firstSelected?.groupKey || 'smart-meter';
@@ -2507,9 +2998,11 @@ function openModal(mode = 'add', index = null) {
 
     const schema = getSourceActivityParamSchema(belongingCategoryCode) || {};
     const accountingForm = collectAccountingParamForm();
-    const activityInput = document.getElementById("source-activity-data-type-label");
-    const activityDataTypeLabel = activityInput?.value.trim() || schema.activityDataTypeLabel || "";
-    const activityDataType = activityInput?.dataset?.activityDataType || schema.activityDataType || (
+    const customActivityDataTypeLabel = accountingForm.labels.customSpecificType || accountingForm.params.customSpecificTypeCustom || "";
+    const activityDataTypeLabel = schema.activityDataTypeLabel || (
+      isCustomScope3BelongingCategory(belongingCategoryCode) ? customActivityDataTypeLabel : ""
+    );
+    const activityDataType = schema.activityDataType || (
       isCustomScope3BelongingCategory(belongingCategoryCode) && activityDataTypeLabel
         ? makeCustomActivityDataTypeCode(activityDataTypeLabel)
         : ""
@@ -2603,6 +3096,17 @@ refreshSourceDataViews();
 
   document.getElementById('source-add-button').addEventListener('click', () => openModal('add'));
   document.getElementById('source-save-button').addEventListener('click', saveSourceForm);
+  document.getElementById('source-category-manage-button')?.addEventListener('click', openSourceCategoryManagementModal);
+  document.getElementById('source-category-management-close')?.addEventListener('click', closeSourceCategoryManagementModal);
+  document.getElementById('source-category-management-cancel')?.addEventListener('click', closeSourceCategoryManagementModal);
+  document.getElementById('source-category-management-save')?.addEventListener('click', saveSourceManagedCategory);
+  document.getElementById('source-managed-group-select')?.addEventListener('change', syncSourceCategoryManagementGroupField);
+  document.getElementById('source-managed-category-select')?.addEventListener('change', () => {
+    document.getElementById("source-managed-category-custom-field")?.classList.toggle(
+      "hidden",
+      document.getElementById("source-managed-category-select")?.value !== "__custom__"
+    );
+  });
   detailCloseButton.addEventListener('click', closeDetailDrawer);
 document.getElementById('source-group-select')?.addEventListener('change', () => {
   const groupSelect = document.getElementById('source-group-select');
@@ -2623,6 +3127,7 @@ document.getElementById('source-group-select')?.addEventListener('change', () =>
 });
 
 document.getElementById('source-scope-select')?.addEventListener('change', () => {
+  syncSharedMockStateFromStorage();
   syncBelongingCategoryByScope();
   updateCategoryMappingText();
   renderAccountingParams(getSelectedBelongingCategoryCode(), {}, {}, { forceUnit: true });
@@ -2636,7 +3141,12 @@ document.getElementById('source-belonging-category-select')?.addEventListener('c
 document.getElementById('source-category-select')?.addEventListener('change', handleSourceCategoryChange);
   document.getElementById('source-datasource-category').addEventListener('change', event => {
     event.target.dataset.selected = event.target.value;
+    clearDatasourceNameFilter();
     renderDatasourceOptions();
+  });
+  document.getElementById('source-datasource-name-search')?.addEventListener('click', applyDatasourceNameFilter);
+  document.getElementById('source-datasource-name-filter')?.addEventListener('keydown', event => {
+    if (event.key === 'Enter') applyDatasourceNameFilter();
   });
   window.addEventListener('resize', () => {
     closeEcoSelectMenu();
@@ -2652,10 +3162,14 @@ document.getElementById('source-category-select')?.addEventListener('change', ha
   });
   window.addEventListener('storage', event => {
     if (event.key !== Mock.STORAGE_KEY) return;
+    syncSharedMockStateFromStorage();
     refreshDatasourceCatalog();
+    refreshSourceFormBoundaryOptions();
     refreshSourceDataViews();
   });
   window.addEventListener('carbon-mock-updated', () => {
+    syncSharedMockStateFromStorage();
+    refreshSourceFormBoundaryOptions();
     refreshSourceDataViews();
   });
   syncPendingFiltersFromState();
