@@ -1715,16 +1715,38 @@ function qualityFor(item) {
   const disabledSourceTypes = allSources.filter(source => source.status === '停用').length;
 
   const Mock = window.CarbonAccountingMock;
-  const allDatasourceIds = new Set(allSources.flatMap(source => source.sharedSourceId
-    ? (Mock?.EmissionSources || []).find(raw => raw.id === source.sharedSourceId)?.datasourceIds || []
-    : []
-  ));
+  const datasourceById = id => (Mock?.DataSources || []).find(ds => normalizeDatasourceIdForBoundary(ds.id) === normalizeDatasourceIdForBoundary(id));
+  const meterRows = allSources.flatMap(source => {
+    const sharedSource = source.sharedSourceId
+      ? (Mock?.EmissionSources || []).find(raw => raw.id === source.sharedSourceId)
+      : null;
+    const datasourceIds = [
+      ...(source.datasourceIds || []),
+      ...(sharedSource?.datasourceIds || []),
+      source.datasourceId
+    ].filter(Boolean);
+    const sourceMeters = source.relatedDevices || source.devices || source.meters || [];
 
-  const relatedDatasources = (Mock?.DataSources || []).filter(ds => allDatasourceIds.has(ds.id));
-  const meterTotal = relatedDatasources.length;
+    return datasourceIds
+      .map(datasourceById)
+      .filter(datasource => datasource?.type === 'smart-meter')
+      .flatMap(datasource => {
+        if (Array.isArray(sourceMeters) && sourceMeters.length) {
+          return sourceMeters.map(device => ({
+            key: device.id || device.pid || device.PID || device.productId || device.mac || device.macAddress || `${datasource.id}-${device.name || device.meterName}`,
+            status: device.status || device.communicationStatus || datasource.status
+          }));
+        }
+        return [{
+          key: datasource.id || datasource.pid || datasource.macAddress || datasource.name,
+          status: datasource.status
+        }];
+      });
+  }).filter((row, index, list) => list.findIndex(item => String(item.key) === String(row.key)) === index);
+  const meterTotal = meterRows.length;
 
-  const meterOnline = relatedDatasources.filter(ds =>
-    ds.status === '在线' || ds.status === '启用' || ds.status === '正常'
+  const meterOnline = meterRows.filter(row =>
+    row.status === '在线' || row.status === '启用' || row.status === '正常'
   ).length;
 
   const meterOffline = Math.max(0, meterTotal - meterOnline);
