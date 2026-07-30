@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>碳核算管理</title>
+  <title>碳核算管理平台 - 模块整合</title>
   <script>
     tailwind.config = {
       theme: {
@@ -274,7 +274,7 @@
 
       <section class="flex-1 min-h-0 relative" id="frame-shell">
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10" id="loading-mask">
-          <div class="px-4 py-2 rounded bg-white border border-slate-200 shadow-sm text-sm text-slate-500">正在打开碳核算管理模块...</div>
+          <div class="px-4 py-2 rounded bg-white border border-slate-200 shadow-sm text-sm text-slate-500">正在打开绿色核算模块...</div>
         </div>
         <iframe id="content-frame" class="module-frame" title="绿色工厂碳核算模块内容"></iframe>
       </section>
@@ -352,6 +352,15 @@
 
     window.addEventListener("hashchange", () => {
       switchModule((location.hash || "#boundary").slice(1));
+    });
+
+    window.addEventListener("message", (event) => {
+      if (event.data?.type !== "carbon-mock-updated") return;
+      moduleFrames.forEach((moduleFrame) => {
+        if (moduleFrame.contentWindow && moduleFrame.contentWindow !== event.source) {
+          moduleFrame.contentWindow?.postMessage({ type: "carbon-mock-updated" }, "*");
+        }
+      });
     });
 
     switchModule((location.hash || "#boundary").slice(1));
