@@ -1646,14 +1646,14 @@ function getDefaultFactorMatchFields(categoryCode) {
     { id: "ef-diesel-generator-ch4", name: "柴油发电机燃烧CH₄因子", code: "EF_DIESEL_GEN_CH4", category: "固定燃烧 / 柴油发电机 / 柴油", standardId: "std-ghgp-corporate-revised", gwp: "AR6 (GWP100)", gases: [{ gas: "CH₄", value: "0.00013", unit: "kgCH₄/L" }], region: "全国", scope: "范围一", source: "GHG Protocol Corporate Accounting and Reporting Standard", startDate: "2024-01-01", endDate: "", status: "启用" },
     { id: "ef-diesel-generator-n2o", name: "柴油发电机燃烧N₂O因子", code: "EF_DIESEL_GEN_N2O", category: "固定燃烧 / 柴油发电机 / 柴油", standardId: "std-ghgp-corporate-revised", gwp: "AR6 (GWP100)", gases: [{ gas: "N₂O", value: "0.000024", unit: "kgN₂O/L" }], region: "全国", scope: "范围一", source: "GHG Protocol Corporate Accounting and Reporting Standard", startDate: "2024-01-01", endDate: "", status: "启用" },
     { id: "ef-national-grid-co2", name: "华东电网外购电力CO₂因子", code: "EF_CN_GRID_2022_CO2", category: "外购电力 / 华东电网", standardId: "std-ghgp-scope-2-guidance", gwp: "AR6 (GWP100)", gases: [{ gas: "CO₂", value: "0.5366", unit: "kgCO₂/kWh" }], region: "华东电网", scope: "范围二", source: "GHG Protocol Scope 2 Guidance", startDate: "2024-01-01", endDate: "", status: "启用" },
-    { id: "ef-r410a-leakage", name: "R410A制冷剂泄漏因子", code: "EF_R410A_LEAK", category: "逸散排放 / 制冷剂泄漏 / R410A", standardId: "std-iso-14064-1-2018", gwp: "AR6 (GWP100)", gases: [{ gas: "R410A", value: "1", unit: "kgR410A/kg" }], region: "全国", scope: "范围一", source: "ISO 14064-1:2018 Greenhouse gases - Part 1", startDate: "2024-01-01", endDate: "", status: "启用" }
+    { id: "ef-r410a-leakage", name: "R410A制冷剂泄漏因子", code: "EF_R410A_LEAK", category: "逸散排放 / 制冷剂泄漏 / R410A", standardId: "std-iso-14064-1-2018", gwp: "AR6 (GWP100)", factorType: "refrigerant", value: "1", unit: "kgR410A/kg", gases: [{ gas: "HFC-32", ratio: 0.5, value: 1, unit: "kgR410A/kg" }, { gas: "HFC-125", ratio: 0.5, value: 1, unit: "kgR410A/kg" }], components: [{ gas: "HFC-32", ratio: 0.5 }, { gas: "HFC-125", ratio: 0.5 }], region: "全国", scope: "范围一", source: "ISO 14064-1:2018 Greenhouse gases - Part 1", startDate: "2024-01-01", endDate: "", status: "启用" }
   ];
 
   const FactorLibraryGroups = [
     { id: "fg-natural-gas", name: "天然气锅炉燃烧因子组", code: "FG_NG_BOILER", category: "固定燃烧 / 厂区锅炉 / 天然气", standardId: "std-ghgp-corporate-revised", gwp: "AR6 (GWP100)", gases: [{ gas: "CO₂", value: "2.162", unit: "kgCO₂/Nm³" }, { gas: "CH₄", value: "0.00012", unit: "kgCH₄/Nm³" }, { gas: "N₂O", value: "0.00003", unit: "kgN₂O/Nm³" }], region: "全国", scope: "范围一", source: "GHG Protocol Corporate Accounting and Reporting Standard", startDate: "2024-01-01", endDate: "", status: "启用" },
     { id: "fg-diesel", name: "柴油发电机燃烧因子组", code: "FG_DIESEL_GEN", category: "固定燃烧 / 柴油发电机 / 柴油", standardId: "std-ghgp-corporate-revised", gwp: "AR6 (GWP100)", gases: [{ gas: "CO₂", value: "2.676", unit: "kgCO₂/L" }, { gas: "CH₄", value: "0.00013", unit: "kgCH₄/L" }, { gas: "N₂O", value: "0.000024", unit: "kgN₂O/L" }], region: "全国", scope: "范围一", source: "GHG Protocol Corporate Accounting and Reporting Standard", startDate: "2024-01-01", endDate: "", status: "启用" },
     { id: "fg-east-china-grid", name: "华东电网外购电力因子组", code: "FG_CN_GRID_2022", category: "外购电力 / 华东电网", standardId: "std-ghgp-scope-2-guidance", gwp: "AR6 (GWP100)", gases: [{ gas: "CO₂", value: "0.5366", unit: "kgCO₂/kWh" }], region: "华东电网", scope: "范围二", source: "GHG Protocol Scope 2 Guidance", startDate: "2024-01-01", endDate: "", status: "启用" },
-    { id: "fg-r410a", name: "R410A制冷剂泄漏因子组", code: "FG_R410A_LEAK", category: "逸散排放 / 制冷剂泄漏 / R410A", standardId: "std-iso-14064-1-2018", gwp: "AR6 (GWP100)", gases: [{ gas: "R410A", value: "1", unit: "kgR410A/kg" }], region: "全国", scope: "范围一", source: "ISO 14064-1:2018 Greenhouse gases - Part 1", startDate: "2024-01-01", endDate: "", status: "启用" }
+    { id: "fg-r410a", name: "R410A制冷剂泄漏因子组", code: "FG_R410A_LEAK", category: "逸散排放 / 制冷剂泄漏 / R410A", standardId: "std-iso-14064-1-2018", gwp: "AR6 (GWP100)", factorType: "refrigerant", value: "1", unit: "kgR410A/kg", gases: [{ gas: "HFC-32", ratio: 0.5, value: 1, unit: "kgR410A/kg" }, { gas: "HFC-125", ratio: 0.5, value: 1, unit: "kgR410A/kg" }], components: [{ gas: "HFC-32", ratio: 0.5 }, { gas: "HFC-125", ratio: 0.5 }], region: "全国", scope: "范围一", source: "ISO 14064-1:2018 Greenhouse gases - Part 1", startDate: "2024-01-01", endDate: "", status: "启用" }
   ];
 
   const FactorLibraryGroupMatchFields = {
@@ -1740,6 +1740,23 @@ function getDefaultFactorMatchFields(categoryCode) {
     const standard = (api?.StandardFiles || StandardFiles || []).find((item) => item.id === standardId)
       || (api?.FactorStandards || FactorStandards || []).find((item) => item.id === standardId);
     return standard?.name || fallback || "";
+  }
+
+  function normalizeRefrigerantGasRows(item = {}) {
+    const rows = Array.isArray(item.components) && item.components.length
+      ? item.components
+      : (Array.isArray(item.gases) ? item.gases : []);
+    return rows
+      .filter((row) => row && row.gas)
+      .map((row) => {
+        const ratio = row.ratio ?? row.value ?? "";
+        return {
+          gas: row.gas,
+          ratio,
+          value: item.value || row.factorValue || row.value || "1",
+          unit: item.unit || row.unit || "kg制冷剂/kg"
+        };
+      });
   }
 
   function normalizeFactorLibraryGroup(group = {}) {
@@ -1941,6 +1958,43 @@ function getGasGwp(gas, ref = {}) {
   return Number(matched?.value || 1);
 }
 
+function expandFactorGasResults({ amount = 0, factorSet = {} } = {}) {
+  const activityAmount = Number(amount) || 0;
+
+  return (factorSet.gases || []).map((gasFactor) => {
+    const componentRatio = Number(gasFactor.ratio ?? 1) || 1;
+    const factorValue = (Number(gasFactor.value) || 0) * componentRatio;
+    const gasAmount = activityAmount * factorValue;
+
+    const gwpVersionId = gasFactor.gwpVersionId || factorSet.gwpVersionId;
+    const gwpVersionCode = gasFactor.gwpVersionCode || factorSet.gwpVersionCode;
+
+    const gwp = getGasGwp(gasFactor.gas, {
+      gwpVersionId,
+      gwpVersionCode,
+      horizon: gasFactor.horizon || factorSet.horizon || "100年"
+    });
+
+    const kgCO2e = gasAmount * gwp;
+
+    return {
+      factorId: gasFactor.factorId,
+      gas: gasFactor.gas,
+      factorValue,
+      factorUnit: gasFactor.unit || factorSet.unit || "",
+      ratio: componentRatio,
+      componentRatio,
+      activityAmount,
+      gasAmount,
+      gwpVersionId,
+      gwpVersionCode,
+      gwp,
+      kgCO2e,
+      tCO2e: kgCO2e / 1000
+    };
+  });
+}
+
 function isModelPeriodMatched(model = {}, period = "") {
   const value = normalizePeriodValue(period || model.period || "");
   const start = normalizePeriodValue(model.periodStart || model.effectiveDate || model.effectiveAt || "");
@@ -2077,35 +2131,7 @@ function matchModel(source, models = api.AccountingModels, period = "") {
     };
   }
 
-  const gasResults = (factorSet.gases || []).map((gasFactor) => {
-    const factorValue = Number(gasFactor.value) || 0;
-    const gasAmount = amount * factorValue;
-
-    const gwpVersionId = gasFactor.gwpVersionId || factorSet.gwpVersionId;
-    const gwpVersionCode = gasFactor.gwpVersionCode || factorSet.gwpVersionCode;
-
-    const gwp = getGasGwp(gasFactor.gas, {
-      gwpVersionId,
-      gwpVersionCode,
-      horizon: gasFactor.horizon || "100年"
-    });
-
-    const kgCO2e = gasAmount * gwp;
-
-    return {
-      factorId: gasFactor.factorId,
-      gas: gasFactor.gas,
-      factorValue,
-      factorUnit: gasFactor.unit,
-      activityAmount: amount,
-      gasAmount,
-      gwpVersionId,
-      gwpVersionCode,
-      gwp,
-      kgCO2e,
-      tCO2e: kgCO2e / 1000
-    };
-  });
+  const gasResults = expandFactorGasResults({ amount, factorSet });
 
   const totalKgCO2e = gasResults.reduce((sum, item) => sum + item.kgCO2e, 0);
 
@@ -3431,6 +3457,9 @@ function getBoundaryCategoryOptionsForSourceForm() {
     const effectiveDate = group.effectiveDate || group.startDate || matchFields.effectiveDate || matchFields.startDate || "";
     const expireDate = group.expireDate || group.endDate || matchFields.expireDate || matchFields.endDate || "";
 
+    const isRefrigerant = group.factorType === "refrigerant";
+    const refrigerantGases = isRefrigerant ? normalizeRefrigerantGasRows(group) : [];
+
     return {
       ...groupWithoutValues,
       categoryCode,
@@ -3452,7 +3481,13 @@ function getBoundaryCategoryOptionsForSourceForm() {
       endDate: expireDate,
       version: group.version || "v1.0.0",
       status: group.status || "启用",
-      versionStatus: getFactorVersionStatus({ ...group, effectiveDate, expireDate })
+      versionStatus: getFactorVersionStatus({ ...group, effectiveDate, expireDate }),
+      ...(isRefrigerant ? {
+        value: group.value || "1",
+        unit: group.unit || "kg制冷剂/kg",
+        gases: refrigerantGases,
+        components: refrigerantGases.map((row) => ({ gas: row.gas, ratio: row.ratio }))
+      } : {})
     };
   }
 
@@ -3469,6 +3504,9 @@ function getBoundaryCategoryOptionsForSourceForm() {
     const gas = factor.gas || firstGas.gas || factor.formula || "CO₂";
     const value = factor.value || factor.factorValue || firstGas.value || "0";
     const unit = factor.unit || factor.factorUnit || firstGas.unit || "";
+
+    const isRefrigerant = factor.factorType === "refrigerant";
+    const refrigerantGases = isRefrigerant ? normalizeRefrigerantGasRows(factor) : [];
 
     return {
       ...factorWithoutValues,
@@ -3493,7 +3531,11 @@ function getBoundaryCategoryOptionsForSourceForm() {
       endDate: expireDate,
       version: factor.version || "v1.0.0",
       status: factor.status || "启用",
-      versionStatus: getFactorVersionStatus({ ...factor, effectiveDate, expireDate })
+      versionStatus: getFactorVersionStatus({ ...factor, effectiveDate, expireDate }),
+      ...(isRefrigerant ? {
+        gases: refrigerantGases,
+        components: refrigerantGases.map((row) => ({ gas: row.gas, ratio: row.ratio }))
+      } : {})
     };
   }
 
@@ -3719,6 +3761,7 @@ function getBoundaryCategoryOptionsForSourceForm() {
       gas: factor.gas,
       value: factor.value,
       unit: factor.unit,
+      ratio: factor.ratio ?? 1,
       gwpVersionId: factor.gwpVersionId || fallback.gwpVersionId,
       gwpVersionCode: factor.gwpVersionCode || fallback.gwpVersionCode
     };
@@ -3754,7 +3797,14 @@ function getBoundaryCategoryOptionsForSourceForm() {
       ...factor,
       factorType: "单因子",
       factors: [factor],
-      gases: [factorToGas(factor, factor)]
+      gases: factor.gases?.length
+        ? factor.gases.map((gas) => ({
+            ...gas,
+            factorId: factor.id,
+            gwpVersionId: gas.gwpVersionId || factor.gwpVersionId,
+            gwpVersionCode: gas.gwpVersionCode || factor.gwpVersionCode
+          }))
+        : [factorToGas(factor, factor)]
     };
   }
 
@@ -3801,29 +3851,7 @@ function getBoundaryCategoryOptionsForSourceForm() {
       };
     }
 
-    const gasResults = (factorSet.gases || []).map((gasFactor) => {
-      const factorValue = Number(gasFactor.value) || 0;
-      const gasAmount = amount * factorValue;
-      const gwp = getGasGwp(gasFactor.gas, {
-        gwpVersionId: gasFactor.gwpVersionId || factorSet.gwpVersionId,
-        gwpVersionCode: gasFactor.gwpVersionCode || factorSet.gwpVersionCode
-      });
-      const kgCO2e = gasAmount * gwp;
-
-      return {
-        factorId: gasFactor.factorId,
-        gas: gasFactor.gas,
-        factorValue,
-        factorUnit: gasFactor.unit,
-        activityAmount: amount,
-        gasAmount,
-        gwpVersionId: gasFactor.gwpVersionId || factorSet.gwpVersionId,
-        gwpVersionCode: gasFactor.gwpVersionCode || factorSet.gwpVersionCode,
-        gwp,
-        kgCO2e,
-        tCO2e: kgCO2e / 1000
-      };
-    });
+    const gasResults = expandFactorGasResults({ amount, factorSet });
     const totalKgCO2e = gasResults.reduce((sum, item) => sum + item.kgCO2e, 0);
 
     return {
@@ -4072,6 +4100,7 @@ addGwpOperationLog,
     inferGwpVersionId,
     getGwpVersionByRef,
     getGasGwp,
+    expandFactorGasResults,
     getEmissionGroupByCategory,
     getEmissionCategoryNode,
     getActivityParamSchema,
