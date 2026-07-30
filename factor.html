@@ -131,6 +131,15 @@
       color: #9ca3af;
       font-size: 12px;
     }
+    .factor-number-input {
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+    .factor-number-input::-webkit-outer-spin-button,
+    .factor-number-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
   </style>
 
 
@@ -284,24 +293,32 @@
     核算参数来自排放源活动数据配置，仅可选择，不在因子库中新增。
   </p>
 </div></section>
-<section class="eco-form-card datasource-modal-section p-4 space-y-4" id="factor-config-section"><div class="flex items-center justify-between"><h3 class="eco-form-heading">排放因子配置</h3><button class="eco-btn eco-btn-primary eco-btn-sm hidden" id="add-gas-row" type="button">添加气体</button></div><div class="eco-table-wrap eco-fixed-table-wrap"><table class="eco-table eco-config-table w-full text-left"><thead><tr><th><span class="eco-table-head-text">温室气体<span class="required-star">*</span></span></th><th><span class="eco-table-head-text">因子值<span class="required-star">*</span></span></th><th><span class="eco-table-head-text">因子单位<span class="required-star">*</span></span></th><th class="w-20 hidden" id="config-action-head"><span class="eco-table-head-text">操作</span></th></tr></thead><tbody id="config-table-body"></tbody></table></div></section>
+<section class="eco-form-card datasource-modal-section p-4 space-y-4" id="factor-config-section">
+  <div class="flex items-center justify-between gap-4">
+    <h3 class="eco-form-heading">因子配置</h3>
+    <button class="eco-btn eco-btn-primary eco-btn-sm hidden" id="add-gas-row" type="button">添加气体</button>
+  </div>
+  <div class="eco-table-wrap eco-fixed-table-wrap"><table class="eco-table eco-config-table w-full text-left"><thead><tr><th class="w-[37%]"><span class="eco-table-head-text">温室气体<span class="required-star">*</span></span></th><th class="w-[16%]"><span class="eco-table-head-text">因子值<span class="required-star">*</span></span></th><th class="w-[25%]"><span class="eco-table-head-text">因子单位<span class="required-star">*</span></span></th><th class="w-[14%]"><span class="eco-table-head-text">比例<span class="required-star">*</span></span></th><th class="w-[8%] hidden" id="config-action-head"><span class="eco-table-head-text">操作</span></th></tr></thead><tbody id="config-table-body"></tbody></table></div>
+</section>
 <section class="eco-form-card datasource-modal-section p-4 space-y-4 hidden" id="group-factor-section"><h3 class="eco-form-heading">引用因子</h3><div class="space-y-2"><select class="eco-select w-full min-h-[168px]" id="form-factor-ids" multiple></select><p class="eco-helper-text" id="factor-candidate-hint">候选因子会按分类、活动类型、标准和匹配参数自动过滤。</p></div></section>
-<section class="eco-form-card datasource-modal-section p-4"><h3 class="eco-form-heading mb-4">来源标准</h3><div class="grid grid-cols-2 gap-4"><div class="eco-field col-span-2"><div class="flex h-7 items-start"><label class="eco-form-label block">来源标准/指南</label></div><select class="eco-select h-11 w-full" id="form-standard"></select><input id="form-source" type="hidden"/></div><div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block">生效日期</label></div><input class="eco-input h-11 w-full" id="form-start-date" type="date"/></div><div class="eco-field" id="end-date-field"><div class="flex h-7 items-start"><label class="eco-form-label block">失效日期</label></div><input class="eco-input h-11 w-full" id="form-end-date" type="date"/></div></div></section>
+<section class="eco-form-card datasource-modal-section p-4"><h3 class="eco-form-heading mb-4">来源标准</h3><div class="grid grid-cols-2 gap-4"><div class="eco-field col-span-2"><div class="flex h-7 items-start"><label class="eco-form-label block">来源标准/指南</label></div><select class="eco-select h-11 w-full" id="form-standard"></select><input id="form-source" type="hidden"/></div><div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block">生效日期</label></div><input class="eco-input h-11 w-full" id="form-start-date" type="date"/></div><div class="eco-field eco-expire-field" id="end-date-field"><label class="eco-form-label">失效日期</label><label class="eco-never-expire-option" id="factor-form-never-expire-option"><input class="eco-never-expire-input" id="factor-form-never-expire" type="checkbox"/><span class="eco-never-expire-check" aria-hidden="true"></span><span>永不失效</span></label><input class="eco-input h-11 w-full" id="form-end-date" type="date"/></div></div></section>
 </div><div class="px-6 py-4 border-t eco-divider flex justify-end gap-3"><button class="eco-btn eco-btn-secondary" id="factor-form-cancel">取消</button><button class="eco-btn eco-btn-secondary hidden" id="factor-form-save-new" type="button">另存为新版本</button><button class="eco-btn eco-btn-primary" id="factor-form-save" type="button">保存当前版本</button></div>
 </div>
 </div>
 <!-- END: Factor Form Modal -->
 <!-- BEGIN: Factor Detail Modal -->
 <div class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden" id="factor-detail-modal">
-<div class="bg-white w-[760px] max-h-[90vh] rounded shadow-2xl flex flex-col overflow-hidden">
+<div class="bg-white w-[860px] max-w-[94vw] max-h-[90vh] rounded shadow-2xl flex flex-col overflow-hidden">
 <div class="px-6 py-4 border-b flex items-center justify-between">
 <div><h2 class="text-xl font-bold text-slate-800" id="detail-modal-title">因子详情</h2><p class="text-xs text-slate-500 mt-1" id="detail-modal-subtitle"></p></div>
 <button class="text-gray-400 hover:text-gray-600" id="detail-modal-close"><span class="material-symbols-outlined text-3xl">close</span></button>
 </div>
 <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-<section class="eco-form-card datasource-modal-section p-4"><h3 class="eco-form-heading mb-4">基础信息</h3><div class="grid grid-cols-2 gap-x-8 gap-y-3" id="detail-info-grid"></div></section>
-<section class="eco-form-card datasource-modal-section p-4"><h3 class="eco-form-heading mb-4">核算参数</h3><div class="grid grid-cols-2 gap-x-8 gap-y-3" id="detail-param-grid"></div></section>
-<section class="eco-form-card datasource-modal-section p-4 space-y-4"><h3 class="eco-form-heading" id="detail-factor-section-title">排放因子配置</h3><div class="eco-table-wrap eco-fixed-table-wrap"><table class="eco-table eco-config-table w-full text-left"><thead><tr><th><span class="eco-table-head-text">因子名称</span></th><th><span class="eco-table-head-text">温室气体</span></th><th><span class="eco-table-head-text">因子值</span></th><th><span class="eco-table-head-text">因子单位</span></th><th><span class="eco-table-head-text">版本号</span></th><th><span class="eco-table-head-text">状态</span></th></tr></thead><tbody id="detail-gas-body"></tbody></table></div></section>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<section class="eco-form-card datasource-modal-section p-4"><h3 class="eco-form-heading mb-4">基础信息</h3><div class="grid grid-cols-1 gap-y-3" id="detail-info-grid"></div></section>
+<section class="eco-form-card datasource-modal-section p-4"><h3 class="eco-form-heading mb-4">核算参数</h3><div class="grid grid-cols-1 gap-y-3" id="detail-param-grid"></div></section>
+</div>
+<section class="eco-form-card datasource-modal-section p-4 space-y-4"><h3 class="eco-form-heading" id="detail-factor-section-title">因子配置</h3><div class="eco-table-wrap eco-fixed-table-wrap"><table class="eco-table eco-config-table w-full text-left"><thead id="detail-gas-head"><tr><th class="w-[38%]"><span class="eco-table-head-text">温室气体</span></th><th class="w-[18%]"><span class="eco-table-head-text">因子值</span></th><th class="w-[30%]"><span class="eco-table-head-text">因子单位</span></th><th class="w-[14%]"><span class="eco-table-head-text">比例</span></th></tr></thead><tbody id="detail-gas-body"></tbody></table></div></section>
 <section class="eco-form-card datasource-modal-section p-4"><h3 class="eco-form-heading mb-4">来源与版本</h3><div class="grid grid-cols-2 gap-x-8 gap-y-3" id="detail-source-grid"></div></section>
 </div>
 <div class="px-6 py-4 border-t bg-gray-50 flex justify-end"><button class="eco-btn eco-btn-primary px-8 py-2.5 bg-primary text-white rounded text-sm font-medium hover:opacity-90" id="detail-modal-ok">完成查看</button></div>
@@ -456,6 +473,8 @@ const categoryCategoryInput = document.getElementById('form-category-category');
   const sourceInput = document.getElementById('form-source');
   const startDateInput = document.getElementById('form-start-date');
   const endDateInput = document.getElementById('form-end-date');
+  const neverExpireInput = document.getElementById('factor-form-never-expire');
+  const neverExpireOption = document.getElementById('factor-form-never-expire-option');
   const configBody = document.getElementById('config-table-body');
   const addGasBtn = document.getElementById('add-gas-row');
   const configActionHead = document.getElementById('config-action-head');
@@ -743,15 +762,44 @@ if (typeInput && schema.activityDataType) {
 
 function getMatchSummary(item = {}) {
   const categoryCode = item.categoryCode || item.category || "";
-  const params = getSchemaParams(categoryCode);
+  const activityDataType = item.activityDataType || "";
+  const schema = getActivitySchemaByActivityType(activityDataType, categoryCode) || getActivitySchemaByCategory(categoryCode);
+  const params = Array.isArray(schema?.params) ? schema.params : [];
 
   if (!params.length) return "-";
 
   return params.map((param) => {
-    const value = item[param.key] || item.matchParams?.[param.key] || "";
+    const value = item[param.key] || item.matchParams?.[param.key] || item.accountingParams?.[param.key] || "";
     const label = (param.options || []).find((option) => option.value === value)?.label || value || "-";
     return `${param.label || param.key}: ${label}`;
   }).join("；");
+}
+
+function detailField(label, value, options = {}) {
+  const valueClass = options.align === 'left'
+    ? 'eco-table-cell-text text-left break-words whitespace-normal'
+    : 'eco-table-cell-text text-right break-words';
+  return `<div class="flex justify-between gap-4 border-b border-dashed eco-divider pb-2"><span class="eco-form-label shrink-0">${escapeHtml(label)}</span><span class="${valueClass}">${options.html ? value : escapeHtml(value || '-')}</span></div>`;
+}
+
+function renderDetailParamFields(summary = "") {
+  const text = String(summary || "").trim();
+  if (!text || text === "-") {
+    return `<div class="eco-table-cell-text text-left break-words whitespace-normal pt-1">-</div>`;
+  }
+  return text.split("；").map((part) => {
+    const [label, ...valueParts] = part.split(":");
+    const value = valueParts.join(":").trim();
+    if (!value) return `<div class="eco-table-cell-text text-left break-words whitespace-normal pt-1">${escapeHtml(part.trim())}</div>`;
+    return detailField(label.trim(), value, { align: 'right' });
+  }).join("");
+}
+
+function formatComponentRatio(value) {
+  const ratio = Number(value);
+  if (!Number.isFinite(ratio)) return value || '-';
+  const percent = ratio <= 1 ? ratio * 100 : ratio;
+  return `${Number(percent.toFixed(4)).toLocaleString('zh-CN')}%`;
 }
 
   function itemSearchText(item = {}) {
@@ -790,7 +838,7 @@ function getMatchSummary(item = {}) {
       })
       .map((param) => ({
         value: param.gas,
-        label: param.gasName ? `${param.gas}（${param.gasName}）` : param.gas
+        label: param.gasName && param.formula ? `${param.gas}（${param.gasName} / ${param.formula}）` : (param.gasName ? `${param.gas}（${param.gasName}）` : param.gas)
       }));
 
     return options.length ? options : ["CO₂", "CH₄", "N₂O"].map((gas) => ({ value: gas, label: gas }));
@@ -1315,25 +1363,88 @@ function sourceCategoryMatchesItem(item, categoryCode) {
     if (![...select.options].some((option) => option.value === value || option.textContent === value)) select.insertAdjacentHTML('beforeend', `<option>${escapeHtml(value)}</option>`);
     select.value = value;
   }
-  function addConfigRow(row = { gas: 'CO₂', value: '', unit: 'kgCO₂/Nm³' }) {
+  function syncNeverExpireControls() {
+    const neverExpire = Boolean(neverExpireInput?.checked);
+    if (endDateInput) {
+      endDateInput.disabled = neverExpire;
+      if (neverExpire) endDateInput.value = '';
+    }
+    neverExpireOption?.classList.toggle('checked', neverExpire);
+  }
+  function addConfigRow(row = { gas: 'CO₂', value: '', unit: 'kgCO₂/Nm³', ratio: 1 }) {
     const tr = document.createElement('tr');
     const gasOptions = getGwpGasOptions();
     tr.className = 'eco-config-row';
-    tr.innerHTML = `<td><select class="gas-select eco-select h-11 w-full">${gasOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join("")}</select></td><td><input class="value-input eco-input h-11 w-full" placeholder="0.00" type="number" step="0.00001"/></td><td><select class="unit-select eco-select h-11 w-full"><option>kgCO₂/Nm³</option><option>kgCH₄/Nm³</option><option>kgN₂O/Nm³</option><option>kgCO₂/L</option><option>kgCH₄/L</option><option>kgN₂O/L</option><option>kgCO₂/kWh</option><option>kgR410A/kg</option></select></td><td class="config-action-cell text-center"><button class="delete-gas-row eco-btn eco-btn-danger eco-btn-square-sm" type="button" title="删除气体"><span class="material-symbols-outlined text-lg">delete</span></button></td>`;
+    tr.innerHTML = `<td class="w-[37%]"><select class="gas-select eco-select h-11 w-full">${gasOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join("")}</select></td><td class="w-[16%]"><input class="value-input factor-number-input eco-input h-11 w-full" placeholder="0.00" type="text" inputmode="decimal"/></td><td class="w-[25%]"><select class="unit-select eco-select h-11 w-full"><option>kgCO₂/Nm³</option><option>kgCH₄/Nm³</option><option>kgN₂O/Nm³</option><option>kgCO₂/L</option><option>kgCH₄/L</option><option>kgN₂O/L</option><option>kgCO₂/kWh</option><option>kgR410A/kg</option></select></td><td class="w-[14%]"><div class="relative"><input class="ratio-input factor-number-input eco-input h-11 w-full pr-8" placeholder="100" type="text" inputmode="decimal"/><span class="pointer-events-none absolute inset-y-0 right-2 flex items-center eco-helper-text font-semibold">%</span></div></td><td class="config-action-cell w-[8%] text-center"><button class="delete-gas-row eco-btn eco-btn-danger eco-btn-square-sm" type="button" title="删除气体"><span class="material-symbols-outlined text-lg">delete</span></button></td>`;
     configBody.appendChild(tr);
     const fallbackGas = gasOptions.some((option) => option.value === row.gas) ? row.gas : (gasOptions[0]?.value || 'CO₂');
     setSelectValue(tr.querySelector('.gas-select'), fallbackGas);
     tr.querySelector('.value-input').value = row.value || '';
     setSelectValue(tr.querySelector('.unit-select'), row.unit || 'kgCO₂/Nm³');
+    tr.querySelector('.ratio-input').value = formatRatioInputValue(row.ratio ?? 1);
     syncEcoSelects(tr);
+  }
+
+  function gwpValueForGas(gas) {
+    return Mock.getGasGwp?.(gas, { gwpVersionId: gwpInput?.value || "", horizon: "100年" }) || 1;
+  }
+
+  function parseComponentRatio(value) {
+    const text = String(value || '').trim();
+    if (!text) return 0;
+    const hasPercent = text.includes('%');
+    const numeric = Number(text.replace('%', ''));
+    if (!Number.isFinite(numeric)) return 0;
+    return hasPercent || numeric > 1 ? numeric / 100 : numeric;
+  }
+
+  function formatRatioInputValue(value) {
+    const text = String(value ?? '').trim();
+    if (!text) return '';
+    if (text.includes('%')) return text.replace('%', '').trim();
+    const numeric = Number(text);
+    if (!Number.isFinite(numeric)) return text;
+    return numeric <= 1
+      ? String(Number((numeric * 100).toFixed(4)))
+      : String(Number(numeric.toFixed(4)));
   }
 
   function collectGasFactors() {
     return Array.from(configBody.querySelectorAll('tr')).map((row) => ({
       gas: row.querySelector('.gas-select')?.value || 'CO₂',
       value: row.querySelector('.value-input')?.value || '0.00',
-      unit: row.querySelector('.unit-select')?.value || 'kgCO₂/Nm³'
+      unit: row.querySelector('.unit-select')?.value || 'kgCO₂/Nm³',
+      ratio: parseComponentRatio(row.querySelector('.ratio-input')?.value || '100')
     }));
+  }
+
+  function validateFactorConfig() {
+    const rows = Array.from(configBody?.querySelectorAll('tr') || []);
+    if (!rows.length) {
+      alert('请至少添加一个温室气体');
+      return false;
+    }
+    const gases = rows.map((row) => row.querySelector('.gas-select')?.value || '');
+    if (gases.some((gas) => !gas)) {
+      alert('请选择温室气体');
+      return false;
+    }
+    const values = rows.map((row) => Number(row.querySelector('.value-input')?.value || 0));
+    if (values.some((value) => !Number.isFinite(value) || value <= 0)) {
+      alert('因子值必须大于 0');
+      return false;
+    }
+    const ratios = rows.map((row) => parseComponentRatio(row.querySelector('.ratio-input')?.value || ''));
+    if (ratios.some((ratio) => !Number.isFinite(ratio) || ratio <= 0)) {
+      alert('比例必须大于 0');
+      return false;
+    }
+    const missingGwp = gases.find((gas) => Number(gwpValueForGas(gas)) <= 0);
+    if (missingGwp) {
+      alert(`当前 GWP 版本缺少 ${missingGwp} 的 GWP 参数`);
+      return false;
+    }
+    return true;
   }
   function selectedFactorIds() {
     return [...(factorIdsInput?.selectedOptions || [])].map((option) => option.value);
@@ -1628,16 +1739,25 @@ syncStandardOptions(item?.standardId);
       versionInput.value = nextVersionText(item?.version || "V1.0");
       startDateInput.value = "";
       endDateInput.value = "";
+      if (neverExpireInput) neverExpireInput.checked = true;
     } else {
       versionInput.value = item?.version || 'V1.0';
       startDateInput.value = item?.effectiveDate || item?.startDate || '';
-      endDateInput.value = item?.expireDate || item?.endDate || '';
+      const expireDate = item?.expireDate || item?.endDate || '';
+      endDateInput.value = expireDate;
+      if (neverExpireInput) neverExpireInput.checked = !expireDate;
     }
+    syncNeverExpireControls();
     configBody.innerHTML = '';
     const gasRows = Array.isArray(item?.gases) && item.gases.length
       ? item.gases
-      : (item ? [firstGas(item)] : [{ gas: 'CO₂', value: '', unit: 'kgCO₂/Nm³' }]);
-    gasRows.forEach(addConfigRow);
+      : (item ? [firstGas(item)] : [{ gas: 'CO₂', value: '', unit: 'kgCO₂/Nm³', ratio: 1 }]);
+    gasRows.forEach((row) => addConfigRow({
+      gas: row.gas,
+      value: row.value ?? item?.value ?? '',
+      unit: row.unit || item?.unit || 'kgCO₂/Nm³',
+      ratio: row.ratio ?? 1
+    }));
     renderFactorCandidates(item?.factorIds || []);
     syncEcoSelects(modal);
   }
@@ -1651,6 +1771,8 @@ syncStandardOptions(item?.standardId);
   const serial = String(list.length + 1).padStart(3, '0');
   const gasFactors = collectGasFactors();
   const gasFactor = gasFactors[0] || { gas: 'CO₂', value: '0.00', unit: 'kgCO₂/Nm³' };
+  const factorValue = gasFactor.value;
+  const factorUnit = gasFactor.unit;
 
   const standard = getStandard(standardInput?.value || resolveFormStandardId(findItem(kind, idInput.value)));
   const categoryCode = categoryInput.value;
@@ -1697,18 +1819,20 @@ matchParamLabels,
     gwpVersionId,
     gwpVersionCode: gwpVersion?.code || "",
     gwp: gwpVersion?.name || "",
+    factorType: existingItem?.factorType,
     gas: kind === 'factor' ? gasFactor.gas : undefined,
-    value: kind === 'factor' ? gasFactor.value : undefined,
-    unit: kind === 'factor' ? gasFactor.unit : undefined,
+    value: kind === 'factor' ? factorValue : undefined,
+    unit: kind === 'factor' ? factorUnit : undefined,
     gases: gasFactors,
+    components: gasFactors.some((item) => Number(item.ratio) !== 1) ? gasFactors.map((item) => ({ gas: item.gas, ratio: item.ratio })) : undefined,
     factorIds,
     region: regionInput?.value || '全国',
     scope: scopeLabel || scopeInput?.value || '',
     source: sourceInput.value.trim() || standard?.name || '',
     effectiveDate: startDateInput.value,
-    expireDate: endDateInput.value,
+    expireDate: neverExpireInput?.checked ? '' : endDateInput.value,
     startDate: startDateInput.value,
-    endDate: endDateInput.value,
+    endDate: neverExpireInput?.checked ? '' : endDateInput.value,
     version: versionInput.value.trim() || 'V1.0',
     status: idInput.value ? (findItem(kind, idInput.value)?.status || '启用') : '启用'
   };
@@ -1725,6 +1849,7 @@ matchParamLabels,
   }
 
   function saveForm(asNewVersion = false) {
+    if (!validateFactorConfig()) return;
     const data = collectForm();
     const kind = kindInput.value;
     const list = kind === 'group' ? groups : factors;
@@ -1798,33 +1923,32 @@ matchParamLabels,
   function findItem(kind, id) { return (kind === 'group' ? groups : factors).find((item) => item.id === id); }
   function openDetail(kind, item) {
     if (!item) return;
-    const status = versionStatus(item);
     const detailFactors = kind === 'group' ? getGroupFactors(item) : [item];
-    const referenceCount = kind === 'group' ? detailFactors.length : 1;
     const categoryLabel = item.categoryLabel || Mock.toCategoryLabel?.(item.categoryCode || item.category) || item.category || '-';
     const accountingSummary = getMatchSummary(item);
     const standard = getStandard(item.standardId);
     const sourceText = standard?.name || item.standardName || item.source;
+    const detailGasHead = document.getElementById('detail-gas-head');
+    const detailGasBody = document.getElementById('detail-gas-body');
 
-    document.getElementById('detail-modal-title').textContent = kind === 'group' ? '因子组详情' : '单因子详情';
-    document.getElementById('detail-modal-subtitle').textContent = `${item.name} · ${kind === 'group' ? '因子组' : '单因子'}`;
-    document.getElementById('detail-factor-section-title').textContent = kind === 'group' ? '引用因子' : '排放因子配置';
+    document.getElementById('detail-modal-title').textContent = '因子详情';
+    document.getElementById('detail-modal-subtitle').textContent = item.name || '';
+    document.getElementById('detail-factor-section-title').textContent = '因子配置';
     document.getElementById('detail-info-grid').innerHTML = [
       ['因子名称', item.name || '-'],
-      ['版本号', item.version || '-'],
       ['因子分类', categoryLabel],
-      ['类型', kind === 'group' ? '因子组' : '单因子'],
-      ['活动数据类型', activityLabel(item.activityDataType)],
-      ['版本状态', statusBadge(status), true],
-      ['引用因子数', referenceCount]
-    ].map(([label, value, html]) => `<div class="flex justify-between gap-4 border-b border-dashed eco-divider pb-2"><span class="eco-form-label">${escapeHtml(label)}</span><span class="eco-table-cell-text text-right">${html ? value : escapeHtml(value)}</span></div>`).join('');
-    document.getElementById('detail-param-grid').innerHTML = [
-      ['核算参数', accountingSummary]
-    ].map(([label, value]) => `<div class="flex justify-between gap-4 border-b border-dashed eco-divider pb-2"><span class="eco-form-label">${escapeHtml(label)}</span><span class="eco-table-cell-text text-right">${escapeHtml(value)}</span></div>`).join('');
-    document.getElementById('detail-gas-body').innerHTML = detailFactors.map((factor) => {
-      const gas = firstGas(factor);
-      return `<tr class="eco-table-row"><td class="eco-table-cell-text">${escapeHtml(factor.name || item.name || '-')}</td><td class="eco-table-cell-text"><span class="eco-tag eco-tag-muted factor-type-tag">${escapeHtml(gas.gas)}</span></td><td class="eco-table-number-text">${escapeHtml(gas.value)}</td><td class="eco-table-cell-text">${escapeHtml(gas.unit)}</td><td class="eco-table-cell-text">${escapeHtml(factor.version || item.version || '-')}</td><td class="eco-table-cell-text">${statusBadge(versionStatus(factor))}</td></tr>`;
-    }).join('');
+      ['活动数据类型', activityLabel(item.activityDataType)]
+    ].map(([label, value]) => detailField(label, value, { align: label === '因子名称' ? 'left' : 'right' })).join('');
+    document.getElementById('detail-param-grid').innerHTML = renderDetailParamFields(accountingSummary);
+    if (detailGasHead) {
+      detailGasHead.innerHTML = `<tr><th><span class="eco-table-head-text">温室气体</span></th><th><span class="eco-table-head-text">因子值</span></th><th><span class="eco-table-head-text">因子单位</span></th><th><span class="eco-table-head-text">比例</span></th></tr>`;
+    }
+    const factorRows = kind === 'group'
+      ? detailFactors.map((factor) => firstGas(factor))
+      : (Array.isArray(item.gases) && item.gases.length ? item.gases : [firstGas(item)]);
+    if (detailGasBody) {
+      detailGasBody.innerHTML = factorRows.map((gas) => `<tr class="eco-table-row"><td class="eco-table-cell-text"><span class="eco-tag eco-tag-muted factor-type-tag">${escapeHtml(gas.gas || '-')}</span></td><td class="eco-table-number-text">${escapeHtml(gas.value ?? '-')}</td><td class="eco-table-cell-text">${escapeHtml(gas.unit || '-')}</td><td class="eco-table-number-text">${escapeHtml(formatComponentRatio(gas.ratio ?? 1))}</td></tr>`).join('');
+    }
     document.getElementById('detail-source-grid').innerHTML = [
       ['来源标准/指南', sourceText || '-', 'standard'],
       ['生效日期', item.effectiveDate || item.startDate || '-'],
@@ -1890,6 +2014,8 @@ activityInput?.addEventListener('change', () => {
     if (sourceInput) sourceInput.value = standardLabel(standardInput.value);
   });
 
+  neverExpireInput?.addEventListener('change', syncNeverExpireControls);
+
   gwpInput?.addEventListener('change', () => {
     refreshGasSelectOptions();
   });
@@ -1897,7 +2023,9 @@ activityInput?.addEventListener('change', () => {
 document.getElementById('factor-accounting-params')?.addEventListener('change', () => {
   renderFactorCandidates(selectedFactorIds());
 });
-  addGasBtn.addEventListener('click', () => addConfigRow({ gas: 'CH₄', value: '', unit: 'kgCH₄/Nm³' }));
+  addGasBtn.addEventListener('click', () => {
+    addConfigRow({ gas: 'CH₄', value: '', unit: 'kgCH₄/Nm³', ratio: 1 });
+  });
   configBody.addEventListener('click', (event) => { const deleteBtn = event.target.closest('.delete-gas-row'); if (deleteBtn && configBody.querySelectorAll('tr').length > 1) deleteBtn.closest('tr').remove(); });
   modal.addEventListener('click', (event) => { if (event.target === modal) closeForm(); });
   detailModal.addEventListener('click', (event) => { if (event.target === detailModal) closeDetail(); });
