@@ -1228,13 +1228,6 @@
       ...presetCategory,
       isCustom: Boolean(presetCategory.isCustom || customCategory)
     });
-    Mock.upsertBoundaryCategory?.({
-      scope: presetCategory.scope || "scope3",
-      category: presetCategory.category,
-      categoryLabel: presetCategory.categoryLabel,
-      status: "启用",
-      description: customCategory ? "由排放源分类管理自定义新增。" : "由排放源分类管理添加。"
-    });
     refreshSourceManagedCategoryViews(group.groupCode, presetCategory.category);
   }
 
