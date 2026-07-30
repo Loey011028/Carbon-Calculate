@@ -1303,7 +1303,7 @@ function calculateSourceQuality(source, activity, result, datasources = []) {
   const result = Mock?.calculateEmission?.(source, activity || {}) || null;
 
   const model = result?.model || Mock?.matchModel?.(source);
-  const factorGroup = result?.factorSet || result?.factor || null;
+  const factorGroup = result?.factorSet || result?.factor || (model && Mock?.matchFactorSetByModelAndSource?.(model, source, activity?.period || source.period || '')) || null;
   const sourceTypeLabel = sourceTypeLabelForSharedSource(source);
   const param = source.accountingParams || {};
   const parameterType = param.fuelType || param.energyType || param.refrigerantType || source.unit || '待选择';
@@ -1329,36 +1329,22 @@ let issueReason = '';
 let matchStage = '已完成闭环';
 let matchOk = false;
 
-const hasDatasource = Array.isArray(source.datasourceIds) && source.datasourceIds.length > 0;
-const hasActivity = Boolean(activity);
 const hasModel = Boolean(model);
 const hasFactor = Boolean(factorGroup);
 const hasGwp =
   Boolean(result?.gwpVersionCode || result?.gwpVersionId || result?.gasResults?.[0]?.gwpVersionCode || result?.gasResults?.[0]?.gwpVersionId) &&
   (result?.gasResults || []).every(item => Number(item.gwp) > 0);
 
-if (!hasDatasource) {
-  matchStage = '数据源';
-  issueReason = '未绑定数据源';
-} else if (!hasActivity) {
-  matchStage = '活动数据 AD';
-  issueReason = '未找到活动数据记录';
-} else if (!hasModel) {
+if (!hasModel) {
   matchStage = '核算模型';
   issueReason = '未匹配到核算模型';
 } else if (!hasFactor) {
   matchStage = '排放因子';
   issueReason = Mock?.explainFactorMismatch?.(model, source, activity?.period || source.period || '') || '未匹配到启用中的排放因子';
-} else if (!hasGwp) {
-  matchStage = 'GWP';
-  issueReason = '已匹配因子，但未找到对应气体的 GWP 参数';
-} else if (result?.status === 'calculated') {
+} else {
   matchOk = true;
   matchStage = '已完成闭环';
   issueReason = '';
-} else {
-  matchStage = '计算结果';
-  issueReason = result?.unmatchedReason || '计算链路未完成';
 }
 const qualityMeta = calculateSourceQuality(source, activity, result, datasources);
   return buildSourceType(source.name || sourceTypeLabel, item.category, {
@@ -1454,11 +1440,40 @@ function sharedBoundaryCategoryToBoundaryItem(category) {
   };
 }
 
+function syncBoundaryMockStateFromStorage() {
+  const Mock = window.CarbonAccountingMock;
+  if (!Mock?.STORAGE_KEY) return;
+
+  try {
+    const saved = JSON.parse(window.localStorage?.getItem(Mock.STORAGE_KEY) || "{}");
+    if (Array.isArray(saved.EmissionSources)) Mock.EmissionSources = saved.EmissionSources;
+    if (Array.isArray(saved.BoundaryCategories)) Mock.BoundaryCategories = saved.BoundaryCategories;
+    if (Array.isArray(saved.DataSources)) Mock.DataSources = saved.DataSources;
+    if (Array.isArray(saved.ActivityDataRecords)) Mock.ActivityDataRecords = saved.ActivityDataRecords;
+    if (Array.isArray(saved.AccountingModels)) {
+      Mock.AccountingModels = saved.AccountingModels;
+      Mock.CalculationModels = Mock.AccountingModels;
+    }
+    if (Array.isArray(saved.FactorLibraryGroups)) {
+      Mock.FactorLibraryGroups = saved.FactorLibraryGroups;
+      Mock.EmissionFactors = Mock.FactorLibraryGroups;
+    }
+    if (Array.isArray(saved.FactorLibraryFactors)) Mock.FactorLibraryFactors = saved.FactorLibraryFactors;
+    if (saved.BoundaryCategoryOptions) Mock.BoundaryCategoryOptions = saved.BoundaryCategoryOptions;
+    if (saved.ActivityParamSchemas) Mock.ActivityParamSchemas = {
+      ...(Mock.ActivityParamSchemas || {}),
+      ...saved.ActivityParamSchemas
+    };
+  } catch (error) {
+    console.warn('同步共享边界数据失败', error);
+  }
+}
+
 function mergeSharedBoundaryCategories(items) {
   const Mock = window.CarbonAccountingMock;
   const existingKeys = new Set(items.map(item => `${item.scope}|${item.categoryCode || Mock?.toCategoryCode?.(item.category) || item.category}`));
   const missingSharedItems = (Mock?.BoundaryCategories || [])
-    .filter(category => category.scope === 'scope3' && category.included !== false && category.status !== '停用')
+    .filter(category => category.included !== false && category.status !== '停用')
     .filter(category => !existingKeys.has(`${category.scope}|${category.categoryCode || category.category}`))
     .map(sharedBoundaryCategoryToBoundaryItem);
   return [...items, ...missingSharedItems];
@@ -1484,21 +1499,14 @@ function mergeSharedBoundaryCategories(items) {
       categoryCode
     });
 
-    const status = closure?.status === "closed"
-      ? "已闭环"
-      : closure?.status === "partial"
-        ? "部分闭环"
-        : closure?.status === "empty"
-          ? "待绑定排放源"
-          : closure?.stage
-            ? `待完善：${closure.stage}`
-            : (matchedSources.length ? summarizeBoundaryStatus(matchedSources.map(source => source.status)) : "待绑定排放源");
+    const status = closure?.status === "closed" ? "已闭环" : "未闭环";
 
     return {
       ...item,
       categoryCode,
       sources: matchedSources,
       status,
+      statusVisible: true,
       closureStatus: closure?.status || "",
       closureStage: closure?.stage || "",
       closureReason: closure?.reason || "",
@@ -1652,8 +1660,11 @@ function mergeSharedBoundaryCategories(items) {
         }
 
         function statusClass(status) {
+            if (status === '已闭环') return 'eco-tag-success';
+            if (status === '未闭环') return 'eco-tag-muted';
+            if (status === '可核算') return 'eco-tag-success';
             if (status === '启用') return 'eco-tag-success';
-            if (status === '待完善') return 'eco-tag-warning';
+            if (status === '待完善' || String(status || '').startsWith('待完善：')) return 'eco-tag-warning';
             return 'eco-tag-muted';
         }
 
@@ -1663,6 +1674,14 @@ function mergeSharedBoundaryCategories(items) {
 
         function categoryStatusHtml(item) {
             return shouldShowCategoryStatus(item) ? `<span class="eco-tag ${statusClass(item.status)}">${item.status}</span>` : '';
+        }
+
+        function sourceClosureStatusLabel(source) {
+            if (!source) return '待完善';
+            if (source.status === '停用') return '停用';
+            if (source.matchOk || isAccountingConfigured(source) || source.instances?.some(isAccountingConfigured)) return '可核算';
+            if (source.matchStage && source.matchStage !== '已完成闭环') return `待完善：${source.matchStage}`;
+            return source.status && source.status !== '启用' ? source.status : '待完善';
         }
 
         function unconfiguredSlot(label, hint = '未配置') {
@@ -2115,7 +2134,7 @@ relatedDevicesPane.innerHTML = `
                 <li>
                     <button class="eco-tree-item w-full text-sm ${source.id === activeDeviceId ? 'active' : ''}" data-device-id="${source.id}" data-parent-id="${item.id}" type="button">
                         <span class="truncate">• ${source.name}</span>
-                        <span class="eco-tag ${(isAccountingConfigured(source) || source.instances?.some(isAccountingConfigured)) ? 'eco-tag-success' : 'eco-tag-warning'}">${(isAccountingConfigured(source) || source.instances?.some(isAccountingConfigured)) ? '已配置' : '待配置'}</span>
+                        <span class="eco-tag ${statusClass(sourceClosureStatusLabel(source))}">${sourceClosureStatusLabel(source)}</span>
                     </button>
                 </li>
             `).join('')}</ul>`;
@@ -2170,8 +2189,8 @@ relatedDevicesPane.innerHTML = `
             const display = activeDevice || item;
             detailTitle.innerText = display.name;
             if (activeDevice || shouldShowCategoryStatus(item)) {
-                detailStatus.innerText = activeDevice ? display.status : item.status;
-                detailStatus.className = `eco-tag ${statusClass(activeDevice ? display.status : item.status)}`;
+                detailStatus.innerText = activeDevice ? sourceClosureStatusLabel(display) : item.status;
+                detailStatus.className = `eco-tag ${statusClass(activeDevice ? sourceClosureStatusLabel(display) : item.status)}`;
                 detailStatus.classList.remove('hidden');
             } else {
                 detailStatus.innerText = '';
@@ -2393,6 +2412,7 @@ function removeSharedEmissionSource(sourceId) {
                 description: `${category}相关的范围三自定义间接排放类别。`,
                 owner: '管理员',
                 status: '启用',
+                statusVisible: false,
                 updatedAt: timestamp,
                 sources: [],
                 isCustom: true
@@ -2447,6 +2467,7 @@ function removeSharedEmissionSource(sourceId) {
                     owner: '管理员',
                     sourceType: '其他间接排放',
                     status: '启用',
+                    statusVisible: false,
                     updatedAt: timestamp,
                     sources: [],
                     modelCount: 0,
@@ -2485,7 +2506,7 @@ function removeSharedEmissionSource(sourceId) {
                 owner: '管理员',
                 sourceType: scope === 'scope1' ? '内部排放' : scope === 'scope2' ? '能源间接排放' : '其他间接排放',
                 status: '启用',
-                statusVisible: scope !== 'scope2',
+                statusVisible: false,
                 updatedAt: timestamp,
                 sources: [],
                 modelCount: 0,
@@ -2779,6 +2800,16 @@ function syncActivityDataTypeField(category, customMode = false) {
         });
         fillModalCategories();
         syncAll();
+        window.addEventListener('carbon-mock-updated', () => {
+            syncBoundaryMockStateFromStorage();
+            window.CarbonAccountingMock?.refreshBoundaryClosureStatuses?.();
+            boundaryItems = syncBoundarySourcesFromSharedDatabase(mergeSharedBoundaryCategories(boundaryItems));
+            syncAll();
+        });
+        window.addEventListener('message', event => {
+            if (event.data?.type !== 'carbon-mock-updated') return;
+            window.dispatchEvent(new Event('carbon-mock-updated'));
+        });
     });
 </script>
 
