@@ -1,6 +1,6 @@
 (function (root) {
   const STORAGE_KEY = "carbon-accounting-mock-state-v7-boundary-source-model-match";
-  const FACTOR_LIBRARY_VERSION = "emission-source-required-v2-standards";
+  const FACTOR_LIBRARY_VERSION = "emission-source-required-v6-gwp100-only";
   const ACTIVITY_RECORDS_VERSION = "datasource-excel-ledger-v2";
   const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -642,8 +642,8 @@
       activityDataTypeLabel: "用电量",
       defaultUnit: "kWh",
       params: [{
-        key: "electricityRegion",
-        label: "电网区域",
+        key: "electricityFactorProfile",
+        label: "电力因子口径",
         allowCustom: true,
         options: [
           { value: "east_china_grid", label: "华东电网", unit: "kWh" },
@@ -653,6 +653,9 @@
           { value: "northwest_china_grid", label: "西北电网", unit: "kWh" },
           { value: "northeast_china_grid", label: "东北电网", unit: "kWh" },
           { value: "national_grid", label: "全国电网", unit: "kWh" },
+          { value: "east_china_green_power", label: "华东电网-绿电", unit: "kWh" },
+          { value: "supplier_green_power", label: "合同能源", unit: "kWh" },
+          { value: "supplier_specific_power", label: "供应商特定电力", unit: "kWh" },
           { value: "__custom__", label: "自定义", unit: "kWh" }
         ]
       }]
@@ -983,8 +986,8 @@
 
       if (index >= 0) {
         result[index] = {
-          ...result[index],
-          ...option
+          ...option,
+          ...result[index]
         };
       } else {
         result.push(option);
@@ -1052,7 +1055,7 @@
   ];
 
   const EmissionSources = [
-    { id: "es-office-building-electricity", name: "办公楼用电", scope: "scope2", groupCode: "factor_energy_fuel", groupLabel: "能源与燃料", category: "factor_purchased_electricity", categoryCode: "factor_purchased_electricity", categoryLabel: "外购电力", sourceType: "office_living_electricity", activityDataType: "electricity_consumption", unit: "kWh", accountingParams: { electricityRegion: "east_china_grid" }, datasourceIds: ["ds-1"], status: "启用", org: "华东园区", equipment: "—" },
+    { id: "es-office-building-electricity", name: "办公楼用电", scope: "scope2", groupCode: "factor_energy_fuel", groupLabel: "能源与燃料", category: "factor_purchased_electricity", categoryCode: "factor_purchased_electricity", categoryLabel: "外购电力", sourceType: "office_living_electricity", activityDataType: "electricity_consumption", unit: "kWh", accountingParams: { electricityFactorProfile: "east_china_grid" }, datasourceIds: ["ds-1"], status: "启用", org: "华东园区", equipment: "—" },
     { id: "es-refrigerant-r410a", name: "中央空调R410A补充", scope: "scope1", groupCode: "factor_refrigeration_fugitive", groupLabel: "制冷与逸散", category: "factor_refrigerant_leakage", categoryCode: "factor_refrigerant_leakage", categoryLabel: "制冷剂泄漏", sourceType: "refrigerant_leakage", activityDataType: "replenishment_amount", unit: "kg", accountingParams: { refrigerantType: "r410a" }, datasourceIds: ["ds-3"], status: "启用", org: "华东园区", equipment: "12台" },
     { id: "es-natural-gas-boiler-1", name: "1号天然气锅炉", scope: "scope1", groupCode: "factor_energy_fuel", groupLabel: "能源与燃料", category: "factor_fossil_fuel", categoryCode: "factor_fossil_fuel", categoryLabel: "化石燃料", sourceType: "plant_boiler", activityDataType: "fuel_consumption", unit: "Nm³", accountingParams: { fuelType: "natural_gas" }, datasourceIds: ["ds-6"], status: "启用", org: "华东园区", equipment: "1台" },
     { id: "es-emergency-diesel-generator", name: "应急柴油发电机", scope: "scope1", groupCode: "factor_energy_fuel", groupLabel: "能源与燃料", category: "factor_fossil_fuel", categoryCode: "factor_fossil_fuel", categoryLabel: "化石燃料", sourceType: "generator_set", activityDataType: "fuel_consumption", unit: "L", accountingParams: { fuelType: "diesel" }, datasourceIds: ["ds-10"], status: "启用", org: "西北生产基地", equipment: "1台" }
@@ -1139,7 +1142,7 @@
     standardId: "std-ghgp-scope-2-guidance",
     standard: "GHG Protocol Scope 2 Guidance",
     method: "排放因子法",
-    formula: "CO2e = 外购电力活动数据 × 按电网区域匹配的电力因子组",
+    formula: "CO2e = 外购电力活动数据 × 按电力因子口径匹配的电力因子组",
     periodStart: "2024-01",
     periodEnd: "",
     matchRule: {
@@ -1153,7 +1156,7 @@
     factorMatchRule: {
       standardId: "std-ghgp-scope-2-guidance",
       activityDataType: "electricity_consumption",
-      fields: ["categoryCode", "standardId", "electricityRegion"]
+      fields: ["categoryCode", "standardId", "electricityFactorProfile"]
     },
     version: "v1.0.0",
     status: "启用"
@@ -1341,38 +1344,41 @@ const GwpVersions = [
   {
     id: "gwp-ar6-100",
     code: "AR6",
-    name: "IPCC AR6 (2021) - GWP100",
-    sourceStandard: "IPCC AR6 WGI Chapter 7 / GHG Protocol GWP Values",
+    name: "IPCC AR6 (2021)",
+    sourceStandard: "IPCC AR6 第六次评估报告",
     reportName: "IPCC 第六次评估报告",
     horizon: "100年",
-    effectiveDate: "2023-01-01",
+    currentHorizon: "100年",
+    effectiveDate: "2021-08-09",
     expireDate: "",
     enabled: true,
     status: "启用",
-    description: "基于 IPCC AR6 的 GWP100 参数库。系统当前 CO₂e 换算默认使用此版本。"
+    description: "基于 IPCC AR6 的 GWP100 参数库。系统保留时间尺度字段，当前内置时间尺度为 GWP100。"
   },
   {
     id: "gwp-ar5-100",
     code: "AR5",
-    name: "IPCC AR5 (2014) - GWP100",
-    sourceStandard: "IPCC AR5 / GHG Protocol GWP Values",
+    name: "IPCC AR5 (2013)",
+    sourceStandard: "IPCC AR5 第五次评估报告",
     reportName: "IPCC 第五次评估报告",
     horizon: "100年",
-    effectiveDate: "2015-06-01",
-    expireDate: "2022-12-31",
+    currentHorizon: "100年",
+    effectiveDate: "2013-09-01",
+    expireDate: "2021-08-08",
     enabled: false,
     status: "停用",
-    description: "基于 IPCC AR5 的 GWP100 参数库。"
+    description: "基于 IPCC AR5 的 GWP100 参数库，常用于历史核算口径对比。"
   },
   {
     id: "gwp-ar4-100",
     code: "AR4",
-    name: "IPCC AR4 (2007) - GWP100",
-    sourceStandard: "IPCC AR4 / GHG Protocol GWP Values",
+    name: "IPCC AR4 (2007)",
+    sourceStandard: "IPCC AR4 第四次评估报告",
     reportName: "IPCC 第四次评估报告",
     horizon: "100年",
-    effectiveDate: "2008-01-01",
-    expireDate: "2015-05-31",
+    currentHorizon: "100年",
+    effectiveDate: "2007-06-01",
+    expireDate: "2013-08-31",
     enabled: false,
     status: "停用",
     description: "基于 IPCC AR4 的 GWP100 参数库，常用于早期盘查或历史口径对比。"
@@ -1385,63 +1391,156 @@ const GWP_GASES = [
     gasName: "二氧化碳",
     formula: "CO₂",
     category: "主要温室气体",
-    values: { AR6: 1, AR5: 1, AR4: 1 }
+    values: { AR4_100: 1, AR5_100: 1, AR6_100: 1, AR6_20: 1, AR6_500: 1 }
   },
   {
     gas: "CH₄",
     gasName: "甲烷",
     formula: "CH₄",
     category: "主要温室气体",
-    values: { AR6: 27.2, AR5: 28, AR4: 25 }
+    values: { AR4_100: 25, AR5_100: 28, AR6_100: 27.9, AR6_20: 81.2, AR6_500: 7.95 }
   },
   {
     gas: "N₂O",
-    gasName: "一氧化二氮",
+    gasName: "氧化亚氮",
     formula: "N₂O",
     category: "主要温室气体",
-    values: { AR6: 273, AR5: 265, AR4: 298 }
+    values: { AR4_100: 298, AR5_100: 265, AR6_100: 273, AR6_20: 273, AR6_500: 130 }
+  },
+  {
+    gas: "HFC-23",
+    gasName: "三氟甲烷",
+    formula: "CHF₃",
+    category: "HFC",
+    values: { AR4_100: 14800, AR5_100: 12400, AR6_100: 14600, AR6_20: 12400, AR6_500: 10500 }
+  },
+  {
+    gas: "HFC-32",
+    gasName: "二氟甲烷",
+    formula: "CH₂F₂",
+    category: "HFC / 制冷剂",
+    values: { AR4_100: 675, AR5_100: 677, AR6_100: 771, AR6_20: 2690, AR6_500: 220 }
+  },
+  {
+    gas: "HFC-125",
+    gasName: "五氟乙烷",
+    formula: "C₂HF₅",
+    category: "HFC / 制冷剂",
+    values: { AR4_100: 3500, AR5_100: 3170, AR6_100: 3740, AR6_20: 6740, AR6_500: 1110 }
   },
   {
     gas: "HFC-134a",
-    gasName: "HFC-134a",
+    gasName: "1,1,1,2-四氟乙烷",
     formula: "CH₂FCF₃",
-    category: "制冷剂",
-    values: { AR6: 1530, AR5: 1300, AR4: 1430 }
+    category: "HFC / 制冷剂",
+    values: { AR4_100: 1430, AR5_100: 1300, AR6_100: 1530, AR6_20: 4140, AR6_500: 436 }
   },
   {
-    gas: "R410A",
-    gasName: "R410A 制冷剂",
-    formula: "R410A",
-    category: "制冷剂混合物",
-    values: { AR6: 2256, AR5: 1924, AR4: 2088 }
+    gas: "HFC-143a",
+    gasName: "1,1,1-三氟乙烷",
+    formula: "C₂H₃F₃",
+    category: "HFC / 制冷剂",
+    values: { AR4_100: 4470, AR5_100: 4800, AR6_100: 5810, AR6_20: 7840, AR6_500: 1940 }
+  },
+  {
+    gas: "HFC-152a",
+    gasName: "1,1-二氟乙烷",
+    formula: "C₂H₄F₂",
+    category: "HFC / 制冷剂",
+    values: { AR4_100: 124, AR5_100: 138, AR6_100: 164, AR6_20: 591, AR6_500: 46.8 }
+  },
+  {
+    gas: "HFC-227ea",
+    gasName: "七氟丙烷",
+    formula: "C₃HF₇",
+    category: "HFC / 灭火剂",
+    values: { AR4_100: 3220, AR5_100: 3350, AR6_100: 3600, AR6_20: 5850, AR6_500: 1100 }
   },
   {
     gas: "SF₆",
     gasName: "六氟化硫",
     formula: "SF₆",
     category: "工业气体",
-    values: { AR6: 25200, AR5: 23500, AR4: 22800 }
+    values: { AR4_100: 22800, AR5_100: 23500, AR6_100: 25200, AR6_20: 18300, AR6_500: 34100 }
   },
   {
     gas: "NF₃",
     gasName: "三氟化氮",
     formula: "NF₃",
     category: "工业气体",
-    values: { AR6: 17400, AR5: 16100, AR4: 17200 }
+    values: { AR4_100: 17200, AR5_100: 16100, AR6_100: 17400, AR6_20: 13400, AR6_500: 18200 }
+  },
+  {
+    gas: "CF₄",
+    gasName: "四氟化碳",
+    formula: "CF₄",
+    category: "PFC",
+    values: { AR4_100: 7390, AR5_100: 6630, AR6_100: 7380, AR6_20: 5300, AR6_500: 10600 }
+  },
+  {
+    gas: "C₂F₆",
+    gasName: "六氟乙烷",
+    formula: "C₂F₆",
+    category: "PFC",
+    values: { AR4_100: 12200, AR5_100: 11100, AR6_100: 12400, AR6_20: 8940, AR6_500: 17500 }
+  },
+  {
+    gas: "C₃F₈",
+    gasName: "八氟丙烷",
+    formula: "C₃F₈",
+    category: "PFC",
+    values: { AR4_100: 8830, AR5_100: 8900, AR6_100: 9290, AR6_20: 6770, AR6_500: 12400 }
+  },
+  {
+    gas: "c-C₄F₈",
+    gasName: "八氟环丁烷",
+    formula: "c-C₄F₈",
+    category: "PFC",
+    values: { AR4_100: 10300, AR5_100: 9540, AR6_100: 10200, AR6_20: 7400, AR6_500: 13800 }
+  },
+  {
+    gas: "C₄F₁₀",
+    gasName: "全氟丁烷",
+    formula: "C₄F₁₀",
+    category: "PFC",
+    values: { AR4_100: 8860, AR5_100: 9200, AR6_100: 10000, AR6_20: 7300, AR6_500: 13400 }
+  },
+  {
+    gas: "C₅F₁₂",
+    gasName: "全氟戊烷",
+    formula: "C₅F₁₂",
+    category: "PFC",
+    values: { AR4_100: 9160, AR5_100: 8550, AR6_100: 9220, AR6_20: 6680, AR6_500: 12700 }
+  },
+  {
+    gas: "C₆F₁₄",
+    gasName: "全氟己烷",
+    formula: "C₆F₁₄",
+    category: "PFC",
+    values: { AR4_100: 9300, AR5_100: 7910, AR6_100: 8620, AR6_20: 6260, AR6_500: 11600 }
   }
 ];
-const GwpParameters = GWP_GASES.flatMap((gas) =>
-  GwpVersions.map((version) => ({
-    id: `gwp-param-${version.code.toLowerCase()}-${String(gas.gas).toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+const GWP_TIME_DIMENSIONS = [
+  { versionId: "gwp-ar4-100", versionCode: "AR4", horizon: "100年" },
+  { versionId: "gwp-ar5-100", versionCode: "AR5", horizon: "100年" },
+  { versionId: "gwp-ar6-100", versionCode: "AR6", horizon: "100年" }
+];
+const GwpParameters = GWP_GASES.flatMap((gas, gasIndex) =>
+  GWP_TIME_DIMENSIONS.map((dimension) => {
+    const version = GwpVersions.find((item) => item.id === dimension.versionId);
+    const horizonNumber = String(dimension.horizon).replace("年", "");
+    const value = gas.values[`${dimension.versionCode}_${horizonNumber}`];
+    return {
+    id: `gwp-param-${version.code.toLowerCase()}-${horizonNumber}-${String(gasIndex + 1).padStart(3, "0")}`,
     versionId: version.id,
     versionCode: version.code,
     versionName: version.name,
-    horizon: version.horizon || "100年",
+    horizon: dimension.horizon,
     gas: gas.gas,
     gasName: gas.gasName,
     formula: gas.formula,
     category: gas.category,
-    value: gas.values[version.code],
+    value,
     unit: "kgCO₂e/kg",
     sourceStandard: version.sourceStandard,
     effectiveDate: version.effectiveDate,
@@ -1449,8 +1548,9 @@ const GwpParameters = GWP_GASES.flatMap((gas) =>
     referenceCount: gas.gas === "CO₂" ? 18 : gas.gas === "CH₄" ? 23 : gas.gas === "R410A" ? 6 : 0,
     enabled: true,
     status: "启用",
-    description: `${gas.gasName} 在 ${version.name} 下的 ${version.horizon || "100年"} GWP 参数。`
-  }))
+    description: `${gas.gasName} 在 ${version.name} 下的 ${dimension.horizon} GWP 参数。`
+    };
+  })
 );
 const GwpOperationLogs = [
   {
@@ -1503,8 +1603,8 @@ const ModelStandardRules = {
   purchased_electricity: {
     defaultStandardId: "std-ghgp-scope-2-guidance",
     activityDataType: "electricity_consumption",
-    factorFields: ["categoryCode", "activityDataType", "standardId", "electricityRegion"],
-    description: "外购电力按电网区域或电力因子口径匹配因子。"
+    factorFields: ["categoryCode", "activityDataType", "standardId", "electricityFactorProfile"],
+    description: "外购电力按电力因子口径匹配因子，可覆盖区域电网、绿电、PPA或供应商特定电力。"
   },
   purchased_steam: {
     defaultStandardId: "std-ghgp-corporate-revised",
@@ -1585,7 +1685,7 @@ function getDefaultFactorMatchFields(categoryCode) {
       activityDataType: "electricity_consumption",
       standardId: "std-ghgp-scope-2-guidance",
       standardName: "GHG Protocol Scope 2 Guidance",
-      electricityRegion: "east_china_grid",
+      electricityFactorProfile: "east_china_grid",
       factorIds: ["ef-national-grid-co2"],
       effectiveDate: "2024-01-01",
       expireDate: ""
@@ -1653,6 +1753,7 @@ function getDefaultFactorMatchFields(categoryCode) {
       standardId: group.standardId || matchFields.standardId || "",
       fuelType: group.fuelType || matchFields.fuelType || "",
       electricityRegion: group.electricityRegion || matchFields.electricityRegion || "",
+      electricityFactorProfile: group.electricityFactorProfile || matchFields.electricityFactorProfile || group.electricityRegion || matchFields.electricityRegion || "",
       refrigerantType: group.refrigerantType || matchFields.refrigerantType || "",
       gwpVersionId: versionId,
       gwpVersionCode: versionCode,
@@ -1678,6 +1779,7 @@ function getDefaultFactorMatchFields(categoryCode) {
       standardId: factor.standardId || matchFields.standardId || "",
       fuelType: factor.fuelType || factor.matchParams?.fuelType || matchFields.fuelType || "",
       electricityRegion: factor.electricityRegion || factor.matchParams?.electricityRegion || matchFields.electricityRegion || "",
+      electricityFactorProfile: factor.electricityFactorProfile || factor.matchParams?.electricityFactorProfile || matchFields.electricityFactorProfile || factor.electricityRegion || factor.matchParams?.electricityRegion || matchFields.electricityRegion || "",
       refrigerantType: factor.refrigerantType || factor.matchParams?.refrigerantType || matchFields.refrigerantType || "",
       gwpVersionId: versionId,
       gwpVersionCode: versionCode,
@@ -2088,10 +2190,10 @@ function matchModel(source, models = api.AccountingModels, period = "") {
       period
     });
 
-    const hasDatasource = Array.isArray(source.datasourceIds) && source.datasourceIds.length > 0;
-    const hasActivity = Boolean(activityRecord);
     const hasModel = Boolean(model);
     const hasFactor = Boolean(factor);
+    const hasDatasource = Array.isArray(source.datasourceIds) && source.datasourceIds.length > 0;
+    const hasActivity = Boolean(activityRecord);
     const hasGwp =
       Boolean(result?.gasResults?.length) &&
       result.gasResults.every((item) => Number(item.gwp) > 0);
@@ -2100,26 +2202,14 @@ function matchModel(source, models = api.AccountingModels, period = "") {
     let status = "closed";
     let reason = "";
 
-    if (!hasDatasource) {
-      stage = "数据源绑定";
-      status = "open";
-      reason = "已添加边界分类，但尚未绑定排放源数据源";
-    } else if (!hasActivity) {
-      stage = "活动数据";
-      status = "open";
-      reason = "已绑定数据源，但暂无活动数据记录";
-    } else if (!hasModel) {
+    if (!hasModel) {
       stage = "核算模型";
       status = "open";
-      reason = "已绑定排放源，但尚未匹配核算模型";
+      reason = "已添加排放源，但尚未匹配核算模型";
     } else if (!hasFactor) {
       stage = "排放因子";
       status = "open";
       reason = api.explainFactorMismatch?.(model, source, period) || "已匹配模型，但尚未匹配排放因子";
-    } else if (!hasGwp) {
-      stage = "GWP";
-      status = "open";
-      reason = "已匹配因子，但未匹配到对应气体 GWP";
     }
 
     return {
@@ -2144,11 +2234,8 @@ function matchModel(source, models = api.AccountingModels, period = "") {
 
   const sourceTotal = rows.length;
   const closedCount = rows.filter((row) =>
-    row.hasDatasource &&
-    row.hasActivity &&
     row.hasModel &&
-    row.hasFactor &&
-    row.hasGwp
+    row.hasFactor
   ).length;
 
   let status = "empty";
@@ -2162,7 +2249,7 @@ function matchModel(source, models = api.AccountingModels, period = "") {
   } else if (sourceTotal > 0 && closedCount > 0) {
     status = "partial";
     stage = "部分闭环";
-    reason = "部分排放源已完成模型、因子、GWP 匹配";
+    reason = "部分排放源已完成模型和因子匹配";
   } else if (sourceTotal > 0) {
     status = "open";
     const firstOpen = rows.find((row) => row.status !== "closed");
@@ -2873,7 +2960,8 @@ function refreshBoundaryClosureStatuses() {
     }
 
     (schema?.params || []).forEach((param) => {
-      const rawValue = values[param.key] || "";
+      const legacyElectricityProfileValue = param.key === "electricityFactorProfile" ? values.electricityRegion : "";
+      const rawValue = values[param.key] || legacyElectricityProfileValue || "";
       if (!rawValue) return;
 
       const selectedOption = (param.options || []).find((option) =>
@@ -2882,7 +2970,9 @@ function refreshBoundaryClosureStatuses() {
       const customLabel = String(
         values[`${param.key}Custom`] ||
         labelsFromForm[param.key] ||
+        (param.key === "electricityFactorProfile" ? labelsFromForm.electricityRegion : "") ||
         formValues[`${param.key}Custom`] ||
+        (param.key === "electricityFactorProfile" ? formValues.electricityRegionCustom : "") ||
         ""
       ).trim();
 
@@ -2891,7 +2981,7 @@ function refreshBoundaryClosureStatuses() {
         accountingParamLabels[param.key] = customLabel || "自定义";
       } else {
         accountingParams[param.key] = selectedOption?.value || rawValue;
-        accountingParamLabels[param.key] = selectedOption?.label || labelsFromForm[param.key] || rawValue;
+        accountingParamLabels[param.key] = selectedOption?.label || labelsFromForm[param.key] || (param.key === "electricityFactorProfile" ? labelsFromForm.electricityRegion : "") || rawValue;
       }
 
       if (!unit && selectedOption?.unit) unit = selectedOption.unit;
@@ -3353,6 +3443,7 @@ function getBoundaryCategoryOptionsForSourceForm() {
       gwp: group.gwp || group.gwpVersion || getGwpVersionByRef({ gwpVersionId: versionId })?.name || "IPCC AR6 (2021)",
       fuelType: group.fuelType || matchFields.fuelType || "",
       electricityRegion: group.electricityRegion || matchFields.electricityRegion || "",
+      electricityFactorProfile: group.electricityFactorProfile || matchFields.electricityFactorProfile || group.electricityRegion || matchFields.electricityRegion || "",
       refrigerantType: group.refrigerantType || matchFields.refrigerantType || "",
       factorIds,
       effectiveDate,
@@ -3394,6 +3485,7 @@ function getBoundaryCategoryOptionsForSourceForm() {
       gwp: factor.gwp || factor.gwpVersion || getGwpVersionByRef({ gwpVersionId: versionId })?.name || "IPCC AR6 (2021)",
       fuelType: factor.fuelType || factor.matchParams?.fuelType || matchFields.fuelType || "",
       electricityRegion: factor.electricityRegion || factor.matchParams?.electricityRegion || matchFields.electricityRegion || "",
+      electricityFactorProfile: factor.electricityFactorProfile || factor.matchParams?.electricityFactorProfile || matchFields.electricityFactorProfile || factor.electricityRegion || factor.matchParams?.electricityRegion || matchFields.electricityRegion || "",
       refrigerantType: factor.refrigerantType || factor.matchParams?.refrigerantType || matchFields.refrigerantType || "",
       effectiveDate,
       expireDate,
@@ -3417,9 +3509,10 @@ function getBoundaryCategoryOptionsForSourceForm() {
     const matchParams = item.matchParams || {};
     const fuelType = item.fuelType || matchParams.fuelType || "";
     const electricityRegion = item.electricityRegion || matchParams.electricityRegion || "";
+    const electricityFactorProfile = item.electricityFactorProfile || matchParams.electricityFactorProfile || electricityRegion;
     const refrigerantType = item.refrigerantType || matchParams.refrigerantType || "";
 
-    const matchValue = fuelType || electricityRegion || refrigerantType || "";
+    const matchValue = fuelType || electricityFactorProfile || refrigerantType || "";
 
     return [
       categoryCode,
@@ -3592,6 +3685,7 @@ function getBoundaryCategoryOptionsForSourceForm() {
       standardId: "来源标准",
       fuelType: "燃料类型",
       electricityRegion: "电力区域",
+      electricityFactorProfile: "电力因子口径",
       refrigerantType: "制冷剂类型",
       energyType: "能源类型"
     };
@@ -4219,6 +4313,12 @@ getLatestActivityRecordBySource(sourceOrId) {
   root.dispatchEvent?.(
     new CustomEvent("carbon-mock-updated", { detail: api })
   );
+
+  try {
+    if (root.parent && root.parent !== root) {
+      root.parent.postMessage({ type: "carbon-mock-updated" }, "*");
+    }
+  } catch (error) {}
 },
 
     upsertEmissionSource(source) {
