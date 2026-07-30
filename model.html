@@ -359,6 +359,27 @@
     const normalizeDate = value => String(value || "").slice(0, 10);
     const sharedReady = Boolean(Mock && (Mock.AccountingModels || Mock.getAccountingModels));
 
+    function syncModelMockStateFromStorage() {
+      if (!Mock?.STORAGE_KEY) return;
+
+      try {
+        const saved = JSON.parse(window.localStorage?.getItem(Mock.STORAGE_KEY) || "{}");
+        if (Array.isArray(saved.AccountingModels)) {
+          Mock.AccountingModels = saved.AccountingModels;
+          Mock.CalculationModels = Mock.AccountingModels;
+        }
+        if (Array.isArray(saved.BoundaryCategories)) Mock.BoundaryCategories = saved.BoundaryCategories;
+        if (Array.isArray(saved.EmissionSources)) Mock.EmissionSources = saved.EmissionSources;
+        if (Array.isArray(saved.FactorLibraryGroups)) Mock.FactorLibraryGroups = saved.FactorLibraryGroups;
+        if (Array.isArray(saved.FactorLibraryFactors)) Mock.FactorLibraryFactors = saved.FactorLibraryFactors;
+        if (Array.isArray(saved.FactorStandards)) Mock.FactorStandards = saved.FactorStandards;
+        if (Array.isArray(saved.StandardFiles)) Mock.StandardFiles = saved.StandardFiles;
+        if (saved.BoundaryCategoryOptions) Mock.BoundaryCategoryOptions = saved.BoundaryCategoryOptions;
+      } catch (error) {
+        console.warn("同步共享模型数据失败", error);
+      }
+    }
+
     const els = {
       tbody: byId("model-table-body"),
       tree: byId("model-tree"),
@@ -1342,12 +1363,24 @@
       applyMethodFormula(event.target.value);
     });
     window.addEventListener("message", event => {
+      if (event.data?.type === "carbon-mock-updated") {
+        window.dispatchEvent(new Event("carbon-mock-updated"));
+        return;
+      }
       if (event.data?.type === "model-navigate" && event.data.view === "list") {
         closeDetail();
         showModelList();
       }
     });
-    window.addEventListener("carbon-mock-updated", refresh);
+    window.addEventListener("carbon-mock-updated", () => {
+      syncModelMockStateFromStorage();
+      refresh();
+    });
+    window.addEventListener("storage", event => {
+      if (event.key === Mock?.STORAGE_KEY) {
+        window.dispatchEvent(new Event("carbon-mock-updated"));
+      }
+    });
 
     if (!sharedReady) {
       els.tbody.innerHTML = `<tr><td class="model-empty-cell" colspan="8">共享模型数据未加载，请确认 shared-mock-data.js 与 model.html 位于同一目录。</td></tr>`;
