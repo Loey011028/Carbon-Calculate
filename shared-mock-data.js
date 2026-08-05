@@ -1742,6 +1742,20 @@ function getDefaultFactorMatchFields(categoryCode) {
     return standard?.name || fallback || "";
   }
 
+  function parseComponentRatio(value, fallback = 1) {
+    const text = String(value ?? "").trim();
+    if (!text) return fallback;
+    const hasPercent = text.includes("%");
+    const numeric = Number(text.replace("%", ""));
+    if (!Number.isFinite(numeric)) return fallback;
+    return hasPercent || numeric > 1 ? numeric / 100 : numeric;
+  }
+
+  function parseFactorNumber(value, fallback = 0) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : fallback;
+  }
+
   function normalizeRefrigerantGasRows(item = {}) {
     const rows = Array.isArray(item.components) && item.components.length
       ? item.components
@@ -1752,7 +1766,7 @@ function getDefaultFactorMatchFields(categoryCode) {
         const ratio = row.ratio ?? row.value ?? "";
         return {
           gas: row.gas,
-          ratio,
+          ratio: parseComponentRatio(ratio),
           value: item.value || row.factorValue || row.value || "1",
           unit: item.unit || row.unit || "kg制冷剂/kg"
         };
@@ -1958,41 +1972,43 @@ function getGasGwp(gas, ref = {}) {
   return Number(matched?.value || 1);
 }
 
-function expandFactorGasResults({ amount = 0, factorSet = {} } = {}) {
-  const activityAmount = Number(amount) || 0;
-
-  return (factorSet.gases || []).map((gasFactor) => {
-    const componentRatio = Number(gasFactor.ratio ?? 1) || 1;
-    const factorValue = (Number(gasFactor.value) || 0) * componentRatio;
-    const gasAmount = activityAmount * factorValue;
-
-    const gwpVersionId = gasFactor.gwpVersionId || factorSet.gwpVersionId;
-    const gwpVersionCode = gasFactor.gwpVersionCode || factorSet.gwpVersionCode;
-
-    const gwp = getGasGwp(gasFactor.gas, {
-      gwpVersionId,
-      gwpVersionCode,
-      horizon: gasFactor.horizon || factorSet.horizon || "100年"
-    });
-
-    const kgCO2e = gasAmount * gwp;
-
-    return {
-      factorId: gasFactor.factorId,
-      gas: gasFactor.gas,
-      factorValue,
-      factorUnit: gasFactor.unit || factorSet.unit || "",
-      ratio: componentRatio,
-      componentRatio,
-      activityAmount,
-      gasAmount,
-      gwpVersionId,
-      gwpVersionCode,
-      gwp,
-      kgCO2e,
-      tCO2e: kgCO2e / 1000
-    };
+function buildGasCalculationRow({ activityAmount = 0, gasFactor = {}, factorSet = {} } = {}) {
+  const componentRatio = parseComponentRatio(gasFactor.ratio ?? 1);
+  const rawFactorValue = parseFactorNumber(gasFactor.value, 0);
+  const factorValue = rawFactorValue * componentRatio;
+  const gasAmount = activityAmount * factorValue;
+  const gwpVersionId = gasFactor.gwpVersionId || factorSet.gwpVersionId;
+  const gwpVersionCode = gasFactor.gwpVersionCode || factorSet.gwpVersionCode;
+  const gwp = getGasGwp(gasFactor.gas, {
+    gwpVersionId,
+    gwpVersionCode,
+    horizon: gasFactor.horizon || factorSet.horizon || "100年"
   });
+  const kgCO2e = gasAmount * gwp;
+
+  return {
+    factorId: gasFactor.factorId,
+    gas: gasFactor.gas,
+    rawFactorValue,
+    factorValue,
+    factorUnit: gasFactor.unit || factorSet.unit || "",
+    ratio: componentRatio,
+    componentRatio,
+    activityAmount,
+    gasAmount,
+    gwpVersionId,
+    gwpVersionCode,
+    gwp,
+    kgCO2e,
+    tCO2e: kgCO2e / 1000
+  };
+}
+
+function expandFactorGasResults({ amount = 0, factorSet = {} } = {}) {
+  const activityAmount = parseFactorNumber(amount, 0);
+  return (factorSet.gases || []).map((gasFactor) =>
+    buildGasCalculationRow({ activityAmount, gasFactor, factorSet })
+  );
 }
 
 function isModelPeriodMatched(model = {}, period = "") {
