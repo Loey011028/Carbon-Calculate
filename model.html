@@ -437,14 +437,8 @@
       return "CO2e = 活动数据 × 排放因子 × GWP";
     }
 
-    function versionStatus(model = {}) {
-      if (model.status === "停用" || model.status === "草稿") return model.status;
-      const today = todayString();
-      const start = normalizeDate(model.effectiveDate || model.effectiveAt || model.periodStart);
-      const end = normalizeDate(model.expireDate || model.expiredAt || model.periodEnd);
-      if (start && start > today) return "待生效";
-      if (end && end < today) return "已失效";
-      return "启用";
+    function modelBusinessStatus(model = {}) {
+      return model.status === "停用" ? "停用" : "启用";
     }
 
     function normalizeModel(raw = {}) {
@@ -468,7 +462,7 @@
         precision: raw.precision || "小数点后 4 位",
         effectiveAt: raw.effectiveDate || raw.effectiveAt || raw.periodStart || "2024-01-01",
         expiredAt: raw.expireDate || raw.expiredAt || raw.periodEnd || "长期有效",
-        status: versionStatus(raw),
+        status: modelBusinessStatus(raw),
         type: raw.type || "共享模型"
       };
     }
@@ -480,6 +474,24 @@
       if (start && start > period) return false;
       if (end && end < period) return false;
       return true;
+    }
+
+    function versionLifecycleStatus(versionModel, index = 0) {
+      const today = todayString();
+      const start = normalizeDate(versionModel.effectiveAt || versionModel.raw?.effectiveDate || versionModel.raw?.periodStart);
+      const end = normalizeDate(versionModel.expiredAt || versionModel.raw?.expireDate || versionModel.raw?.periodEnd);
+      if (start && start > today) return "待生效";
+      if (end && end < today) return "已归档";
+      if (index > 0 && !end) return "已归档";
+      return "生效中";
+    }
+
+    function versionLifecycleText(status = "") {
+      const lifecycleLabels = ["生效中", "待生效", "已归档"];
+      if (lifecycleLabels.includes(status)) return status;
+      if (status === "当前版本" || status === "启用") return "生效中";
+      if (status === "历史版本" || status === "已失效" || status === "停用") return "已归档";
+      return "生效中";
     }
 
     function pickDisplayVersion(versions = []) {
@@ -542,9 +554,6 @@
     }
 
     function renderStatusCell(model) {
-      if (["待生效", "已失效"].includes(model.status)) {
-        return `<span class="${statusClass(model.status)}">${escapeHtml(model.status)}</span>`;
-      }
       return `
         <button class="${statusToggleClass(model.status)}" type="button" data-action="toggle-status" title="${model.status === "停用" ? "启用模型" : "停用模型"}" aria-label="${model.status === "停用" ? "启用模型" : "停用模型"}">
           <span class="eco-status-toggle-track"><span class="eco-status-toggle-thumb"></span></span>
@@ -766,6 +775,16 @@
       return "";
     }
 
+    function validateVersionTransition(current, payload, mode) {
+      if (mode !== "new-version" || !current) return "";
+      const currentEffective = normalizeDate(current.effectiveDate || current.effectiveAt || current.periodStart);
+      const payloadEffective = normalizeDate(payload.effectiveDate || payload.effectiveAt || payload.periodStart);
+      if (currentEffective && payloadEffective && payloadEffective <= currentEffective) {
+        return "新版生效日期必须晚于当前版本生效日期。";
+      }
+      return "";
+    }
+
     function dateStart(value) {
       return normalizeDate(value) || "0000-01-01";
     }
@@ -808,6 +827,16 @@
       ) || null;
     }
 
+    function findOverlappingGroupVersion(payload, groupId, excludeId = "") {
+      if (!groupId || payload.status === "停用") return null;
+      return (Mock.AccountingModels || []).find(item =>
+        String(item.id || "") !== String(excludeId || "") &&
+        String(modelGroupIdOf(item)) === String(groupId) &&
+        item.status !== "停用" &&
+        hasOverlappingPeriod(item, payload)
+      ) || null;
+    }
+
     function saveForm(mode = "current") {
       const current = state.editingId ? (Mock.AccountingModels || []).find(item => item.id === state.editingId) : null;
       const formPayload = readFormPayload();
@@ -816,7 +845,17 @@
         showModelNotice(validationMessage);
         return;
       }
+      const transitionMessage = validateVersionTransition(current, formPayload, mode);
+      if (transitionMessage) {
+        showModelNotice(transitionMessage);
+        return;
+      }
       const currentGroupId = modelGroupIdOf(current || {});
+      const groupConflict = findOverlappingGroupVersion(formPayload, currentGroupId, current?.id || "");
+      if (groupConflict) {
+        showModelNotice(`同一模型的不同版本不能存在重叠适用时间段：${groupConflict.version || groupConflict.name || "已有版本"} 已占用该时间段。`);
+        return;
+      }
       const conflict = findConflictingModel(formPayload, current?.id || "", mode === "new-version" ? currentGroupId : "");
       if (conflict) {
         showModelNotice(`同一时间同一分类同一标准只能存在一个模型：${conflict.name || "已有模型"} 已占用该配置。`);
@@ -829,7 +868,7 @@
         version: formPayload.version,
         operator: "当前用户",
         date: todayString(),
-        status: "当前版本",
+        status: versionLifecycleStatus({ effectiveAt: formPayload.effectiveDate, expiredAt: formPayload.expireDate, raw: formPayload }),
         description: mode === "new-version"
           ? formPayload.changeDescription || `另存为新版本 ${formPayload.version}。`
           : formPayload.changeDescription
@@ -842,7 +881,7 @@
         id: nextId,
         modelGroupId: currentGroupId || state.editingId || nextId,
         type: current?.type || "自定义模型",
-        changeLog: [changeEntry, ...previousLogs.map(log => ({ ...log, status: log.status === "当前版本" ? "历史版本" : log.status }))]
+        changeLog: [changeEntry, ...previousLogs.map(log => ({ ...log, status: "已归档" }))]
       };
       delete payload.changeDescription;
 
@@ -853,7 +892,7 @@
           modelGroupId: currentGroupId || current.id,
           expireDate: clippedExpireDate,
           periodEnd: clippedExpireDate.slice(0, 7),
-          changeLog: previousLogs.map(log => ({ ...log, status: log.status === "当前版本" ? "历史版本" : log.status }))
+          changeLog: previousLogs.map(log => ({ ...log, status: "已归档" }))
         };
         if (Mock.updateAccountingModel) Mock.updateAccountingModel(current.id, clippedCurrent);
         else if (Mock.upsertAccountingModel) Mock.upsertAccountingModel(clippedCurrent);
@@ -907,14 +946,14 @@
             version: model.version,
             operator: model.raw?.operator || "系统",
             date: model.effectiveAt,
-            status: "当前版本",
+            status: versionLifecycleStatus(model),
             description: model.raw?.description || "初始化共享模型配置。"
           }];
       return logs.map((log, index) => ({
         version: log.version || model.version,
         operator: log.operator || "系统",
         date: log.date || log.createdAt || model.effectiveAt,
-        status: log.status || (index === 0 ? "当前版本" : "历史版本"),
+        status: versionLifecycleText(log.status || (index === 0 ? "生效中" : "已归档")),
         description: log.description || log.content || "保存模型配置。"
       }));
     }
@@ -925,11 +964,15 @@
         .filter(item => String(item.modelGroupId || item.id) === String(groupId))
         .sort((a, b) => String(b.effectiveAt || "").localeCompare(String(a.effectiveAt || "")));
       if (groupVersions.length > 1) {
+        const today = todayString();
         return groupVersions.map((versionModel, index) => ({
           version: versionModel.version,
           operator: versionModel.raw?.operator || "系统",
           date: versionModel.effectiveAt,
-          status: index === 0 && isVersionApplicable(versionModel) ? "当前版本" : versionModel.status,
+          status: versionLifecycleStatus(
+            versionModel,
+            groupVersions.slice(0, index).some(item => normalizeDate(item.effectiveAt) <= today) ? 1 : 0
+          ),
           description: versionModel.raw?.changeLog?.[0]?.description || versionModel.raw?.description || "保存模型配置。",
           rawModel: versionModel.raw,
           normalizedModel: versionModel
@@ -943,10 +986,13 @@
       });
     }
 
-    function versionBadge(index, status = "") {
-      const text = status || (index ? "历史版本" : "当前版本");
-      const active = text === "当前版本" || text === "启用";
-      return `<span class="${active ? "eco-status-badge eco-status-active" : "eco-status-badge eco-status-disabled"}">${escapeHtml(text)}</span>`;
+    function versionBadge(status = "") {
+      const lifecycleLabels = ["生效中", "待生效", "已归档"];
+      const text = lifecycleLabels.includes(status) ? status : versionLifecycleText(status);
+      const badgeClass = text === "生效中"
+        ? "eco-status-badge eco-status-active"
+        : (text === "待生效" ? "eco-status-badge eco-status-pending" : "eco-status-badge eco-status-disabled");
+      return `<span class="${badgeClass}">${escapeHtml(text)}</span>`;
     }
 
     function renderModelVersionCard(model, log, index) {
@@ -958,7 +1004,7 @@
             <div class="min-w-0">
               <div class="flex items-center gap-2">
                 <span class="eco-section-title">${escapeHtml(snapshot.version || "-")}</span>
-                ${versionBadge(index, log.status)}
+                ${versionBadge(snapshot.versionStatus)}
               </div>
               <div class="eco-helper-text mt-1 truncate">${escapeHtml(model.name || "")}</div>
             </div>
@@ -1042,7 +1088,7 @@
           <h4 class="eco-form-heading mb-4">${escapeHtml(snapshot.version)} 版本信息</h4>
           <div class="grid grid-cols-2 gap-y-3 gap-x-8">
             <div class="flex"><span class="eco-detail-label w-24 shrink-0">模型名称：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.name)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">版本状态：</span><span class="eco-detail-value mt-0 flex-1">${index ? "历史版本" : "当前版本"}</span></div>
+            <div class="flex"><span class="eco-detail-label w-24 shrink-0">版本状态：</span><span class="eco-detail-value mt-0 flex-1">${versionBadge(snapshot.versionStatus)}</span></div>
             <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算范围：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.scopeLabel)}</span></div>
             <div class="flex"><span class="eco-detail-label w-24 shrink-0">排放类别：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.categoryLabel)}</span></div>
             <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算方法：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.method)}</span></div>
@@ -1069,6 +1115,7 @@
       return {
         name: versionModel.name,
         version: log.version || versionModel.version,
+        versionStatus: versionLifecycleStatus(versionModel, index),
         status: versionModel.status === "停用" ? "停用" : "启用",
         standard: versionModel.standard,
         standardCode,
@@ -1095,7 +1142,7 @@
       return `
         <div class="space-y-5">
           <div class="grid grid-cols-3 gap-4">
-            <div class="eco-stat-card"><div class="eco-stat-label">当前版本</div><div class="eco-stat-value text-[22px]">${escapeHtml(model.version)}</div></div>
+            <div class="eco-stat-card"><div class="eco-stat-label">当前适用版本</div><div class="eco-stat-value text-[22px]">${escapeHtml(model.version)}</div></div>
             <div class="eco-stat-card"><div class="eco-stat-label">当前状态</div><div class="mt-2"><span class="${statusClass(model.status)}">${escapeHtml(model.status)}</span></div></div>
             <div class="eco-stat-card"><div class="eco-stat-label">引用标准</div><div class="eco-list-primary-text mt-2 whitespace-normal">${escapeHtml(model.standard)}</div></div>
           </div>
@@ -1115,7 +1162,7 @@
                       <div class="eco-list-primary-text">${escapeHtml(log.version)} · ${escapeHtml(log.status)}</div>
                       <div class="eco-helper-text mt-1">${escapeHtml(log.date)} / ${escapeHtml(log.operator)}</div>
                     </div>
-                    <span class="${index ? "eco-status-badge eco-status-disabled" : "eco-status-badge eco-status-active"}">${index ? "历史版本" : "当前版本"}</span>
+                    ${versionBadge(log.status)}
                   </div>
                   <div class="eco-list-secondary-text whitespace-normal mt-3">${escapeHtml(log.description)}</div>
                 </div>
