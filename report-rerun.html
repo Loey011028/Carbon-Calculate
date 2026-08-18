@@ -14,11 +14,25 @@
     html,body{height:100%}
     .rerun-shell{height:100vh;min-height:0;display:flex;flex-direction:column}
     .rerun-content{height:100%;flex:1;min-height:0;display:flex;flex-direction:column;padding:16px 18px 18px;overflow:hidden}
-    .rerun-current{margin-bottom:16px}
-    .rerun-current-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(220px,.8fr) minmax(170px,.45fr);gap:14px;align-items:center}
+    .rerun-pending-overview{margin-bottom:10px;padding:12px 14px}
+    .rerun-overview-header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px}
+    .rerun-overview-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:8px}
+    .rerun-overview-stat{border:1px solid var(--eco-line);border-radius:10px;background:var(--eco-paper);padding:6px 10px}
+    .rerun-overview-stat-label{font-size:12px;color:var(--eco-muted);font-weight:700}
+    .rerun-overview-stat-value{margin-top:2px;font-size:16px;font-weight:800;color:var(--eco-green-900)}
+    .rerun-overview-table{border:1px solid var(--eco-line);border-radius:10px;overflow:hidden;background:var(--eco-paper)}
+    .rerun-overview-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(190px,1.2fr) minmax(90px,.55fr) minmax(96px,.55fr);gap:10px;align-items:center;padding:7px 12px;border-top:1px solid var(--eco-line)}
+    .rerun-overview-row>*{min-width:0}
+    .rerun-overview-row:first-child{border-top:0}
+    .rerun-overview-head{background:var(--eco-surface-container-low);font-size:12px;font-weight:800;color:var(--eco-muted)}
+    .rerun-overview-value{font-size:13px;color:var(--eco-on-surface);font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rerun-overview-action{justify-self:center;text-align:center}
+    .rerun-overview-pagination{margin-top:6px}
     .rerun-view-panel{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
-    .rerun-progress{height:10px;border-radius:999px;background:var(--eco-sage-100);overflow:hidden;border:1px solid var(--eco-line)}
+    .rerun-progress{height:8px;border-radius:999px;background:var(--eco-sage-100);overflow:hidden;border:1px solid var(--eco-line)}
     .rerun-progress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--eco-green-500),var(--eco-green-700))}
+    .rerun-table-progress{display:grid;gap:4px;min-width:0}
+    .rerun-table-progress-text{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--eco-muted)}
     .rerun-tabs{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}
     .rerun-tab.active{background:var(--eco-green-900)!important;color:#fff!important;border-color:var(--eco-green-900)!important}
     .rerun-status-tabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -28,17 +42,29 @@
     .rerun-table-area{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;border:0!important;border-radius:0!important;box-shadow:none!important}
     .rerun-table-min{width:100%;min-width:0}
     .rerun-cell-wrap{white-space:normal;word-break:break-word;line-height:1.45}
-    .rerun-action-buttons{display:flex;flex-wrap:nowrap;justify-content:center;gap:8px}
-    .rerun-action-buttons .eco-action-btn{min-width:62px;height:32px;border-radius:8px;font-weight:600}
+    .rerun-action-buttons{display:flex;flex-wrap:nowrap;justify-content:center;gap:5px;white-space:nowrap}
+    .rerun-action-buttons .eco-action-btn{min-width:46px;height:30px;border-radius:8px;font-weight:600;padding:0 8px}
+    .rerun-compact-pagination{min-height:34px;padding:5px 12px!important}
+    .rerun-compact-pagination .eco-btn-square-sm{width:28px!important;height:28px!important;min-height:28px!important}
+    .rerun-compact-pagination .eco-pagination-summary{font-size:12px}
     .rerun-action-detail{border-color:var(--eco-line)!important;background:var(--eco-paper)!important;color:var(--eco-green-900)!important}
     .rerun-action-detail:hover{border-color:var(--eco-green-400)!important;background:var(--eco-sage-100)!important}
+    .rerun-action-pin{border-color:rgba(47,111,61,.24)!important;background:rgba(215,230,195,.38)!important;color:var(--eco-green-900)!important}
+    .rerun-action-pin:hover{border-color:var(--eco-green-500)!important;background:var(--eco-sage-100)!important}
     .rerun-action-cancel{border-color:rgba(185,28,28,.28)!important;background:#fff5f5!important;color:#b91c1c!important}
     .rerun-action-cancel:hover{background:#fee2e2!important;border-color:rgba(185,28,28,.45)!important}
     .rerun-action-disabled{border-color:var(--eco-line)!important;background:var(--eco-surface-container-low)!important;color:var(--eco-muted)!important;cursor:not-allowed;opacity:.68}
     .rerun-submit-feedback{margin:0 20px 12px;padding:10px 14px;border:1px solid rgba(47,111,61,.22);border-radius:12px;background:rgba(215,230,195,.5);color:var(--eco-green-900);font-weight:600;display:flex;align-items:center;gap:8px}
     .rerun-submit-feedback.hidden{display:none}
-    .rerun-row-new td{background:rgba(215,230,195,.38)!important;box-shadow:inset 0 1px 0 rgba(47,111,61,.12),inset 0 -1px 0 rgba(47,111,61,.08)}
-    .rerun-row-new td:first-child{box-shadow:inset 4px 0 0 var(--eco-green-600),inset 0 1px 0 rgba(47,111,61,.12),inset 0 -1px 0 rgba(47,111,61,.08)}
+    .rerun-row-running td{background:rgba(215,230,195,.22)!important}
+    .rerun-row-running td:first-child{box-shadow:inset 4px 0 0 var(--eco-green-700)}
+    .rerun-confirm-card{width:560px;max-width:92vw;overflow:hidden}
+    .rerun-confirm-body{padding:20px 24px;display:grid;gap:12px}
+    .rerun-confirm-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .rerun-confirm-item{border:1px solid var(--eco-line);border-radius:10px;background:var(--eco-paper);padding:10px 12px;min-width:0}
+    .rerun-confirm-label{font-size:12px;font-weight:700;color:var(--eco-muted);margin-bottom:4px}
+    .rerun-confirm-value{font-size:14px;font-weight:800;color:var(--eco-on-surface);word-break:break-word}
+    .rerun-confirm-note{border:1px solid rgba(111,150,55,.22);border-radius:10px;background:rgba(215,230,195,.34);padding:10px 12px;color:var(--eco-green-900);font-size:13px;font-weight:700}
     .rerun-form-select,.rerun-form-input{border-radius:14px!important;background-color:var(--eco-paper)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.74)!important;font-weight:600!important}
     .rerun-select-wrap{position:relative}
     .rerun-select-wrap::after{content:"";position:absolute;right:15px;top:50%;width:8px;height:8px;border-right:2px solid var(--eco-green-700);border-bottom:2px solid var(--eco-green-700);transform:translateY(-65%) rotate(45deg);pointer-events:none}
@@ -46,15 +72,64 @@
     .rerun-select-wrap select[multiple]{padding-right:12px!important}
     .rerun-select-wrap:has(select[multiple])::after{display:none}
     .rerun-scope-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:16px}
-    .rerun-check-tree{min-height:112px;max-height:240px;overflow:auto;border:1px solid var(--eco-line);border-radius:12px;background:var(--eco-paper);padding:10px}
-    .rerun-tree-group{border-bottom:1px solid var(--eco-line);padding:8px 0}
+    .rerun-pending-status{font-size:12px;color:var(--eco-muted);white-space:nowrap}
+    .rerun-pending-chip-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .rerun-pending-chip{max-width:100%;border:1px solid rgba(111,150,55,.28);border-radius:12px;background:rgba(255,255,255,.74);padding:10px 12px}
+    .rerun-pending-chip-name{font-size:14px;font-weight:800;color:var(--eco-green-900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rerun-pending-chip-meta{margin-top:3px;font-size:12px;color:var(--eco-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rerun-pending-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    .rerun-pending-tag{display:inline-flex;align-items:center;gap:6px;max-width:210px;padding:5px 10px;border:1px solid rgba(111,150,55,.28);border-radius:999px;background:var(--eco-paper);color:var(--eco-green-900);font-size:12px;font-weight:700}
+    .rerun-pending-tag span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rerun-pending-overflow{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:var(--eco-surface-container-low);color:var(--eco-muted);font-size:12px;font-weight:700}
+    .rerun-pending-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+    .rerun-pending-summary-item{border:1px solid var(--eco-line);border-radius:10px;background:var(--eco-paper);padding:9px 10px}
+    .rerun-pending-summary-label{font-size:12px;color:var(--eco-muted);font-weight:700;margin-bottom:2px}
+    .rerun-pending-summary-value{font-size:15px;color:var(--eco-green-900);font-weight:800}
+    .rerun-pending-batch{border:1px solid rgba(111,150,55,.22);border-radius:12px;background:rgba(255,255,255,.64);padding:12px}
+    .rerun-current-pending-empty{border:1px dashed rgba(111,150,55,.28);border-radius:12px;background:var(--eco-surface-container-low);padding:12px;color:var(--eco-muted)}
+    .rerun-pending-batch-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+    .rerun-pending-batch-pill{display:inline-flex;align-items:center;gap:4px;border:1px solid rgba(111,150,55,.24);border-radius:999px;background:var(--eco-sage-100);padding:3px 8px;color:var(--eco-green-900);font-weight:700}
+    .rerun-pending-table{border:1px solid var(--eco-line);border-radius:10px;overflow:hidden;background:var(--eco-paper)}
+    .rerun-pending-row{display:grid;grid-template-columns:minmax(160px,1.2fr) minmax(96px,.75fr) minmax(150px,1fr) minmax(128px,.85fr);gap:10px;align-items:center;padding:10px 12px;border-top:1px solid var(--eco-line)}
+    .rerun-pending-row:first-child{border-top:0}
+    .rerun-pending-head{font-size:12px;font-weight:800;color:var(--eco-muted);background:var(--eco-surface-container-low);padding-top:8px;padding-bottom:8px}
+    .rerun-pending-value{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:var(--eco-on-surface)}
+    .rerun-pending-value.primary{font-weight:800;color:var(--eco-green-900)}
+    .rerun-pending-simple-list{display:grid;gap:8px}
+    .rerun-pending-simple-item{border:1px solid var(--eco-line);border-radius:10px;background:var(--eco-paper);padding:9px 10px}
+    .rerun-pending-simple-name{font-size:14px;font-weight:800;color:var(--eco-green-900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rerun-pending-simple-meta{margin-top:3px;font-size:12px;color:var(--eco-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rerun-check-tree{min-height:112px;max-height:280px;overflow:auto;border:1px solid var(--eco-line);border-radius:12px;background:var(--eco-paper);padding:10px}
+    .rerun-tree-group{border-bottom:1px solid var(--eco-line);padding:10px 0 12px}
     .rerun-tree-group:last-child{border-bottom:0}
     .rerun-tree-parent,.rerun-tree-child,.rerun-tree-item{display:flex;align-items:center;gap:10px;line-height:1.45;border-radius:8px}
-    .rerun-tree-parent{font-weight:600;color:var(--eco-green-900);padding:8px}
+    .rerun-tree-parent{font-weight:700;color:var(--eco-green-900);padding:8px 10px;background:rgba(215,230,195,.45);border:1px solid rgba(111,150,55,.22)}
+    .rerun-tree-label{display:flex;align-items:center;gap:10px;min-width:0;flex:1;cursor:pointer}
+    .rerun-tree-label-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rerun-tree-toggle{width:24px;height:24px;flex:0 0 auto;border:1px solid rgba(111,150,55,.28);border-radius:8px;background:var(--eco-paper);color:var(--eco-green-900);display:inline-flex;align-items:center;justify-content:center;transition:.16s ease}
+    .rerun-tree-toggle:hover{border-color:var(--eco-green-400);background:var(--eco-sage-100)}
+    .rerun-tree-toggle .material-symbols-outlined{font-size:20px;transition:transform .16s ease}
+    .rerun-tree-toggle[aria-expanded="false"] .material-symbols-outlined{transform:rotate(-90deg)}
+    .rerun-tree-branch{position:relative;margin-left:18px;padding-left:12px}
+    .rerun-tree-branch::before{content:"";position:absolute;left:0;top:0;bottom:2px;border-left:1px dashed rgba(47,111,61,.28)}
+    .rerun-tree-source-node{position:relative;margin:6px 0 0;color:var(--eco-on-surface);padding:8px 10px;background:var(--eco-surface-container-low);border:1px solid var(--eco-line)}
+    .rerun-tree-source-node::before{content:"";position:absolute;left:-12px;top:50%;width:10px;border-top:1px dashed rgba(47,111,61,.3)}
     .rerun-tree-child{margin:6px 0 0 26px;color:var(--eco-on-surface);padding:8px}
+    .rerun-tree-grandchild{position:relative;margin-left:76px;margin-top:8px;padding:7px 10px 7px 14px;color:var(--eco-muted);background:rgba(255,253,245,.76);border:1px dashed rgba(111,150,55,.32);font-size:12px;line-height:1.35}
+    .rerun-tree-grandchild::before{content:"";position:absolute;left:-34px;top:50%;width:30px;border-top:1px dashed rgba(47,111,61,.32)}
+    .rerun-tree-grandchild .rerun-tree-label-text{font-size:12px;font-weight:500}
+    .rerun-tree-datasource-dot{width:7px;height:7px;flex:0 0 auto;border-radius:999px;background:var(--eco-green-300);box-shadow:0 0 0 3px rgba(111,150,55,.1)}
     .rerun-tree-item{margin:6px 0;color:var(--eco-on-surface);padding:10px;border:1px solid var(--eco-line);background:var(--eco-surface-container-low)}
     .rerun-tree-child:hover,.rerun-tree-item:hover{border-color:var(--eco-green-300);background:var(--eco-sage-100)}
+    .rerun-check-tree .eco-checkbox{appearance:none;width:18px;height:18px;flex:0 0 auto;border:1.5px solid var(--eco-green-500);border-radius:5px;background:var(--eco-paper);cursor:pointer;display:inline-grid;place-content:center;transition:.14s ease}
+    .rerun-check-tree .eco-checkbox::before{content:"";width:9px;height:9px;transform:scale(0);transition:.12s ease;clip-path:polygon(14% 44%,0 60%,40% 100%,100% 18%,84% 4%,38% 66%);background:#fff}
+    .rerun-check-tree .eco-checkbox:checked{background:var(--eco-green-700);border-color:var(--eco-green-700)}
+    .rerun-check-tree .eco-checkbox:checked::before{transform:scale(1)}
+    .rerun-check-tree .eco-checkbox:indeterminate{background:var(--eco-green-700);border-color:var(--eco-green-700)}
+    .rerun-check-tree .eco-checkbox:indeterminate::before{clip-path:none;width:10px;height:2px;border-radius:999px;transform:scale(1);background:#fff}
+    .rerun-check-tree .eco-checkbox:focus-visible{outline:2px solid rgba(47,111,61,.28);outline-offset:2px}
     .rerun-tree-parent .eco-checkbox,.rerun-tree-child .eco-checkbox,.rerun-tree-item .eco-checkbox{width:18px;height:18px;flex:0 0 auto}
+    .rerun-tree-parent .eco-checkbox{width:19px;height:19px}
     .rerun-scope-panel{display:none}
     .rerun-scope-panel.active{display:block}
     .rerun-stage{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start}
@@ -62,24 +137,41 @@
     .rerun-stage.done .rerun-stage-dot{background:var(--eco-green-700);border-color:var(--eco-green-700);color:#fff}
     .rerun-stage.current .rerun-stage-dot{background:var(--eco-sage-300);border-color:var(--eco-green-500);color:var(--eco-green-900)}
     @media (max-width: 1100px){.rerun-content{overflow:auto}.rerun-table-card{min-height:560px}}
-    @media (max-width: 900px){.rerun-content{padding:16px}.rerun-current-grid{grid-template-columns:1fr}}
+    @media (max-width: 900px){.rerun-content{padding:16px}}
   </style>
 </head>
 <body class="eco-page text-on-surface font-body-md overflow-hidden">
 <main class="eco-app-shell rerun-shell">
   <div class="rerun-content">
-    <section id="rerun-current-task" class="eco-card rerun-current shrink-0 p-5"></section>
+    <section id="rerun-pending-overview" class="eco-card rerun-pending-overview shrink-0 hidden">
+      <div class="rerun-overview-header">
+        <div>
+          <h2 class="eco-section-title">待重跑总览</h2>
+        </div>
+        <span id="rerun-overview-count" class="eco-tag eco-tag-info">0 个</span>
+      </div>
+      <div id="rerun-overview-stats" class="rerun-overview-stats"></div>
+      <div id="rerun-overview-batches" class="rerun-overview-table"></div>
+      <div class="eco-pagination rerun-overview-pagination rerun-compact-pagination">
+        <div id="rerun-overview-pagination-summary" class="eco-pagination-summary">共 0 组</div>
+        <div class="eco-pagination-controls">
+          <button id="rerun-overview-prev-page" class="eco-btn eco-btn-secondary eco-btn-square-sm" type="button"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+          <span id="rerun-overview-page-label" class="eco-pagination-summary">第 1 / 1 页</span>
+          <button id="rerun-overview-next-page" class="eco-btn eco-btn-secondary eco-btn-square-sm" type="button"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+        </div>
+      </div>
+    </section>
 
     <section class="eco-card rerun-table-card">
       <div class="px-5 pt-4 border-b eco-divider">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div>
-            <h2 id="rerun-view-title" class="eco-section-title">任务队列列表</h2>
+            <h2 id="rerun-view-title" class="eco-section-title">任务队列</h2>
           </div>
-          <button id="create-rerun-btn" class="eco-btn eco-btn-primary" type="button"><span class="material-symbols-outlined text-sm">add</span>新建重跑任务</button>
+          <button id="create-rerun-btn" class="eco-btn eco-btn-primary" type="button"><span class="material-symbols-outlined text-sm">add</span>新建任务</button>
         </div>
         <div id="rerun-task-filters" class="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div id="rerun-status-tabs" class="rerun-status-tabs"><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab active" data-status-tab="all" type="button">全部 0</button><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab" data-status-tab="running" type="button">执行中 0</button><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab" data-status-tab="queued" type="button">排队中 0</button><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab" data-status-tab="completed" type="button">已完成 0</button><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab" data-status-tab="failed" type="button">失败 0</button><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab" data-status-tab="cancelled" type="button">已取消 0</button></div>
+          <div id="rerun-status-tabs" class="rerun-status-tabs"><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab active" data-status-tab="current" type="button">当前任务 0</button><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab" data-status-tab="completed" type="button">已完成 0</button><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab" data-status-tab="failed" type="button">失败 0</button><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab" data-status-tab="cancelled" type="button">已取消 0</button></div>
           <span id="rerun-refresh-note" class="eco-muted-text">执行中任务每 5 秒刷新一次进度</span>
         </div>
       </div>
@@ -90,18 +182,18 @@
             <thead>
               <tr>
                 <th class="w-[15%] eco-table-head-text">任务编号</th>
-                <th class="w-[10%] eco-table-head-text">状态</th>
+                <th class="w-[13%] eco-table-head-text">状态</th>
                 <th class="w-[17%] eco-table-head-text">时间范围</th>
-                <th class="w-[16%] eco-table-head-text">核算标准</th>
-                <th class="w-[23%] eco-table-head-text">对象范围</th>
+                <th class="w-[18%] eco-table-head-text">核算标准</th>
+                <th class="w-[10%] eco-table-head-text">预计耗时</th>
                 <th class="w-[10%] eco-table-head-text">创建时间</th>
-                <th class="w-[9%] eco-table-head-text text-center">操作</th>
+                <th class="w-[17%] eco-table-head-text text-center">操作</th>
               </tr>
             </thead>
             <tbody id="rerun-task-body"></tbody>
           </table>
         </div>
-        <div class="eco-pagination">
+        <div class="eco-pagination rerun-compact-pagination">
           <div id="rerun-pagination-summary" class="eco-pagination-summary">共 0 条</div>
           <div class="eco-pagination-controls">
             <button id="rerun-prev-page" class="eco-btn eco-btn-secondary eco-btn-square-sm" type="button"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
@@ -117,7 +209,7 @@
 <div id="rerun-task-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
   <div class="eco-card w-[920px] max-w-[94vw] max-h-[90vh] flex flex-col overflow-hidden">
     <div class="shrink-0 p-6 border-b eco-divider flex items-center justify-between">
-      <h2 class="eco-section-title">新建重跑任务</h2>
+      <h2 class="eco-section-title">新建任务</h2>
       <button data-close-task-modal type="button" class="text-outline hover:text-on-surface"><span class="material-symbols-outlined">close</span></button>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto p-6 space-y-5">
@@ -143,6 +235,8 @@
 
       <section class="eco-form-card p-4">
         <h3 class="eco-form-heading mb-2">重算对象范围 <span class="text-error">*</span></h3>
+        <div id="rerun-pending-sources" class="rerun-pending-chip-list hidden"></div>
+        <span id="pending-source-select-status" class="rerun-pending-status hidden"></span>
         <p class="eco-helper-text mb-4">必填且单选：全企业 / 指定排放源。系统只记录影响提示，不推荐任务，任务需人工确认后创建。</p>
         <div class="rerun-scope-grid">
           <label class="eco-btn eco-btn-secondary eco-btn-sm justify-center"><input class="sr-only" name="scopeType" value="enterprise" type="radio" checked/>全企业</label>
@@ -150,9 +244,9 @@
         </div>
         <div id="scope-enterprise" class="rerun-scope-panel active eco-helper-text">重跑企业范围内所有已解析的结果对象。</div>
         <div id="scope-source" class="rerun-scope-panel">
-          <div class="eco-field mb-3"><label class="eco-form-label">搜索排放源 / 数据源</label><input id="rerun-source-search" class="eco-input rerun-form-input h-11" placeholder="输入分类、排放源或绑定数据源关键字" type="search"/></div>
-          <div class="eco-field"><label class="eco-form-label">排放源树</label><div id="rerun-source-tree" class="rerun-check-tree"></div></div>
-          <p class="eco-helper-text mt-2">按「分类 -> 排放源 -> 绑定数据源」展示，支持直接在树上多选。</p>
+          <div class="eco-field mb-3"><label class="eco-form-label">搜索排放源 / 数据源</label><input id="rerun-source-search" class="eco-input rerun-form-input h-11" placeholder="输入分类、排放源或数据源关键字" type="search"/></div>
+          <div class="eco-field"><label class="eco-form-label">按边界分类选择排放源</label><div id="rerun-source-tree" class="rerun-check-tree"></div></div>
+          <p class="eco-helper-text mt-2">按「分类 -> 排放源 -> 数据源」展示；本期仅选择分类或排放源，数据源只展示不可勾选。</p>
         </div>
       </section>
 
@@ -171,9 +265,9 @@
 </div>
 
 <div id="rerun-confirm-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
-  <div class="eco-card w-[520px] max-w-[92vw] overflow-hidden">
-    <div class="px-6 py-4 border-b eco-divider flex items-center justify-between"><h2 class="eco-section-title">确认提交重跑任务</h2><button data-close-confirm type="button" class="text-outline hover:text-on-surface"><span class="material-symbols-outlined">close</span></button></div>
-    <div id="rerun-confirm-body" class="p-6 space-y-3 eco-table-cell-text"></div>
+  <div class="eco-card rerun-confirm-card">
+    <div class="px-6 py-4 border-b eco-divider flex items-center justify-between"><h2 class="eco-section-title">确认提交任务</h2><button data-close-confirm type="button" class="text-outline hover:text-on-surface"><span class="material-symbols-outlined">close</span></button></div>
+    <div id="rerun-confirm-body" class="rerun-confirm-body eco-table-cell-text"></div>
     <div class="px-6 py-4 border-t eco-divider flex justify-end gap-3"><button data-close-confirm type="button" class="eco-btn eco-btn-secondary">返回修改</button><button id="confirm-rerun-task" type="button" class="eco-btn eco-btn-primary">确认提交</button></div>
   </div>
 </div>
@@ -198,25 +292,34 @@
 const MAX_QUEUE_SIZE = 5;
 const MAX_SPAN_DAYS = 31;
 const PAGE_SIZE = 6;
+const OVERVIEW_PAGE_SIZE = 2;
 const Mock = window.CarbonAccountingMock || {};
-const storageKey = "carbon-report-rerun-tasks-v1";
+const storageKey = "carbon-report-rerun-tasks-v2";
 const $ = (id) => document.getElementById(id);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const statusText = { queued: "排队中", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消" };
 const statusClass = { queued: "eco-tag-warning", running: "eco-tag-info", completed: "eco-tag-success", failed: "eco-tag-danger", cancelled: "eco-tag-muted" };
 const stages = ["校验闭环与标准", "计算点位小时", "汇总日表", "汇总空间与月表", "写入报表结果"];
-let activeStatus = "all";
+const activeTaskStatuses = new Set(["queued", "running", "completed"]);
+let activeStatus = "current";
 let pendingCancelTaskId = null;
 let currentPage = 1;
+let overviewPage = 1;
 let pendingDraft = null;
+let currentCreateBatchKey = "";
+let cancelledPendingBatchKeys = new Set();
+const pendingRerunSourceSeeds = [
+  { sourceId: "es-natural-gas-boiler-1", triggerAction: "核算模型参数调整", affectedAt: "2026-08-12 09:18", operator: "陈工", start: "2026-08-01", end: "2026-08-07", standard: "ISO 14064-1:2018" },
+  { sourceId: "es-refrigerant-r410a", triggerAction: "因子值适用期调整", affectedAt: "2026-08-12 10:26", operator: "王蕾", start: "2026-08-01", end: "2026-08-07", standard: "ISO 14064-1:2018" },
+  { sourceId: "es-emergency-diesel-generator", triggerAction: "活动数据补录", affectedAt: "2026-08-13 15:42", operator: "李工", start: "2026-07-20", end: "2026-07-22", standard: "GHG Protocol Corporate Standard" }
+];
 const defaultTasks = [
-  { id: "RR-20260812-001", status: "running", source: "手动创建", dateRange: "2026-08-01 至 2026-08-07", standard: "ISO 14064-1:2018", scope: "空间：1号车间、锅炉房", progress: 62, stageIndex: 2, creator: "王蕾", createdAt: "2026-08-12 09:10", startedAt: "2026-08-12 09:12", endedAt: "", remark: "对账修正", processed: "186 / 300", result: "", error: "" },
-  { id: "RR-20260812-002", status: "queued", source: "手动创建", dateRange: "2026-08-08 至 2026-08-10", standard: "ISO 14064-1:2018", scope: "数据源：锅炉房月度 Excel 台账", progress: 0, stageIndex: 0, creator: "陈工", createdAt: "2026-08-12 09:18", startedAt: "", endedAt: "", remark: "数据补录", processed: "0 / 72", result: "", error: "" },
+  { id: "RR-20260812-001", status: "running", source: "手动创建", dateRange: "2026-08-01 至 2026-08-07", standard: "ISO 14064-1:2018", scope: "排放源：1号天然气锅炉、应急柴油发电机", scopeType: "source", scopeValues: ["排放源：1号天然气锅炉", "排放源：应急柴油发电机"], progress: 62, stageIndex: 2, creator: "王蕾", createdAt: "2026-08-12 09:10", startedAt: "2026-08-12 09:12", endedAt: "", remark: "对账修正", processed: "186 / 300", result: "", error: "" },
+  { id: "RR-20260812-002", status: "queued", source: "手动创建", dateRange: "2026-08-08 至 2026-08-10", standard: "ISO 14064-1:2018", scope: "排放源：1号天然气锅炉", scopeType: "source", scopeValues: ["排放源：1号天然气锅炉"], progress: 0, stageIndex: 0, creator: "陈工", createdAt: "2026-08-12 09:18", startedAt: "", endedAt: "", remark: "数据补录", processed: "0 / 72", result: "", error: "" },
   { id: "RR-20260811-006", status: "completed", source: "手动创建", dateRange: "2026-07-01 至 2026-07-31", standard: "ISO 14064-1:2018", scope: "全企业", progress: 100, stageIndex: 4, creator: "管理员", createdAt: "2026-08-11 16:22", startedAt: "2026-08-11 16:25", endedAt: "2026-08-11 16:58", remark: "月度复核", processed: "744 / 744", result: "写入成功 12,480 条，未匹配跳过 3 条", error: "" },
   { id: "RR-20260810-004", status: "failed", source: "手动创建", dateRange: "2026-07-20 至 2026-07-22", standard: "GHG Protocol Corporate Standard", scope: "排放源：制冷剂补充", progress: 38, stageIndex: 1, creator: "王蕾", createdAt: "2026-08-10 14:02", startedAt: "2026-08-10 14:04", endedAt: "2026-08-10 14:09", remark: "因子更新", processed: "18 / 48", result: "", error: "制冷剂 R410A 在所选标准下缺少有效因子" }
 ];
 let tasks = loadTasks();
-let lastCreatedTaskId = "";
 
 function loadTasks() {
   try {
@@ -249,7 +352,9 @@ function renderCheckboxTree(targetId, groups, emptyText) {
   }).join("");
 }
 function selectedCheckedValues(targetId) {
-  return Array.from($(targetId).querySelectorAll("input[data-tree-child]:checked,input[data-tree-leaf]:checked,input[data-tree-datasource]:checked")).map((item) => item.value);
+  return Array.from($(targetId).querySelectorAll("input[data-tree-parent]:checked,input[data-tree-child]:checked,input[data-tree-leaf]:checked"))
+    .filter((item) => item.value)
+    .map((item) => item.value);
 }
 function treeSearchText(id) {
   return String($(id)?.value || "").trim().toLowerCase();
@@ -274,28 +379,21 @@ function renderEmissionSourceDataTree(targetId, groups, emptyText) {
   }
   target.innerHTML = groups.map((group, groupIndex) => {
     const groupKey = `${targetId}-category-${groupIndex}`;
-    return `<div class="rerun-tree-group"><label class="rerun-tree-parent"><input class="eco-checkbox" type="checkbox" data-tree-parent="${groupKey}"/>${esc(group.label)}<span class="eco-muted-text">(${group.children.length})</span></label>${group.children.map((source, sourceIndex) => {
+    return `<div class="rerun-tree-group"><div class="rerun-tree-parent"><button class="rerun-tree-toggle" type="button" data-tree-toggle="${groupKey}" aria-expanded="true" aria-label="展开或折叠${esc(group.label)}"><span class="material-symbols-outlined">expand_more</span></button><label class="rerun-tree-label"><input class="eco-checkbox" type="checkbox" data-tree-parent="${groupKey}" value="${esc(group.value || group.label)}"/><span class="rerun-tree-label-text">${esc(group.label)}</span><span class="eco-muted-text">(${group.children.length})</span></label></div><div class="rerun-tree-branch" data-tree-branch="${groupKey}">${group.children.map((source, sourceIndex) => {
       const sourceKey = `${groupKey}-source-${sourceIndex}`;
       const dataSources = source.dataSources || [];
-      return `<div><label class="rerun-tree-child"><input class="eco-checkbox" type="checkbox" data-tree-child="${groupKey}" data-tree-source="${sourceKey}" value="${esc(source.value)}"/>${esc(source.label)}<span class="eco-muted-text">(${dataSources.length})</span></label>${dataSources.map((item) => `<label class="rerun-tree-child rerun-tree-grandchild"><input class="eco-checkbox" type="checkbox" data-tree-child="${sourceKey}" data-tree-datasource="true" value="${esc(item.value)}"/>${esc(item.label)}</label>`).join("")}</div>`;
-    }).join("")}</div>`;
+      return `<div><div class="rerun-tree-child rerun-tree-source-node"><button class="rerun-tree-toggle" type="button" data-tree-toggle="${sourceKey}" aria-expanded="true" aria-label="展开或折叠${esc(source.label)}"><span class="material-symbols-outlined">expand_more</span></button><label class="rerun-tree-label"><input class="eco-checkbox" type="checkbox" data-tree-child="${groupKey}" data-tree-source="${sourceKey}" value="${esc(source.value)}"/><span class="rerun-tree-label-text">${esc(source.label)}</span><span class="eco-muted-text">(${dataSources.length})</span></label></div><div data-tree-branch="${sourceKey}">${dataSources.map((item) => `<div class="rerun-tree-child rerun-tree-grandchild" aria-disabled="true"><span class="rerun-tree-datasource-dot"></span><span class="rerun-tree-label-text">${esc(item.label)}</span></div>`).join("")}</div></div>`;
+    }).join("")}</div></div>`;
   }).join("");
 }
 function dataSourceRows() {
   return (Mock.DataSources || []).filter((item) => item && item.status !== "已删除");
 }
-function categoryDataSources(categoryLabel) {
-  const rows = Mock.getEmissionSources?.() || Mock.EmissionSources || [];
-  const ids = new Set();
-  rows.filter((item) => {
-    const label = item.belongingCategoryLabel || item.categoryLabel || item.boundaryCategory || item.belongingCategory || "未分类";
-    return item && item.status !== "已删除" && item.status !== "已归档" && label === categoryLabel;
-  }).forEach((item) => {
-    (item.datasourceIds || []).forEach((id) => ids.add(String(id)));
-  });
+function sourceDataSources(source) {
+  const ids = new Set((source?.datasourceIds || []).map((id) => String(id)));
   return dataSourceRows()
-    .filter((source) => ids.has(String(source.id)))
-    .map((source) => ({ value: `数据源：${source.name || source.id || ""}`, label: source.name || source.id || "" }));
+    .filter((item) => ids.has(String(item.id)))
+    .map((item) => ({ value: `数据源：${item.name || item.id || ""}`, label: item.name || item.id || "", searchText: `${item.name || ""} ${item.type || ""} ${item.sourceType || ""} ${item.dataType || ""}` }));
 }
 function currentEnabledStandard() {
   const rows = Mock.getStandardFiles?.() || Mock.StandardFiles || [];
@@ -317,34 +415,210 @@ function renderStandardOptions() {
   $("rerun-standard-select").innerHTML = optionHtml(options.length ? options : [{ value: "", label: "未找到可用标准" }]);
   $("rerun-standard-select").value = enabledName || options[0]?.value || "";
 }
-function emissionSourceOptions() {
+function selectStandardOption(standard) {
+  const select = $("rerun-standard-select");
+  const option = Array.from(select.options).find((item) => standardMatches(item.value, standard));
+  if (option) select.value = option.value;
+}
+function boundaryCategoryOptionsForTree() {
+  const boundaryTree = Mock.getBoundaryTree?.();
+  if (Array.isArray(boundaryTree) && boundaryTree.length) {
+    return boundaryTree.flatMap((scopeNode) => (scopeNode.categories || []).map((category) => ({
+      value: `分类：${category.categoryLabel || category.label || category.category || ""}`,
+      label: category.categoryLabel || category.label || category.category || "",
+      category: category.category || category.categoryCode || "",
+      scope: category.scope || scopeNode.scope || "",
+      scopeLabel: scopeNode.scopeLabel || "",
+      sources: category.sources || []
+    }))).filter((item) => item.label);
+  }
+  return (Mock.BoundaryCategories || [])
+    .filter((item) => item && item.included !== false && item.status !== "停用")
+    .map((item) => ({
+      value: `分类：${item.categoryLabel || item.label || item.category || ""}`,
+      label: item.categoryLabel || item.label || item.category || "",
+      category: item.category || item.categoryCode || "",
+      scope: item.scope || "",
+      scopeLabel: item.scopeLabel || "",
+      sources: []
+    }))
+    .filter((item) => item.label);
+}
+function sourceBelongsToBoundary(source, category) {
+  if (!source || !category) return false;
+  const sourceCategory = source.belongingCategoryCode || source.belongingCategory || source.categoryCode || source.category || "";
+  const mappedCategory = Mock.toAccountingCategoryCode?.(sourceCategory) || sourceCategory;
+  const sameScope = !category.scope || !source.scope || source.scope === category.scope;
+  const sameCategory = mappedCategory === category.category || sourceCategory === category.category || source.belongingCategoryLabel === category.label || source.categoryLabel === category.label;
+  return sameScope && sameCategory;
+}
+function emissionSourcesForBoundaryCategory(category) {
+  const explicitSources = Array.isArray(category.sources) && category.sources.length ? category.sources : null;
+  const rows = explicitSources || (Mock.getEmissionSources?.() || Mock.EmissionSources || []).filter((source) => sourceBelongsToBoundary(source, category));
+  return rows.filter((item) => item && item.status !== "已删除" && item.status !== "已归档");
+}
+function emissionSourceOptions(category) {
+  return emissionSourcesForBoundaryCategory(category).map((item) => {
+    const dataSources = sourceDataSources(item);
+    return {
+      value: sourceValue(item),
+      label: item.name || item.id || "",
+      categoryLabel: category.label,
+      dataSources,
+      searchText: `${category.label || ""} ${item.name || ""} ${item.org || ""} ${item.sourceType || ""} ${dataSources.map((source) => source.label).join(" ")}`
+    };
+  });
+}
+function sourceValue(source) {
+  return `排放源：${source?.name || source?.id || ""}`;
+}
+function sourceBoundaryLabel(source) {
+  const category = boundaryCategoryOptionsForTree().find((item) => sourceBelongsToBoundary(source, item));
+  return category?.label || source?.belongingCategoryLabel || source?.categoryLabel || "未分类";
+}
+function normalizeStandardText(text) {
+  return String(text || "").toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "");
+}
+function standardTokens(text) {
+  return String(text || "").toLowerCase().match(/[a-z0-9\u4e00-\u9fa5]+/g) || [];
+}
+function standardMatches(left, right) {
+  const normalizedLeft = normalizeStandardText(left);
+  const normalizedRight = normalizeStandardText(right);
+  if (!normalizedLeft || !normalizedRight) return false;
+  if (normalizedLeft === normalizedRight || normalizedLeft.includes(normalizedRight) || normalizedRight.includes(normalizedLeft)) return true;
+  const leftTokens = standardTokens(left);
+  const rightTokens = standardTokens(right);
+  const shortTokens = leftTokens.length <= rightTokens.length ? leftTokens : rightTokens;
+  const longTokens = leftTokens.length <= rightTokens.length ? rightTokens : leftTokens;
+  return shortTokens.length >= 3 && shortTokens.every((token) => longTokens.includes(token));
+}
+function taskMatchesPendingContext(task, record) {
+  return standardMatches(task?.standard, record?.standard) && task?.dateRange === `${record.start} 至 ${record.end}`;
+}
+function taskCoversPendingSource(task, record) {
+  if (!task || !record || !activeTaskStatuses.has(task.status)) return false;
+  if (!taskMatchesPendingContext(task, record)) return false;
+  const values = Array.isArray(task.scopeValues) ? task.scopeValues : [];
+  return task.scopeType === "enterprise" || values.includes(record.value) || String(task.scope || "").includes(record.sourceName);
+}
+function pendingRerunSourceRecords() {
   const rows = Mock.getEmissionSources?.() || Mock.EmissionSources || [];
-  const keyword = treeSearchText("rerun-source-search");
-  const options = rows.filter((item) => item && item.status !== "已删除" && item.status !== "已归档")
-    .map((item) => {
-      const categoryLabel = item.belongingCategoryLabel || item.categoryLabel || item.boundaryCategory || item.belongingCategory || "未分类";
-      const dataSources = categoryDataSources(categoryLabel);
-      return { value: item.name || item.id || "", label: item.name || item.id || "", categoryLabel, dataSources, searchText: `${categoryLabel} ${item.org || ""} ${item.sourceType || ""} ${dataSources.map((source) => source.label).join(" ")}` };
-    })
-    .filter((item) => matchesTreeSearch(item, keyword));
-  return options;
+  return pendingRerunSourceSeeds.map((seed) => {
+    const source = rows.find((item) => item.id === seed.sourceId);
+    if (!source || source.status === "已删除" || source.status === "已归档") return null;
+    return {
+      sourceId: source.id,
+      sourceName: source.name || source.id,
+      value: sourceValue(source),
+      boundary: sourceBoundaryLabel(source),
+      triggerAction: seed.triggerAction,
+      affectedAt: seed.affectedAt,
+      start: seed.start,
+      end: seed.end,
+      standard: seed.standard,
+      operator: seed.operator
+    };
+  }).filter(Boolean).filter((record) => !cancelledPendingBatchKeys.has(pendingBatchKey(record)) && !tasks.some((task) => taskCoversPendingSource(task, record)));
+}
+function pendingBatchKey(record) {
+  return `${record.start}|${record.end}|${record.standard}`;
+}
+function pendingRerunBatches(records = pendingRerunSourceRecords()) {
+  const grouped = new Map();
+  records.forEach((record) => {
+    const key = pendingBatchKey(record);
+    if (!grouped.has(key)) grouped.set(key, { key, start: record.start, end: record.end, standard: record.standard, records: [] });
+    grouped.get(key).records.push(record);
+  });
+  return Array.from(grouped.values());
+}
+function pendingBatchByKey(key) {
+  return pendingRerunBatches().find((batch) => batch.key === key) || null;
+}
+function currentConditionPendingRecords(records = pendingRerunSourceRecords()) {
+  const start = $("rerun-date-start")?.value || "";
+  const end = $("rerun-date-end")?.value || "";
+  const standard = $("rerun-standard-select")?.value || "";
+  if (!start || !end || !standard) return [];
+  return records.filter((record) => standardMatches(standard, record.standard) && start <= record.start && end >= record.end);
+}
+function pendingSourceTags(records, limit = 8) {
+  const visible = records.slice(0, limit);
+  const rest = Math.max(0, records.length - visible.length);
+  return `<div class="rerun-pending-tags">${visible.map((item) => `<span class="rerun-pending-tag" title="${esc(item.sourceName)} · ${esc(item.start)} 至 ${esc(item.end)} · ${esc(item.standard)}"><span>${esc(item.sourceName)}</span></span>`).join("")}${rest ? `<span class="rerun-pending-overflow">+${rest} 个</span>` : ""}</div>`;
+}
+function renderPendingOverview() {
+  const records = pendingRerunSourceRecords();
+  $("rerun-pending-overview").classList.toggle("hidden", !records.length);
+  $("rerun-overview-count").textContent = `${records.length} 个`;
+  if (!records.length) {
+    $("rerun-overview-stats").innerHTML = "";
+    $("rerun-overview-batches").innerHTML = "";
+    $("rerun-overview-pagination-summary").textContent = "共 0 组";
+    $("rerun-overview-page-label").textContent = "第 1 / 1 页";
+    $("rerun-overview-prev-page").disabled = true;
+    $("rerun-overview-next-page").disabled = true;
+    return;
+  }
+  const batches = pendingRerunBatches(records);
+  const standards = new Set(records.map((item) => item.standard));
+  $("rerun-overview-stats").innerHTML = `<div class="rerun-overview-stat"><div class="rerun-overview-stat-label">剩余待重跑</div><div class="rerun-overview-stat-value">${records.length} 个</div></div><div class="rerun-overview-stat"><div class="rerun-overview-stat-label">涉及批次</div><div class="rerun-overview-stat-value">${batches.length} 组</div></div><div class="rerun-overview-stat"><div class="rerun-overview-stat-label">涉及标准</div><div class="rerun-overview-stat-value">${standards.size} 个</div></div>`;
+  const totalPages = Math.max(1, Math.ceil(batches.length / OVERVIEW_PAGE_SIZE));
+  overviewPage = Math.min(Math.max(overviewPage, 1), totalPages);
+  const pageBatches = batches.slice((overviewPage - 1) * OVERVIEW_PAGE_SIZE, overviewPage * OVERVIEW_PAGE_SIZE);
+  $("rerun-overview-batches").innerHTML = `<div class="rerun-overview-row rerun-overview-head"><div>影响时间</div><div>核算标准</div><div>排放源数量</div><div class="rerun-overview-action">操作</div></div>${pageBatches.map((batch) => `<div class="rerun-overview-row"><div class="rerun-overview-value" title="${esc(batch.start)} 至 ${esc(batch.end)}">${esc(batch.start)} 至 ${esc(batch.end)}</div><div class="rerun-overview-value" title="${esc(batch.standard)}">${esc(batch.standard)}</div><div class="rerun-overview-value">${batch.records.length} 个</div><div class="rerun-overview-action flex justify-center gap-2"><button class="eco-btn eco-btn-secondary eco-btn-sm" type="button" data-pending-batch="${esc(batch.key)}">按此批次新建</button><button class="eco-btn eco-btn-secondary eco-btn-sm rerun-action-cancel" type="button" data-cancel-pending-batch="${esc(batch.key)}">取消</button></div></div>`).join("")}`;
+  $("rerun-overview-pagination-summary").textContent = `共 ${batches.length} 组`;
+  $("rerun-overview-page-label").textContent = `第 ${overviewPage} / ${totalPages} 页`;
+  $("rerun-overview-prev-page").disabled = overviewPage <= 1;
+  $("rerun-overview-next-page").disabled = overviewPage >= totalPages;
+}
+function renderCurrentConditionBatch(records) {
+  return records.map((item) => `<div class="rerun-pending-chip"><div class="rerun-pending-chip-name" title="${esc(item.sourceName)}">${esc(item.sourceName)}</div><div class="rerun-pending-chip-meta" title="${esc(item.boundary)} · ${esc(item.triggerAction)} · ${esc(item.affectedAt)}">${esc(item.boundary)} · ${esc(item.triggerAction)} · ${esc(item.affectedAt)}</div></div>`).join("");
 }
 function emissionSourceTreeGroups() {
-  const grouped = new Map();
-  emissionSourceOptions().forEach((item) => {
-    const label = item.categoryLabel || "未分类";
-    if (!grouped.has(label)) grouped.set(label, []);
-    grouped.get(label).push(item);
-  });
-  return Array.from(grouped.entries()).map(([label, children]) => ({ label, children }));
-}
-function sourceCategoryOptions() {
-  const rows = Mock.getEmissionSources?.() || Mock.EmissionSources || [];
-  const labels = Array.from(new Set(rows.map((item) => item.belongingCategoryLabel || item.categoryLabel || item.boundaryCategory || item.belongingCategory).filter(Boolean)));
-  return [{ value: "all", label: "全部" }, ...labels.map((label) => ({ value: label, label }))];
+  const keyword = treeSearchText("rerun-source-search");
+  return boundaryCategoryOptionsForTree().map((category) => {
+    const children = emissionSourceOptions(category).filter((source) => {
+      if (!keyword) return true;
+      return matchesTreeSearch(source, keyword) || source.dataSources.some((dataSource) => matchesTreeSearch(dataSource, keyword)) || String(category.label || "").toLowerCase().includes(keyword);
+    });
+    return { value: category.value, label: category.label, children };
+  }).filter((group) => group.children.length);
 }
 function renderEmissionSourceOptions() {
   renderEmissionSourceDataTree("rerun-source-tree", emissionSourceTreeGroups(), "当前筛选下暂无排放源");
+  updatePendingSourceSelectState();
+}
+function renderPendingRerunSources() {
+  const records = pendingRerunSourceRecords();
+  const target = $("rerun-pending-sources");
+  if (!currentCreateBatchKey || !records.length) {
+    target.classList.add("hidden");
+    $("rerun-pending-sources").innerHTML = "";
+    $("pending-source-select-status").textContent = "";
+    return;
+  }
+  const currentRecords = currentConditionPendingRecords(records);
+  const currentHtml = currentRecords.length
+    ? renderCurrentConditionBatch(currentRecords)
+    : `<div class="rerun-current-pending-empty">当前时间范围和核算标准下暂无待重跑排放源；剩余待处理内容可在页面顶部总览查看。</div>`;
+  target.classList.toggle("hidden", !currentRecords.length);
+  $("rerun-pending-sources").innerHTML = currentHtml;
+  updatePendingSourceSelectState();
+}
+function pendingSourceInputs(records = pendingRerunSourceRecords()) {
+  const values = new Set(records.map((item) => item.value));
+  return Array.from($("rerun-source-tree").querySelectorAll("input[data-tree-child]")).filter((input) => values.has(input.value));
+}
+function allPendingSourcesSelected(records = pendingRerunSourceRecords()) {
+  const inputs = pendingSourceInputs(records);
+  return records.length > 0 && inputs.length === records.length && inputs.every((input) => input.checked);
+}
+function updatePendingSourceSelectState(message = "") {
+  const status = $("pending-source-select-status");
+  if (!status) return;
+  status.textContent = message || "";
 }
 function normalizeDataSourceKind(item) {
   const raw = String(item.type || item.sourceType || item.dataType || item.groupKey || "").toLowerCase();
@@ -357,6 +631,8 @@ function normalizeDataSourceKind(item) {
 function renderSharedOptions() {
   renderStandardOptions();
   renderEmissionSourceOptions();
+  renderPendingRerunSources();
+  renderPendingOverview();
 }
 function reportTypesFromForm() { return ["终端报表", "空间报表", "设备报表", "碳核算结果"]; }
 function selectedScopeType() { return document.querySelector('input[name="scopeType"]:checked')?.value || "enterprise"; }
@@ -380,7 +656,7 @@ function scopeSummary(scopeType, values) {
 function scopeGuidanceText(scopeType) {
   const map = {
     enterprise: "整企业太大时必须能收窄。单选：全企业 / 指定排放源。",
-    source: "排放源按分类树展示，第三层为绑定数据源；改因子、模型、排放源或绑定数据源后可在树上直接多选。"
+    source: "排放源按分类树展示，第三层为数据源；本期只勾选分类或排放源，选中排放源即重算其下全部数据源。"
   };
   return map[scopeType] || "";
 }
@@ -406,7 +682,18 @@ function applyDateShortcut(shortcut) {
   }
   $("rerun-date-start").value = dateValue(start);
   $("rerun-date-end").value = dateValue(end);
-  updateEstimate();
+  refreshPendingAndEstimate();
+}
+function selectedPendingRecords(values) {
+  const selected = new Set(values);
+  return pendingRerunSourceRecords().filter((record) => selected.has(record.value));
+}
+function validatePendingBatchSelection(start, end, standard, values) {
+  const records = selectedPendingRecords(values);
+  if (!records.length) return { ok: true };
+  const invalid = records.filter((record) => !standardMatches(standard, record.standard) || start > record.start || end < record.end);
+  if (invalid.length) return { ok: false, message: "所选待重跑排放源未被当前时间范围和核算标准完整覆盖，请调整时间/标准或拆分创建。" };
+  return { ok: true };
 }
 function validateDraft() {
   const start = $("rerun-date-start").value;
@@ -420,9 +707,17 @@ function validateDraft() {
   if (end > today) return { ok: false, message: "不可选择未来日期" };
   if (daySpan(start, end) > MAX_SPAN_DAYS) return { ok: false, message: `单次重跑时间跨度不能超过 ${MAX_SPAN_DAYS} 天，请缩小范围或拆分任务` };
   if (!standard) return { ok: false, message: "请先配置并启用核算标准" };
-  if (scopeType !== "enterprise" && !values.length) return { ok: false, message: "请至少选择一个排放源或绑定数据源" };
+  if (scopeType !== "enterprise" && !values.length) return { ok: false, message: "请至少选择一个分类或排放源" };
+  if (scopeType === "source") {
+    const batchValidation = validatePendingBatchSelection(start, end, standard, values);
+    if (!batchValidation.ok) return batchValidation;
+  }
   if (queuedCount() >= MAX_QUEUE_SIZE) return { ok: false, message: "排队任务已达上限，请取消部分排队后再建" };
   return { ok: true, draft: { start, end, standard, scopeType, values, resultObjects: resolveResultObjectsFromScope(scopeType, values), reportTypes: reportTypesFromForm(), remark: $("rerun-remark").value.trim() } };
+}
+function nonPendingSelectedSourceValues(values) {
+  const pendingValues = new Set(pendingRerunSourceRecords().map((item) => item.value));
+  return values.filter((value) => String(value || "").startsWith("排放源：") && !pendingValues.has(value));
 }
 function updateEstimate() {
   const start = $("rerun-date-start").value;
@@ -433,9 +728,24 @@ function updateEstimate() {
   const resultObjects = resolveResultObjectsFromScope(scopeType, values);
   $("rerun-estimate").textContent = days ? `${scopeGuidanceText(scopeType)} 预计处理 ${days} 天，解析 ${resultObjects.length} 个结果对象。` : scopeGuidanceText(scopeType) || "请选择范围后查看预估影响。";
 }
+function refreshPendingAndEstimate() {
+  renderPendingRerunSources();
+  renderPendingOverview();
+  updateEstimate();
+}
 function showError(message) { $("rerun-form-error").textContent = message; $("rerun-form-error").classList.remove("hidden"); }
 function hideError() { $("rerun-form-error").classList.add("hidden"); $("rerun-form-error").textContent = ""; }
 function setModal(id, show) { $(id).classList.toggle("hidden", !show); $(id).classList.toggle("flex", show); }
+function handleTreeToggle(event) {
+  const button = event.target.closest("[data-tree-toggle]");
+  if (!button) return;
+  const tree = button.closest(".rerun-check-tree");
+  const branch = tree?.querySelector(`[data-tree-branch="${button.dataset.treeToggle}"]`);
+  if (!branch) return;
+  const expanded = button.getAttribute("aria-expanded") !== "false";
+  button.setAttribute("aria-expanded", String(!expanded));
+  branch.classList.toggle("hidden", expanded);
+}
 function handleTreeChange(event) {
   const input = event.target.closest("input[type='checkbox']");
   if (!input) return;
@@ -444,25 +754,37 @@ function handleTreeChange(event) {
   if (input.dataset.treeParent) {
     tree.querySelectorAll(`input[data-tree-child="${input.dataset.treeParent}"]`).forEach((child) => {
       child.checked = input.checked;
+      child.indeterminate = false;
     });
-  }
-  if (input.dataset.treeSource) {
-    tree.querySelectorAll(`input[data-tree-child="${input.dataset.treeSource}"]`).forEach((child) => {
-      child.checked = input.checked;
-    });
+    input.indeterminate = false;
   }
   const groupKey = input.dataset.treeParent || input.dataset.treeChild;
   syncTreeParentState(tree.id, groupKey);
-  if (input.dataset.treeChild) {
-    const parentSource = tree.querySelector(`input[data-tree-source="${input.dataset.treeChild}"]`);
-    if (parentSource) {
-      const children = Array.from(tree.querySelectorAll(`input[data-tree-child="${input.dataset.treeChild}"]`));
-      const checked = children.filter((item) => item.checked).length;
-      parentSource.checked = checked === children.length;
-      parentSource.indeterminate = checked > 0 && checked < children.length;
-      syncTreeParentState(tree.id, parentSource.dataset.treeChild);
-    }
+  updatePendingSourceSelectState();
+  updateEstimate();
+}
+function selectPendingRerunSources() {
+  const records = currentConditionPendingRecords();
+  if (!records.length) return;
+  const sourceRadio = document.querySelector('input[name="scopeType"][value="source"]');
+  if (sourceRadio) sourceRadio.checked = true;
+  $("rerun-source-search").value = "";
+  renderScopePanels();
+  renderEmissionSourceOptions();
+  if (allPendingSourcesSelected(records)) {
+    updatePendingSourceSelectState("已带入该批次待重跑排放源");
+    updateEstimate();
+    return;
   }
+  const values = new Set(records.map((item) => item.value));
+  $("rerun-source-tree").querySelectorAll("input[data-tree-child]").forEach((input) => {
+    input.checked = values.has(input.value);
+    input.indeterminate = false;
+  });
+  $("rerun-source-tree").querySelectorAll("input[data-tree-parent]").forEach((input) => {
+    syncTreeParentState("rerun-source-tree", input.dataset.treeParent);
+  });
+  updatePendingSourceSelectState(`已带入该批次 ${records.length} 个待重跑排放源`);
   updateEstimate();
 }
 function orderedTasks() {
@@ -470,13 +792,19 @@ function orderedTasks() {
   return tasks.slice().sort((a, b) => {
     const statusDiff = (rank[a.status] ?? 9) - (rank[b.status] ?? 9);
     if (statusDiff) return statusDiff;
-    if (a.status === "queued" && b.status === "queued") return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
+    if (a.status === "queued" && b.status === "queued") {
+      const pinDiff = Number(Boolean(b.pinnedAt)) - Number(Boolean(a.pinnedAt));
+      if (pinDiff) return pinDiff;
+      if (a.pinnedAt || b.pinnedAt) return String(b.pinnedAt || "").localeCompare(String(a.pinnedAt || ""));
+      return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
+    }
     return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
   });
 }
 function filteredTasks() {
   const rows = orderedTasks();
-  return activeStatus === "all" ? rows : rows.filter((task) => task.status === activeStatus);
+  if (activeStatus === "current") return rows.filter((task) => task.status === "running" || task.status === "queued");
+  return rows.filter((task) => task.status === activeStatus);
 }
 function runningTask() {
   return tasks.find((task) => task.status === "running") || null;
@@ -486,41 +814,48 @@ function queuedCount() {
 }
 function renderStatusTabs() {
   const tabs = [
-    ["all", "全部"],
-    ["running", "执行中"],
-    ["queued", "排队中"],
+    ["current", "当前任务"],
     ["completed", "已完成"],
     ["failed", "失败"],
     ["cancelled", "已取消"]
   ];
   $("rerun-status-tabs").innerHTML = tabs.map(([status, label]) => {
-    const count = status === "all" ? tasks.length : tasks.filter((task) => task.status === status).length;
+    const count = status === "current" ? tasks.filter((task) => task.status === "running" || task.status === "queued").length : tasks.filter((task) => task.status === status).length;
     return `<button class="eco-btn eco-btn-secondary eco-btn-sm rerun-status-tab ${activeStatus === status ? "active" : ""}" data-status-tab="${status}" type="button">${label} ${count}</button>`;
   }).join("");
 }
 function renderCurrentTask() {
-  const task = runningTask();
-  $("rerun-current-task").classList.toggle("hidden", !task);
-  $("rerun-current-task").innerHTML = task ? `<div class="rerun-current-grid"><div><div class="eco-stat-label">当前执行</div><div class="eco-section-title mt-1">${esc(task.id)} · ${esc(task.scope)}</div><div class="eco-muted-text mt-1">${esc(task.dateRange)} · ${esc(task.standard)}</div></div><div><div class="flex items-center justify-between eco-muted-text mb-2"><span>${esc(stages[task.stageIndex])}</span><span>${task.progress}%</span></div><div class="rerun-progress"><span style="width:${task.progress}%"></span></div></div><div class="eco-detail-card"><div class="eco-detail-label">预计剩余</div><div class="eco-detail-value">约 8 分钟</div></div></div>` : "";
+  return;
 }
 function operationButtons(task) {
   const detail = `<button class="eco-btn eco-btn-secondary eco-action-btn rerun-action-detail" data-action="detail" data-id="${esc(task.id)}" type="button">详情</button>`;
-  if (task.status === "queued") return `${detail}<button class="eco-btn eco-action-btn rerun-action-cancel" data-action="cancel" data-id="${esc(task.id)}" type="button">取消</button>`;
+  if (task.status === "queued") return `${detail}<button class="eco-btn eco-action-btn rerun-action-pin" data-action="pin" data-id="${esc(task.id)}" type="button">置顶</button><button class="eco-btn eco-action-btn rerun-action-cancel" data-action="cancel" data-id="${esc(task.id)}" type="button">取消</button>`;
   if (task.status === "running") return `${detail}<button class="eco-btn eco-action-btn rerun-action-disabled" type="button" disabled title="执行中不可取消">取消</button>`;
   return detail;
+}
+function statusCell(task) {
+  if (task.status !== "running") return `<span class="eco-tag ${statusClass[task.status]}">${statusText[task.status]}</span>`;
+  return `<div class="rerun-table-progress"><div class="rerun-table-progress-text"><span>${esc(stages[task.stageIndex])}</span><span>${task.progress}%</span></div><div class="rerun-progress"><span style="width:${task.progress}%"></span></div></div>`;
+}
+function estimatedDuration(task) {
+  const [start, end] = String(task.dateRange || "").split(" 至 ");
+  const days = start && end && end >= start ? daySpan(start, end) : 1;
+  const objectCount = Array.isArray(task.resultObjects) && task.resultObjects.length ? task.resultObjects.length : Math.max(1, (Array.isArray(task.scopeValues) ? task.scopeValues.length : 1));
+  return `约 ${Math.max(3, Math.min(90, days * objectCount * 2))} 分钟`;
 }
 function renderTable() {
   const rows = filteredTasks();
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   currentPage = Math.min(Math.max(currentPage, 1), totalPages);
   const pageRows = rows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-  $("rerun-task-body").innerHTML = pageRows.length ? pageRows.map((task) => `<tr class="${task.id === lastCreatedTaskId ? "rerun-row-new" : ""}"><td class="eco-table-cell-text font-mono rerun-cell-wrap">${esc(task.id)}</td><td><span class="eco-tag ${statusClass[task.status]}">${statusText[task.status]}</span></td><td class="eco-table-cell-text rerun-cell-wrap">${esc(task.dateRange)}</td><td class="eco-table-cell-text rerun-cell-wrap">${esc(task.standard)}</td><td class="eco-table-cell-text rerun-cell-wrap" title="${esc(task.scope)}">${esc(task.scope)}</td><td class="eco-table-cell-text rerun-cell-wrap">${esc(task.createdAt)}</td><td><div class="rerun-action-buttons">${operationButtons(task)}</div></td></tr>`).join("") : `<tr><td colspan="7" class="py-10 text-center eco-muted-text">暂无匹配任务</td></tr>`;
+  $("rerun-task-body").innerHTML = pageRows.length ? pageRows.map((task) => `<tr class="${task.status === "running" ? "rerun-row-running" : ""}"><td class="eco-table-cell-text font-mono rerun-cell-wrap">${esc(task.id)}</td><td>${statusCell(task)}</td><td class="eco-table-cell-text rerun-cell-wrap">${esc(task.dateRange)}</td><td class="eco-table-cell-text rerun-cell-wrap">${esc(task.standard)}</td><td class="eco-table-cell-text rerun-cell-wrap">${estimatedDuration(task)}</td><td class="eco-table-cell-text rerun-cell-wrap">${esc(task.createdAt)}</td><td><div class="rerun-action-buttons">${operationButtons(task)}</div></td></tr>`).join("") : `<tr><td colspan="7" class="py-10 text-center eco-muted-text">暂无匹配任务</td></tr>`;
   $("rerun-pagination-summary").textContent = `共 ${rows.length} 条`;
   $("rerun-page-label").textContent = `第 ${currentPage} / ${totalPages} 页`;
   $("rerun-prev-page").disabled = currentPage <= 1;
   $("rerun-next-page").disabled = currentPage >= totalPages;
   renderStatusTabs();
   renderCurrentTask();
+  renderPendingOverview();
 }
 function renderScopePanels() {
   const type = selectedScopeType();
@@ -528,14 +863,23 @@ function renderScopePanels() {
   document.querySelectorAll('input[name="scopeType"]').forEach((input) => input.parentElement.classList.toggle("eco-btn-primary", input.checked));
   updateEstimate();
 }
-function openCreateModal() {
+function openCreateModal(batchKey = "") {
+  const batch = batchKey ? pendingBatchByKey(batchKey) : null;
+  currentCreateBatchKey = batch?.key || "";
+  pendingDraft = null;
   hideError();
-  $("rerun-date-start").value = "2026-08-01";
-  $("rerun-date-end").value = "2026-08-07";
+  $("pending-source-select-status").textContent = "";
+  $("rerun-source-search").value = "";
+  $("rerun-date-start").value = batch?.start || "2026-08-01";
+  $("rerun-date-end").value = batch?.end || "2026-08-07";
   renderStandardOptions();
+  if (batch) selectStandardOption(batch.standard);
   $("rerun-remark").value = "";
-  document.querySelector('input[name="scopeType"][value="enterprise"]').checked = true;
-    renderScopePanels();
+  document.querySelector(`input[name="scopeType"][value="${batch ? "source" : "enterprise"}"]`).checked = true;
+  renderScopePanels();
+  renderEmissionSourceOptions();
+  renderPendingRerunSources();
+  if (batch) selectPendingRerunSources();
   setModal("rerun-task-modal", true);
 }
 function submitDraft() {
@@ -544,7 +888,9 @@ function submitDraft() {
   if (!result.ok) return showError(result.message);
   pendingDraft = result.draft;
   const queueNote = runningTask() ? "当前有任务执行中，新建任务将进入排队。" : "当前无执行中任务，新建任务将立即执行。";
-  $("rerun-confirm-body").innerHTML = `<div><b>时间范围：</b>${esc(pendingDraft.start)} 至 ${esc(pendingDraft.end)}</div><div><b>核算标准：</b>${esc(pendingDraft.standard)}</div><div><b>重跑对象范围：</b>${esc(scopeSummary(pendingDraft.scopeType, pendingDraft.values))}</div><div><b>影响报表：</b>${esc(pendingDraft.reportTypes.join("、"))}</div><div class="rounded-lg bg-surface-container-low p-3 eco-muted-text">${queueNote}</div>`;
+  const extraSources = pendingDraft.scopeType === "source" ? nonPendingSelectedSourceValues(pendingDraft.values) : [];
+  const extraWarning = extraSources.length ? `<div class="rounded-lg border border-warning/30 bg-warning-container/40 p-3 text-warning text-sm"><b>范围提示：</b>你额外勾选了 ${esc(extraSources.join("、"))}，这些不在当前待重跑排放源中，请确认是否需要一起重跑。</div>` : "";
+  $("rerun-confirm-body").innerHTML = `<div class="rerun-confirm-summary"><div class="rerun-confirm-item"><div class="rerun-confirm-label">时间范围</div><div class="rerun-confirm-value">${esc(pendingDraft.start)} 至 ${esc(pendingDraft.end)}</div></div><div class="rerun-confirm-item"><div class="rerun-confirm-label">核算标准</div><div class="rerun-confirm-value">${esc(pendingDraft.standard)}</div></div><div class="rerun-confirm-item"><div class="rerun-confirm-label">重算对象范围</div><div class="rerun-confirm-value">${esc(scopeSummary(pendingDraft.scopeType, pendingDraft.values))}</div></div><div class="rerun-confirm-item"><div class="rerun-confirm-label">影响报表</div><div class="rerun-confirm-value">${esc(pendingDraft.reportTypes.join("、"))}</div></div></div>${extraWarning}<div class="rerun-confirm-note">${queueNote}</div>`;
   setModal("rerun-confirm-modal", true);
 }
 function showSubmitFeedback(task) {
@@ -558,16 +904,16 @@ function confirmDraft() {
   const pad = (n) => String(n).padStart(2, "0");
   const id = `RR-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(tasks.length + 1)}`;
   const status = runningTask() ? "queued" : "running";
-  const newTask = { id, status, source: "手动创建", dateRange: `${pendingDraft.start} 至 ${pendingDraft.end}`, standard: pendingDraft.standard, scope: scopeSummary(pendingDraft.scopeType, pendingDraft.values), progress: status === "running" ? 3 : 0, stageIndex: 0, creator: "当前用户", createdAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`, startedAt: status === "running" ? "刚刚" : "", endedAt: "", remark: pendingDraft.remark, processed: `0 / ${pendingDraft.resultObjects.length}`, result: "", error: "", resultObjects: pendingDraft.resultObjects, reportTypes: pendingDraft.reportTypes };
+  const newTask = { id, status, source: "手动创建", dateRange: `${pendingDraft.start} 至 ${pendingDraft.end}`, standard: pendingDraft.standard, scope: scopeSummary(pendingDraft.scopeType, pendingDraft.values), scopeType: pendingDraft.scopeType, scopeValues: pendingDraft.values, progress: status === "running" ? 3 : 0, stageIndex: 0, creator: "当前用户", createdAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`, startedAt: status === "running" ? "刚刚" : "", endedAt: "", remark: pendingDraft.remark, processed: `0 / ${pendingDraft.resultObjects.length}`, result: "", error: "", resultObjects: pendingDraft.resultObjects, reportTypes: pendingDraft.reportTypes };
   tasks.unshift(newTask);
-  lastCreatedTaskId = id;
   saveTasks();
   pendingDraft = null;
   setModal("rerun-confirm-modal", false);
   setModal("rerun-task-modal", false);
-  activeStatus = "all";
+  activeStatus = "current";
   currentPage = 1;
   renderTable();
+  renderPendingRerunSources();
   showSubmitFeedback(newTask);
 }
 function openCancelModal(id) {
@@ -585,22 +931,47 @@ function cancelQueuedTask(id) {
   saveTasks();
   renderTable();
 }
-function detailStages(task) {
-  return stages.map((stage, index) => `<div class="rerun-stage ${index < task.stageIndex || task.status === "completed" ? "done" : index === task.stageIndex && task.status === "running" ? "current" : ""}"><span class="rerun-stage-dot">${index < task.stageIndex || task.status === "completed" ? "✓" : index + 1}</span><div><div class="eco-list-primary-text">${esc(stage)}</div><div class="eco-helper-text">${index === task.stageIndex && task.status === "running" ? "当前阶段" : index < task.stageIndex || task.status === "completed" ? "已完成" : "等待中"}</div></div></div>`).join("");
+function pinQueuedTask(id) {
+  const now = new Date().toISOString();
+  tasks = tasks.map((task) => task.id === id && task.status === "queued" ? { ...task, pinnedAt: now } : task);
+  saveTasks();
+  activeStatus = "current";
+  currentPage = 1;
+  renderTable();
+}
+function detailSourceChips(task) {
+  const values = Array.isArray(task.scopeValues) && task.scopeValues.length ? task.scopeValues : [task.scope || "-"];
+  return values.map((value) => `<span class="rerun-pending-tag"><span>${esc(String(value).replace(/^排放源：/, ""))}</span></span>`).join("");
+}
+function executionResultText(task) {
+  if (task.error) return task.error;
+  if (task.result) return task.result;
+  if (task.status === "running") return `执行中，当前阶段：${stages[task.stageIndex]}，进度 ${task.progress}%`;
+  if (task.status === "queued") return "任务排队中，等待前序任务完成后执行。";
+  if (task.status === "cancelled") return "任务已取消，未执行重算。";
+  return "-";
 }
 function showDetail(id) {
   const task = tasks.find((item) => item.id === id);
   if (!task) return;
-  $("rerun-detail-body").innerHTML = `<section class="grid grid-cols-2 gap-4"><div class="eco-detail-card"><div class="eco-detail-label">任务编号</div><div class="eco-detail-value">${esc(task.id)}</div></div><div class="eco-detail-card"><div class="eco-detail-label">状态</div><div class="eco-detail-value">${statusText[task.status]}</div></div><div class="eco-detail-card"><div class="eco-detail-label">来源</div><div class="eco-detail-value">${esc(task.source)}</div></div><div class="eco-detail-card"><div class="eco-detail-label">创建人</div><div class="eco-detail-value">${esc(task.creator)}</div></div><div class="eco-detail-card"><div class="eco-detail-label">处理量</div><div class="eco-detail-value">${esc(task.processed)}</div></div><div class="eco-detail-card"><div class="eco-detail-label">时间范围</div><div class="eco-detail-value">${esc(task.dateRange)}</div></div><div class="eco-detail-card"><div class="eco-detail-label">对象范围</div><div class="eco-detail-value">${esc(task.scope)}</div></div></section><section class="eco-form-card p-4 space-y-3"><h3 class="eco-form-heading">进度明细</h3>${detailStages(task)}</section>${task.result ? `<section class="eco-form-card p-4"><h3 class="eco-form-heading mb-2">结果摘要</h3><p class="eco-table-cell-text">${esc(task.result)}</p></section>` : ""}${task.error ? `<section class="eco-form-card p-4"><h3 class="eco-form-heading mb-2">错误信息</h3><p class="text-error">${esc(task.error)}</p></section>` : ""}<section class="eco-form-card p-4"><h3 class="eco-form-heading mb-2">备注</h3><p class="eco-muted-text">${esc(task.remark || "-")}</p></section>`;
+  $("rerun-detail-body").innerHTML = `<section class="grid grid-cols-2 gap-4"><div class="eco-detail-card"><div class="eco-detail-label">任务编号</div><div class="eco-detail-value">${esc(task.id)}</div></div><div class="eco-detail-card"><div class="eco-detail-label">状态</div><div class="eco-detail-value">${statusText[task.status]}</div></div><div class="eco-detail-card"><div class="eco-detail-label">核算标准</div><div class="eco-detail-value">${esc(task.standard)}</div></div><div class="eco-detail-card"><div class="eco-detail-label">创建人</div><div class="eco-detail-value">${esc(task.creator)}</div></div><div class="eco-detail-card"><div class="eco-detail-label">预计耗时</div><div class="eco-detail-value">${estimatedDuration(task)}</div></div><div class="eco-detail-card"><div class="eco-detail-label">时间范围</div><div class="eco-detail-value">${esc(task.dateRange)}</div></div></section><section class="eco-form-card p-4"><h3 class="eco-form-heading mb-3">重算对象范围</h3><div class="rerun-pending-tags">${detailSourceChips(task)}</div></section><section class="eco-form-card p-4"><h3 class="eco-form-heading mb-2">执行结果</h3><p class="${task.error ? "text-error" : "eco-table-cell-text"}">${esc(executionResultText(task))}</p></section><section class="eco-form-card p-4"><h3 class="eco-form-heading mb-2">备注</h3><p class="eco-muted-text">${esc(task.remark || "-")}</p></section>`;
   setModal("rerun-detail-modal", true);
 }
 
 $("submit-rerun-task").onclick = submitDraft;
 $("confirm-rerun-task").onclick = confirmDraft;
-$("create-rerun-btn").onclick = openCreateModal;
+$("create-rerun-btn").onclick = () => openCreateModal();
 document.addEventListener("click", (event) => {
   const createBtn = event.target.closest("#create-rerun-btn");
   if (createBtn) openCreateModal();
+  const batchBtn = event.target.closest("[data-pending-batch]");
+  if (batchBtn) openCreateModal(batchBtn.dataset.pendingBatch);
+  const cancelPendingBatchBtn = event.target.closest("[data-cancel-pending-batch]");
+  if (cancelPendingBatchBtn) {
+    cancelledPendingBatchKeys.add(cancelPendingBatchBtn.dataset.cancelPendingBatch);
+    renderPendingOverview();
+    renderPendingRerunSources();
+  }
 });
 document.querySelectorAll("[data-close-task-modal]").forEach((btn) => btn.onclick = () => setModal("rerun-task-modal", false));
 document.querySelectorAll("[data-close-confirm]").forEach((btn) => btn.onclick = () => setModal("rerun-confirm-modal", false));
@@ -608,16 +979,23 @@ document.querySelectorAll("[data-close-detail]").forEach((btn) => btn.onclick = 
 document.querySelectorAll("[data-close-cancel]").forEach((btn) => btn.onclick = () => setModal("rerun-cancel-modal", false));
 $("confirm-cancel-task").onclick = confirmCancelTask;
 document.querySelectorAll('input[name="scopeType"]').forEach((input) => input.onchange = renderScopePanels);
-["rerun-date-start", "rerun-date-end"].forEach((id) => $(id).addEventListener("change", updateEstimate));
+["rerun-date-start", "rerun-date-end"].forEach((id) => {
+  $(id).addEventListener("input", refreshPendingAndEstimate);
+  $(id).addEventListener("change", refreshPendingAndEstimate);
+});
 $("rerun-source-search").oninput = () => { renderEmissionSourceOptions(); updateEstimate(); };
-$("rerun-standard-select").onchange = updateEstimate;
+$("rerun-standard-select").onchange = refreshPendingAndEstimate;
 $("rerun-source-tree").addEventListener("change", handleTreeChange);
+$("rerun-source-tree").addEventListener("click", handleTreeToggle);
 $("rerun-prev-page").onclick = () => { currentPage -= 1; renderTable(); };
 $("rerun-next-page").onclick = () => { currentPage += 1; renderTable(); };
+$("rerun-overview-prev-page").onclick = () => { overviewPage -= 1; renderPendingOverview(); };
+$("rerun-overview-next-page").onclick = () => { overviewPage += 1; renderPendingOverview(); };
 $("rerun-task-body").addEventListener("click", (event) => {
   const btn = event.target.closest("[data-action]");
   if (!btn) return;
   if (btn.dataset.action === "detail") showDetail(btn.dataset.id);
+  if (btn.dataset.action === "pin") pinQueuedTask(btn.dataset.id);
   if (btn.dataset.action === "cancel") openCancelModal(btn.dataset.id);
 });
 document.addEventListener("click", (event) => {
