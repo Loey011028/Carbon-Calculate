@@ -796,7 +796,7 @@ function orderedTasks() {
       const pinDiff = Number(Boolean(b.pinnedAt)) - Number(Boolean(a.pinnedAt));
       if (pinDiff) return pinDiff;
       if (a.pinnedAt || b.pinnedAt) return String(b.pinnedAt || "").localeCompare(String(a.pinnedAt || ""));
-      return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
+      return String(a.createdAt || "").localeCompare(String(b.createdAt || ""));
     }
     return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
   });
