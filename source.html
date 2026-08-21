@@ -3016,6 +3016,43 @@ function openModal(mode = 'add', index = null) {
     return false;
   }
 
+  function formatRerunValue(value) {
+    if (Array.isArray(value)) return value.join("、") || "-";
+    if (value && typeof value === "object") return Object.entries(value).map(([key, val]) => `${key}:${val}`).join("；") || "-";
+    return String(value ?? "-");
+  }
+
+  function normalizeSourceRerunChanges(changes = []) {
+    const accountingParamsChanged = changes.some(([key]) => key === "accountingParams");
+    return accountingParamsChanged
+      ? changes.filter(([key]) => key !== "activityDataType")
+      : changes;
+  }
+
+  function recordSourceRerunChanges(before = {}, after = {}) {
+    const fields = [
+      ["datasourceIds", "绑定数据源"],
+      ["belongingCategoryCode", "所属核算边界/类别"],
+      ["categoryCode", "排放分类"],
+      ["activityDataType", "活动数据类型"],
+      ["accountingParams", "核算参数"],
+      ["unit", "单位"],
+      ["status", "状态"]
+    ];
+    const changes = normalizeSourceRerunChanges(fields.filter(([key]) => formatRerunValue(before[key]) !== formatRerunValue(after[key])));
+    if (!changes.length || (!Mock.recordRerunChanges && !Mock.recordRerunChange)) return;
+    const records = changes.map(([key, label]) => ({
+      sourceId: after.id || before.id,
+      sourceName: after.name || before.name,
+      objectType: "排放源",
+      triggerAction: "排放源关键配置修改",
+      changePoint: label,
+      beforeValue: formatRerunValue(before[key]),
+      afterValue: formatRerunValue(after[key])
+    }));
+    Mock.recordRerunChanges ? Mock.recordRerunChanges(records) : records.forEach((record) => Mock.recordRerunChange(record));
+  }
+
   function saveSourceForm() {
     refreshDatasourceCatalog();
     const ownerMap = buildDatasourceOwnerMap(sourceFormState.editingIndex);
@@ -3109,6 +3146,7 @@ function openModal(mode = 'add', index = null) {
       org: existingSource?.org || firstSelectedDatasource?.org || ""
     };
     if (sourceFormState.mode === 'edit' && sourceFormState.editingIndex !== null) {
+  const beforeSource = { ...emissionSourceData[sourceFormState.editingIndex] };
   emissionSourceData[sourceFormState.editingIndex] = {
     ...emissionSourceData[sourceFormState.editingIndex],
     ...payload
@@ -3119,6 +3157,8 @@ function openModal(mode = 'add', index = null) {
   if (saved) {
     Object.assign(emissionSourceData[sourceFormState.editingIndex], sharedSourceToRow(saved));
   }
+
+  recordSourceRerunChanges(beforeSource, emissionSourceData[sourceFormState.editingIndex]);
 
   if (selectedDetailIndex === sourceFormState.editingIndex) {
     selectedDetailSourceId =
