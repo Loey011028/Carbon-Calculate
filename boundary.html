@@ -83,6 +83,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="./eco-admin-theme.css" rel="stylesheet"/>
 <script id="tailwind-config">
+        window.tailwind = window.tailwind || {};
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -2351,6 +2352,16 @@ function removeSharedEmissionSource(sourceId) {
     console.warn('删除共享排放源失败', error);
   }
 }
+        function recordBoundaryRerunChange(changePoint, beforeValue, afterValue) {
+            window.CarbonAccountingMock?.recordRerunChange?.({
+                objectType: '核算边界',
+                impactObject: '边界内排放源',
+                triggerAction: '核算边界关键配置修改',
+                changePoint,
+                beforeValue,
+                afterValue
+            });
+        }
         function performDelete() {
             const target = getActiveDeleteTarget();
             if (!target) return;
@@ -2364,6 +2375,7 @@ function removeSharedEmissionSource(sourceId) {
   boundaryItems = boundaryItems.filter(boundary => boundary.id !== target.item.id);
   activeDeviceId = '';
 }
+            recordBoundaryRerunChange(target.type === 'device' ? '边界下排放源删除' : '边界类别删除', target.name || '-', '已删除');
             closeDeleteModal();
             syncAll();
         }
@@ -2431,6 +2443,7 @@ function removeSharedEmissionSource(sourceId) {
                     }
                     boundaryItems.push(item);
                     activeBoundaryId = item.id;
+                    recordBoundaryRerunChange('范围三自定义类别/活动数据类型', '-', `${item.name} / ${item.activityDataTypeLabel || activityDataTypeLabel}`);
                 });
                 activeDeviceId = '';
                 expandedScopes.scope3 = true;
@@ -2475,6 +2488,7 @@ function removeSharedEmissionSource(sourceId) {
                 };
                 boundaryItems.push(item);
                 persistBoundaryCategoryWithActivity(item);
+                recordBoundaryRerunChange('范围三边界类别', '-', item.name || category);
                 activeBoundaryId = item.id;
                 activeDeviceId = '';
                 expandedScopes.scope3 = true;
@@ -2514,6 +2528,7 @@ function removeSharedEmissionSource(sourceId) {
             };
             boundaryItems.push(targetCategory);
             persistBoundaryCategoryWithActivity(targetCategory);
+            recordBoundaryRerunChange('核算边界类别', '-', `${scopeMeta[scope]?.treeLabel || scope} / ${targetCategory.name}`);
             activeBoundaryId = targetCategory.id;
             activeDeviceId = '';
             expandedScopes[scope] = true;
