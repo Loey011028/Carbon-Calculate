@@ -4024,6 +4024,7 @@ ActivityDataRecords: savedActivityRecordsIsCurrent && Array.isArray(savedState.A
     StandardFiles: ensureSingleStandardFileEnabled(mergeById(StandardFiles, savedState.StandardFiles)),
     GwpVersions: savedFactorLibraryIsCurrent ? mergeById(GwpVersions, savedState.GwpVersions) : clone(GwpVersions),
     GwpParameters: savedFactorLibraryIsCurrent ? mergeById(GwpParameters, savedState.GwpParameters) : clone(GwpParameters),
+    RerunChangeRecords: Array.isArray(savedState.RerunChangeRecords) ? savedState.RerunChangeRecords : [],
     GwpOperationLogs: savedFactorLibraryIsCurrent
   ? mergeById(GwpOperationLogs, savedState.GwpOperationLogs)
   : clone(GwpOperationLogs),
@@ -4108,6 +4109,139 @@ chooseCurrentVersion,
     getGwpParameters,
     getGwpOperationLogs,
 addGwpOperationLog,
+    getRerunChangeRecords() {
+      return clone(api.RerunChangeRecords || []);
+    },
+    buildRerunChangeRecord(change = {}, affectedAt = "") {
+      const now = new Date();
+      const pad = (value) => String(value).padStart(2, "0");
+      affectedAt = affectedAt || change.affectedAt || `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      const source = change.sourceId
+        ? (api.EmissionSources || []).find((item) => String(item.id) === String(change.sourceId))
+        : null;
+      const standard = change.standard || (api.StandardFiles || []).find((item) => item.enabled)?.name || "";
+      const dateOnly = affectedAt.slice(0, 10);
+      const record = {
+        id: change.id || `rcr-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        sourceId: change.sourceId || source?.id || "",
+        sourceName: change.sourceName || source?.name || change.impactObject || "受影响对象",
+        objectType: change.objectType || "配置",
+        value: change.value || (change.sourceName || source?.name ? `排放源：${change.sourceName || source?.name}` : change.impactObject || "受影响对象"),
+        boundary: change.boundary || source?.belongingCategoryLabel || source?.categoryLabel || change.objectType || "配置变更",
+        triggerAction: change.triggerAction || "关键配置修改",
+        changePoint: change.changePoint || "关键字段",
+        beforeValue: String(change.beforeValue ?? "-"),
+        afterValue: String(change.afterValue ?? "-"),
+        affectedAt,
+        operator: change.operator || "当前用户",
+        start: change.start || dateOnly,
+        end: change.end || dateOnly,
+        standard,
+        status: "pending",
+        createdAt: affectedAt
+      };
+      return record;
+    },
+    dedupeRerunChangeKey(change = {}) {
+      return [
+        change.sourceId || "",
+        change.sourceName || change.impactObject || "",
+        change.objectType || "",
+        change.triggerAction || "",
+        change.changePoint || "",
+        String(change.beforeValue ?? ""),
+        String(change.afterValue ?? "")
+      ].join("|");
+    },
+    normalizeRerunChangeBatch(changes = []) {
+      const seen = new Set();
+      const list = (Array.isArray(changes) ? changes.filter(Boolean) : [changes].filter(Boolean)).filter((change) => {
+        const key = api.dedupeRerunChangeKey(change);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      const methodKeys = new Set(list.filter((change) => change?.objectType === "核算模型" && change?.changePoint === "核算方法").map((change) => `${change.sourceName || change.impactObject || ""}|${change.objectType || ""}`));
+      return list.filter((change) => {
+        if (change?.objectType !== "核算模型" || change.changePoint !== "计算公式") return true;
+        return !methodKeys.has(`${change.sourceName || change.impactObject || ""}|${change.objectType || ""}`);
+      });
+    },
+    recordRerunChanges(changes = []) {
+      const list = api.normalizeRerunChangeBatch(changes);
+      if (!list.length) return [];
+      const now = new Date();
+      const pad = (value) => String(value).padStart(2, "0");
+      const affectedAt = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      const records = list.map((change) => api.buildRerunChangeRecord(change, change.affectedAt || affectedAt));
+      api.RerunChangeRecords = [...records, ...(api.RerunChangeRecords || [])];
+      api.saveState?.();
+      api.showRerunChangePrompt?.(records);
+      return records;
+    },
+    recordRerunChange(change = {}) {
+      const [record] = api.recordRerunChanges([change]);
+      return record;
+    },
+    showRerunChangePrompt(input = {}) {
+      try {
+        const records = (Array.isArray(input) ? input : [input]).filter(Boolean);
+        const first = records[0] || {};
+        const existing = root.document?.getElementById("rerun-change-prompt");
+        if (existing) existing.remove();
+        const modal = root.document.createElement("div");
+        modal.id = "rerun-change-prompt";
+        modal.className = "fixed inset-0 z-[120] flex items-center justify-center bg-black/40 backdrop-blur-sm";
+        modal.innerHTML = `
+          <div class="rerun-change-prompt-card w-[620px] max-w-[94vw] overflow-hidden rounded-2xl shadow-2xl" style="border:1px solid var(--eco-line);background:var(--eco-paper);color:var(--eco-on-surface)">
+            <div class="flex items-start gap-3 px-6 py-5" style="border-bottom:1px solid var(--eco-line);background:var(--eco-sage-100)">
+              <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white" style="background:var(--eco-green-700)">
+                <span class="material-symbols-outlined text-[22px]">published_with_changes</span>
+              </div>
+              <div>
+                <div class="text-base font-bold" style="color:var(--eco-green-900)">该修改会影响核算结果</div>
+                <div class="mt-1 text-sm font-medium" style="color:var(--eco-muted)">已生成 ${records.length || 1} 条待重跑记录，可前往重跑界面创建任务。</div>
+              </div>
+            </div>
+            <div class="rerun-change-prompt-list max-h-[360px] space-y-3 overflow-y-auto px-6 py-5 text-sm" style="color:var(--eco-on-surface)">
+              ${records.map((record) => `
+                <div class="rounded-xl p-4" style="border:1px solid var(--eco-line);background:var(--eco-surface-container-low)">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <div class="font-bold" style="color:var(--eco-green-900)">${String(record.sourceName || record.impactObject || first.sourceName || "受影响对象")}</div>
+                    <div class="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold" style="background:var(--eco-sage-300);color:var(--eco-green-900)">${String(record.changePoint || "-")}</div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="rounded-lg p-3" style="background:var(--eco-paper)">
+                      <div class="mb-1 text-xs font-bold" style="color:var(--eco-muted)">改动前</div>
+                      <div class="break-words font-semibold" style="color:var(--eco-on-surface)">${String(record.beforeValue || "-")}</div>
+                    </div>
+                    <div class="rounded-lg p-3" style="background:var(--eco-paper)">
+                      <div class="mb-1 text-xs font-bold" style="color:var(--eco-muted)">改动后</div>
+                      <div class="break-words font-semibold" style="color:var(--eco-on-surface)">${String(record.afterValue || "-")}</div>
+                    </div>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+            <div class="flex justify-end gap-3 px-6 py-4" style="border-top:1px solid var(--eco-line)">
+              <button type="button" data-rerun-defer class="rounded-lg px-4 py-2 text-sm font-semibold" style="border:1px solid var(--eco-line);background:var(--eco-paper);color:var(--eco-on-surface)">暂不处理</button>
+              <button type="button" data-rerun-open class="rounded-lg px-4 py-2 text-sm font-semibold text-white" style="background:var(--eco-green-700)">去重跑界面</button>
+            </div>
+          </div>`;
+        modal.querySelector("[data-rerun-defer]").onclick = () => modal.remove();
+        modal.querySelector("[data-rerun-open]").onclick = () => {
+          if (root.parent && root.parent !== root) {
+            root.parent.postMessage({ type: "carbon-open-module", moduleKey: "reportRerun" }, "*");
+            modal.remove();
+            return;
+          }
+          root.location.href = "index.html?module=reportRerun";
+        };
+        root.document.body.appendChild(modal);
+      } catch (error) {
+        root.alert?.("关键修改已生成待重跑记录，请前往重跑界面进行任务重跑，或暂不处理。");
+      }
+    },
     upsertGwpVersion,
     upsertGwpParameter,
     removeGwpVersion,
@@ -4350,6 +4484,7 @@ getLatestActivityRecordBySource(sourceOrId) {
         StandardFiles: api.StandardFiles,
         GwpVersions: api.GwpVersions,
         GwpParameters: api.GwpParameters,
+        RerunChangeRecords: api.RerunChangeRecords,
         GwpOperationLogs: api.GwpOperationLogs
       })
     );
