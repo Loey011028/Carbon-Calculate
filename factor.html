@@ -12,7 +12,6 @@
 <!-- Chart.js for the trend chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script id="tailwind-config">
-    window.tailwind = window.tailwind || {};
     tailwind.config = {
       darkMode: "class",
       theme: {
@@ -364,31 +363,6 @@
 </div>
 </div>
 <!-- END: Factor Form Modal -->
-<!-- BEGIN: Factor Version Form Modal -->
-<div class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden" id="factor-version-form-modal">
-<div class="eco-card eco-detail-modal w-[760px] max-w-[96vw] max-h-[94vh] overflow-hidden flex flex-col">
-<div class="px-6 py-4 border-b eco-divider flex items-center justify-between"><h2 class="eco-section-title">因子版本</h2><button class="text-outline hover:text-on-surface" id="factor-version-form-close-x" type="button"><span class="material-symbols-outlined">close</span></button></div>
-<div class="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
-<input id="version-form-kind" type="hidden" value="factor"/><input id="version-form-id" type="hidden"/>
-<section class="eco-form-card datasource-modal-section p-4"><h3 class="eco-form-heading mb-4">基础信息</h3><div class="grid grid-cols-2 gap-4">
-<div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block">版本号</label></div><input class="eco-input h-9 w-full" id="version-form-version" placeholder="请输入版本号" type="text"/></div>
-<div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block">默认GWP版本</label></div><select class="eco-select h-9 w-full" id="version-form-gwp-version"></select></div>
-<div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block">生效时间</label></div><input class="eco-input h-9 w-full" id="version-form-start-date" type="date"/></div>
-<div class="eco-field eco-expire-field"><label class="eco-form-label">失效时间</label><label class="eco-never-expire-option" id="version-form-never-expire-option"><input class="eco-never-expire-input" id="version-form-never-expire" type="checkbox"/><span class="eco-never-expire-check" aria-hidden="true"></span><span>永不失效</span></label><input class="eco-input h-9 w-full" id="version-form-end-date" type="date"/></div>
-<div class="eco-field"><div class="flex h-7 items-start"><label class="eco-form-label block">状态</label></div><select class="eco-select h-9 w-full" id="version-form-status"><option value="启用">启用</option><option value="停用">停用</option></select></div>
-</div></section>
-<section class="eco-form-card datasource-modal-section p-4 space-y-4">
-  <div class="flex items-center justify-between gap-4">
-    <h3 class="eco-form-heading">气体配置</h3>
-    <button class="eco-btn eco-btn-primary eco-btn-sm" id="version-add-gas-row" type="button"><span class="material-symbols-outlined text-sm">add</span>添加气体</button>
-  </div>
-  <div class="eco-table-wrap eco-fixed-table-wrap"><table class="eco-table eco-config-table w-full text-left"><thead><tr><th class="w-[28%]"><span class="eco-table-head-text">温室气体</span></th><th class="w-[17%]"><span class="eco-table-head-text">因子值</span></th><th class="w-[29%]"><span class="eco-table-head-text">因子单位</span></th><th class="w-[17%]"><span class="eco-table-head-text">比例</span></th><th class="w-[9%]"><span class="eco-table-head-text">操作</span></th></tr></thead><tbody id="version-config-table-body"></tbody></table></div>
-</section>
-<section class="eco-form-card datasource-modal-section p-4"><h3 class="eco-form-heading mb-4">备注</h3><textarea class="eco-input w-full min-h-[70px] resize-none" id="version-form-remark" placeholder="请描述此版本的变更内容.."></textarea></section>
-</div><div class="px-6 py-4 border-t eco-divider flex justify-end gap-3"><button class="eco-btn eco-btn-secondary" id="factor-version-form-cancel" type="button">取消</button><button class="eco-btn eco-btn-primary" id="factor-version-form-save" type="button">保存</button></div>
-</div>
-</div>
-<!-- END: Factor Version Form Modal -->
 <!-- BEGIN: Factor Detail Modal -->
 <div class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden" id="factor-detail-modal">
 <div class="bg-white w-[860px] max-w-[94vw] max-h-[90vh] rounded shadow-2xl flex flex-col overflow-hidden">
@@ -535,7 +509,6 @@
   }
 
   const modal = document.getElementById('factor-form-modal');
-  const factorVersionModal = document.getElementById('factor-version-form-modal');
   const detailModal = document.getElementById('factor-detail-modal');
   const title = document.getElementById('factor-form-title');
   const kindInput = document.getElementById('factor-form-kind');
@@ -564,18 +537,6 @@ const categoryCategoryInput = document.getElementById('form-category-category');
   const configActionHead = document.getElementById('config-action-head');
   const nameLabel = document.getElementById('name-label');
   const endDateField = document.getElementById('end-date-field');
-  const versionFormKind = document.getElementById('version-form-kind');
-  const versionFormId = document.getElementById('version-form-id');
-  const versionFormVersion = document.getElementById('version-form-version');
-  const versionFormGwp = document.getElementById('version-form-gwp-version');
-  const versionFormStartDate = document.getElementById('version-form-start-date');
-  const versionFormEndDate = document.getElementById('version-form-end-date');
-  const versionFormNeverExpire = document.getElementById('version-form-never-expire');
-  const versionFormNeverExpireOption = document.getElementById('version-form-never-expire-option');
-  const versionFormStatus = document.getElementById('version-form-status');
-  const versionFormRemark = document.getElementById('version-form-remark');
-  const versionConfigBody = document.getElementById('version-config-table-body');
-  let versionEditContext = { kind: "factor", id: "", item: null, activityUnit: "" };
   const factorFilters = {
     gas: "全部",
     standardId: "全部",
@@ -1608,178 +1569,6 @@ function sourceCategoryMatchesItem(item, categoryCode) {
     }
     return true;
   }
-
-  function getActivityUnitForFactorItem(item = {}) {
-    const categoryCode = item.categoryCode || item.category || "";
-    const activityDataType = item.activityDataType || "";
-    const schema = getActivitySchemaByActivityType(activityDataType, categoryCode) || getActivitySchemaByCategory(categoryCode);
-    const params = item.matchParams || item.accountingParams || item || {};
-    const matchedParam = (schema?.params || []).find((param) =>
-      (param.options || []).some((option) => option.value === params[param.key] && option.unit)
-    );
-    const matchedOption = matchedParam
-      ? (matchedParam.options || []).find((option) => option.value === params[matchedParam.key] && option.unit)
-      : null;
-    return matchedOption?.unit || schema?.defaultUnit || firstGas(item).unit?.split("/")?.[1] || "";
-  }
-
-  function syncVersionNeverExpireControls() {
-    const neverExpire = Boolean(versionFormNeverExpire?.checked);
-    if (versionFormEndDate) {
-      versionFormEndDate.disabled = neverExpire;
-      if (neverExpire) versionFormEndDate.value = "";
-    }
-    versionFormNeverExpireOption?.classList.toggle("checked", neverExpire);
-  }
-
-  function renderVersionGwpOptions(value) {
-    if (!versionFormGwp) return;
-    const versions = getGwpVersions();
-    versionFormGwp.innerHTML = versions.map((version) =>
-      `<option value="${escapeHtml(version.id)}">${escapeHtml(version.name || version.code || version.id)}</option>`
-    ).join("");
-    versionFormGwp.value = value && versions.some((version) => version.id === value)
-      ? value
-      : (getDefaultGwpVersion()?.id || versions[0]?.id || "");
-  }
-
-  function addVersionConfigRow(row = { gas: "CO₂", value: "", ratio: 1 }) {
-    if (!versionConfigBody) return;
-    const tr = document.createElement("tr");
-    const gasOptions = getGwpGasOptions(versionFormGwp?.value || "");
-    tr.className = "eco-config-row";
-    tr.innerHTML = `<td class="w-[28%]"><select class="version-gas-select eco-select h-9 w-full">${gasOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join("")}</select></td><td class="w-[17%]"><input class="version-value-input factor-number-input eco-input h-9 w-full" placeholder="0.00" type="text" inputmode="decimal"/></td><td class="w-[29%]"><select class="version-unit-select eco-select h-9 w-full"><option>kgCO₂/Nm³</option><option>kgCH₄/Nm³</option><option>kgN₂O/Nm³</option><option>kgCO₂/L</option><option>kgCH₄/L</option><option>kgN₂O/L</option><option>kgCO₂/kWh</option><option>kgR410A/kg</option></select></td><td class="w-[17%]"><div class="relative"><input class="version-ratio-input factor-number-input eco-input h-9 w-full pr-8" placeholder="100" type="text" inputmode="decimal"/><span class="pointer-events-none absolute inset-y-0 right-2 flex items-center eco-helper-text font-semibold">%</span></div></td><td class="w-[9%] text-center"><button class="version-delete-gas-row eco-btn eco-btn-danger eco-btn-square-sm" type="button" title="删除气体"><span class="material-symbols-outlined text-lg">delete</span></button></td>`;
-    versionConfigBody.appendChild(tr);
-    const fallbackGas = gasOptions.some((option) => option.value === row.gas) ? row.gas : (gasOptions[0]?.value || "CO₂");
-    setSelectValue(tr.querySelector(".version-gas-select"), fallbackGas);
-    tr.querySelector(".version-value-input").value = row.value || "";
-    setSelectValue(tr.querySelector(".version-unit-select"), row.unit || buildFactorUnit(fallbackGas, versionEditContext.activityUnit) || "kgCO₂/Nm³");
-    tr.querySelector(".version-ratio-input").value = formatRatioInputValue(row.ratio ?? 1);
-    syncEcoSelects(tr);
-  }
-
-  function syncVersionConfigRowUnit(row) {
-    if (!row) return;
-    const gas = row.querySelector(".version-gas-select")?.value || "CO₂";
-    const unitSelect = row.querySelector(".version-unit-select");
-    const nextUnit = buildFactorUnit(gas, versionEditContext.activityUnit);
-    if (unitSelect && nextUnit) setSelectValue(unitSelect, nextUnit);
-    syncEcoSelects(row);
-  }
-
-  function refreshVersionGasSelectOptions() {
-    const rows = Array.from(versionConfigBody?.querySelectorAll("tr") || []);
-    const gasOptions = getGwpGasOptions(versionFormGwp?.value || "");
-    rows.forEach((row) => {
-      const gasSelect = row.querySelector(".version-gas-select");
-      const currentGas = gasSelect?.value || "";
-      if (!gasSelect) return;
-      gasSelect.innerHTML = gasOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join("");
-      setSelectValue(gasSelect, gasOptions.some((option) => option.value === currentGas) ? currentGas : (gasOptions[0]?.value || "CO₂"));
-      syncVersionConfigRowUnit(row);
-    });
-    syncEcoSelects(factorVersionModal);
-  }
-
-  function collectVersionGasFactors() {
-    return Array.from(versionConfigBody?.querySelectorAll("tr") || []).map((row) => ({
-      gas: row.querySelector(".version-gas-select")?.value || "CO₂",
-      value: row.querySelector(".version-value-input")?.value || "0.00",
-      unit: row.querySelector(".version-unit-select")?.value || "kgCO₂/Nm³",
-      ratio: parseComponentRatio(row.querySelector(".version-ratio-input")?.value || "100")
-    }));
-  }
-
-  function validateVersionFactorConfig() {
-    const rows = Array.from(versionConfigBody?.querySelectorAll("tr") || []);
-    if (!rows.length) {
-      alert("请至少添加一个温室气体");
-      return false;
-    }
-    const values = rows.map((row) => Number(row.querySelector(".version-value-input")?.value || 0));
-    if (values.some((value) => !Number.isFinite(value) || value <= 0)) {
-      alert("因子值必须大于 0");
-      return false;
-    }
-    const ratios = rows.map((row) => parseComponentRatio(row.querySelector(".version-ratio-input")?.value || ""));
-    if (ratios.some((ratio) => !Number.isFinite(ratio) || ratio <= 0)) {
-      alert("比例必须大于 0");
-      return false;
-    }
-    return true;
-  }
-
-  function openVersionEditForm(kind, item) {
-    if (!item || !factorVersionModal) return;
-    versionEditContext = { kind, id: item.id, item, activityUnit: getActivityUnitForFactorItem(item) };
-    versionFormKind.value = kind;
-    versionFormId.value = item.id || "";
-    versionFormVersion.value = item.version || "V1.0";
-    renderVersionGwpOptions(item.gwpVersionId || "");
-    versionFormStartDate.value = item.effectiveDate || item.startDate || "";
-    const expireDate = item.expireDate || item.endDate || "";
-    versionFormEndDate.value = expireDate;
-    versionFormNeverExpire.checked = !expireDate;
-    versionFormStatus.value = isDisabledStatus(item.status) ? "停用" : "启用";
-    versionFormRemark.value = item.description || item.changeDescription || item.remark || "";
-    syncVersionNeverExpireControls();
-    versionConfigBody.innerHTML = "";
-    const gasRows = Array.isArray(item.gases) && item.gases.length
-      ? item.gases
-      : [firstGas(item)];
-    gasRows.forEach((row) => addVersionConfigRow({
-      gas: row.gas,
-      value: row.value ?? item.value ?? "",
-      unit: row.unit || item.unit || "kgCO₂/Nm³",
-      ratio: row.ratio ?? 1
-    }));
-    syncEcoSelects(factorVersionModal);
-    factorVersionModal.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
-  }
-
-  function closeVersionEditForm() {
-    factorVersionModal?.classList.add("hidden");
-    document.body.classList.remove("overflow-hidden");
-  }
-
-  function saveVersionEditForm() {
-    if (!validateVersionFactorConfig()) return;
-    const kind = versionFormKind.value || versionEditContext.kind;
-    const list = kind === "group" ? groups : factors;
-    const index = list.findIndex((item) => item.id === versionFormId.value);
-    if (index < 0) return;
-    const gasFactors = collectVersionGasFactors();
-    const gasFactor = gasFactors[0] || { gas: "CO₂", value: "0.00", unit: "kgCO₂/Nm³" };
-    const gwpVersion = getGwpVersions().find((version) => version.id === versionFormGwp.value);
-    list[index] = normalizeFactorRecord({
-      ...list[index],
-      version: versionFormVersion.value.trim() || "V1.0",
-      gwpVersionId: versionFormGwp.value || "",
-      gwpVersionCode: gwpVersion?.code || "",
-      gwp: gwpVersion?.name || "",
-      effectiveDate: versionFormStartDate.value,
-      startDate: versionFormStartDate.value,
-      expireDate: versionFormNeverExpire.checked ? "" : versionFormEndDate.value,
-      endDate: versionFormNeverExpire.checked ? "" : versionFormEndDate.value,
-      status: versionFormStatus.value || "启用",
-      gas: kind === "factor" ? gasFactor.gas : undefined,
-      value: kind === "factor" ? gasFactor.value : undefined,
-      unit: kind === "factor" ? gasFactor.unit : undefined,
-      gases: gasFactors,
-      components: gasFactors.some((item) => Number(item.ratio) !== 1) ? gasFactors.map((item) => ({ gas: item.gas, ratio: item.ratio })) : undefined,
-      description: versionFormRemark.value.trim(),
-      changeDescription: versionFormRemark.value.trim(),
-      remark: versionFormRemark.value.trim()
-    });
-    syncFactorLibraryState();
-    closeVersionEditForm();
-    render();
-    if (versionContext.item) {
-      const latest = findItem(versionContext.kind, versionContext.id) || versionContext.item;
-      versionContext.item = latest;
-    }
-  }
   function selectedFactorIds() {
     return [...(factorIdsInput?.selectedOptions || [])].map((option) => option.value);
   }
@@ -1859,6 +1648,100 @@ function buildFactorIdentityKey(item = {}) {
     .join(";");
 
   return [categoryCode, activityDataType, paramPart].join("|");
+}
+
+function factorRerunFieldValue(value, key = "") {
+  if (key === "standardId") return getStandard(value)?.name || value || "-";
+  if (key === "gwpVersionId") return getGwpVersions().find((version) => String(version.id) === String(value))?.name || value || "-";
+  if (Array.isArray(value)) return value.join("、") || "-";
+  if (value && typeof value === "object") {
+    return Object.keys(value).sort().map((field) => `${field}:${value[field]}`).join("；") || "-";
+  }
+  return String(value ?? "-");
+}
+
+function factorGasRowsForRerun(item = {}) {
+  const rows = Array.isArray(item.gases) && item.gases.length
+    ? item.gases
+    : (item.id || item.gas || item.value || item.unit ? [firstGas(item)] : []);
+  return rows.map((row) => ({
+    gas: row.gas || "CO₂",
+    value: factorRerunFieldValue(row.value),
+    unit: factorRerunFieldValue(row.unit),
+    ratio: parseComponentRatio(row.ratio ?? 1)
+  }));
+}
+
+function factorRatioRerunValue(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return factorRerunFieldValue(value);
+  return `${Number((numeric * 100).toFixed(4))}%`;
+}
+
+function factorGasRatioChanges(before = {}, after = {}) {
+  const beforeRows = new Map(factorGasRowsForRerun(before).map((row) => [row.gas, row]));
+  const afterRows = new Map(factorGasRowsForRerun(after).map((row) => [row.gas, row]));
+  return Array.from(new Set([...beforeRows.keys(), ...afterRows.keys()]))
+    .filter((gas) => beforeRows.has(gas) && afterRows.has(gas))
+    .filter((gas) => factorRatioRerunValue(beforeRows.get(gas).ratio) !== factorRatioRerunValue(afterRows.get(gas).ratio))
+    .map((gas) => ({
+      changePoint: `气体比例（${gas}）`,
+      beforeValue: factorRatioRerunValue(beforeRows.get(gas).ratio),
+      afterValue: factorRatioRerunValue(afterRows.get(gas).ratio)
+    }));
+}
+
+function factorGasValueUnitChanges(before = {}, after = {}) {
+  const beforeRows = new Map(factorGasRowsForRerun(before).map((row) => [row.gas, row]));
+  const afterRows = new Map(factorGasRowsForRerun(after).map((row) => [row.gas, row]));
+  return Array.from(new Set([...beforeRows.keys(), ...afterRows.keys()])).flatMap((gas) => {
+    const prev = beforeRows.get(gas);
+    const next = afterRows.get(gas);
+    if (!prev && next) return [{ changePoint: `气体配置（${gas}）`, beforeValue: "-", afterValue: "已新增" }];
+    if (prev && !next) return [{ changePoint: `气体配置（${gas}）`, beforeValue: "已配置", afterValue: "已删除" }];
+    return [
+      ["value", `因子值（${gas}）`],
+      ["unit", `因子单位（${gas}）`]
+    ]
+      .filter(([key]) => factorRerunFieldValue(prev[key]) !== factorRerunFieldValue(next[key]))
+      .map(([key, label]) => ({ changePoint: label, beforeValue: factorRerunFieldValue(prev[key]), afterValue: factorRerunFieldValue(next[key]) }));
+  });
+}
+
+function cloneFactorRerunSnapshot(item = {}) {
+  return JSON.parse(JSON.stringify(item || {}));
+}
+
+function recordFactorRerunChanges(before = {}, after = {}, action = "因子关键配置修改") {
+  if (!before?.id || (!Mock.recordRerunChanges && !Mock.recordRerunChange)) return;
+  const objectType = kindInput.value === "group" ? "因子组" : "因子";
+  const fields = [
+    ["standardId", "方法学标准"],
+    ["gwpVersionId", "默认GWP版本"],
+    ["activityDataType", "活动数据类型"],
+    ["matchParams", "核算参数"],
+    ["effectiveDate", "生效日期"],
+    ["expireDate", "失效日期"],
+    ["status", "状态"]
+  ];
+  const fieldChanges = fields
+    .filter(([key]) => factorRerunFieldValue(before[key], key) !== factorRerunFieldValue(after[key], key))
+    .map(([key, label]) => ({ changePoint: label, beforeValue: factorRerunFieldValue(before[key], key), afterValue: factorRerunFieldValue(after[key], key) }));
+  const changes = [
+    ...fieldChanges,
+    ...factorGasValueUnitChanges(before, after),
+    ...factorGasRatioChanges(before, after)
+  ];
+  if (!changes.length) return;
+  const base = {
+    objectType,
+    impactObject: after.name || before.name || "受影响因子",
+    triggerAction: action,
+    start: after.effectiveDate || before.effectiveDate || after.startDate || before.startDate || "",
+    end: after.expireDate || before.expireDate || after.endDate || before.endDate || ""
+  };
+  const records = changes.map((change) => ({ ...base, ...change }));
+  Mock.recordRerunChanges ? Mock.recordRerunChanges(records) : records.forEach((record) => Mock.recordRerunChange(record));
 }
 
 function selectDisplayVersion(versions = []) {
@@ -1960,7 +1843,7 @@ function collapseFactorVersions(items = []) {
     const title = item.name || (kind === "group" ? "因子组版本管理" : "因子版本管理");
 
     content.innerHTML = `
-    <div class="h-full bg-surface-container-lowest shadow-2xl flex flex-col rounded-lg overflow-hidden">
+    <div class="h-full bg-surface-container-lowest shadow-2xl flex flex-col">
       <div class="px-6 py-4 border-b eco-divider bg-surface-container-low flex items-center justify-between">
         <div>
           <h2 class="eco-section-title">${escapeHtml(title)}</h2>
@@ -1971,7 +1854,7 @@ function collapseFactorVersions(items = []) {
         </button>
       </div>
 
-      <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-6 space-y-4">
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
         ${versions.length ? versions.map((version) => renderVersionCard(kind, version)).join("") : `
           <div class="eco-empty-state"><div class="eco-empty-title">暂无版本记录</div><div class="eco-empty-desc">添加新版本后会自动启用</div></div>
         `}
@@ -1997,8 +1880,7 @@ function collapseFactorVersions(items = []) {
     container?.classList.remove("pointer-events-none");
     overlay?.classList.remove("pointer-events-none", "opacity-0");
     overlay?.classList.add("opacity-100");
-    content?.classList.remove("scale-95", "opacity-0");
-    content?.classList.add("scale-100", "opacity-100");
+    content?.classList.remove("translate-x-full");
     document.body.style.overflow = "hidden";
   }
 
@@ -2009,8 +1891,7 @@ function collapseFactorVersions(items = []) {
 
     overlay?.classList.add("opacity-0");
     overlay?.classList.remove("opacity-100");
-    content?.classList.add("scale-95", "opacity-0");
-    content?.classList.remove("scale-100", "opacity-100");
+    content?.classList.add("translate-x-full");
 
     setTimeout(() => {
       container?.classList.add("pointer-events-none");
@@ -2190,6 +2071,8 @@ matchParamLabels,
     const kind = kindInput.value;
     const list = kind === 'group' ? groups : factors;
     const index = list.findIndex((item) => item.id === idInput.value);
+    const beforeItem = index >= 0 ? cloneFactorRerunSnapshot(list[index]) : null;
+    let savedItem = null;
 
     if (asNewVersion && index >= 0) {
       if (!startDateInput.value) {
@@ -2198,6 +2081,7 @@ matchParamLabels,
       }
 
       const newRecord = Mock.createFactorNewVersion?.(kind, idInput.value, data);
+      savedItem = newRecord ? normalizeFactorRecord(newRecord) : null;
 
       if (!newRecord) {
         const oldItem = list[index];
@@ -2210,6 +2094,7 @@ matchParamLabels,
           status: "启用"
         });
         list.unshift(fallbackRecord);
+        savedItem = fallbackRecord;
 
         if (data.effectiveDate && data.effectiveDate <= todayString() && versionStatus(oldItem) === "当前版本") {
           oldItem.expireDate = previousDay(data.effectiveDate);
@@ -2220,8 +2105,10 @@ matchParamLabels,
       syncFromSharedFactorState?.();
     } else if (index >= 0) {
       list[index] = normalizeFactorRecord({ ...list[index], ...data });
+      savedItem = list[index];
     } else {
-      list.unshift(normalizeFactorRecord(data));
+      savedItem = normalizeFactorRecord(data);
+      list.unshift(savedItem);
       if (kind === 'group') groupPage = 1; else factorPage = 1;
     }
 
@@ -2233,6 +2120,9 @@ matchParamLabels,
       const latest = findItem(versionContext.kind, versionContext.id) || versionContext.item;
       versionContext.item = latest;
       renderVersionDrawer(versionContext.kind, latest);
+    }
+    if (beforeItem && savedItem) {
+      recordFactorRerunChanges(beforeItem, savedItem, asNewVersion ? "因子新版本发布" : "因子关键配置修改");
     }
   }
   function activateTab(tabName) {
@@ -2378,22 +2268,6 @@ document.getElementById('factor-accounting-params')?.addEventListener('change', 
   });
   configBody.addEventListener('click', (event) => { const deleteBtn = event.target.closest('.delete-gas-row'); if (deleteBtn && configBody.querySelectorAll('tr').length > 1) deleteBtn.closest('tr').remove(); });
   modal.addEventListener('click', (event) => { if (event.target === modal) closeForm(); });
-  document.getElementById('factor-version-form-save')?.addEventListener('click', saveVersionEditForm);
-  document.getElementById('factor-version-form-cancel')?.addEventListener('click', closeVersionEditForm);
-  document.getElementById('factor-version-form-close-x')?.addEventListener('click', closeVersionEditForm);
-  document.getElementById('version-add-gas-row')?.addEventListener('click', () => {
-    addVersionConfigRow({ gas: 'CH₄', value: '', ratio: 1 });
-  });
-  versionFormNeverExpire?.addEventListener('change', syncVersionNeverExpireControls);
-  versionFormGwp?.addEventListener('change', refreshVersionGasSelectOptions);
-  versionConfigBody?.addEventListener('change', (event) => {
-    if (event.target.closest('.version-gas-select')) syncVersionConfigRowUnit(event.target.closest('tr'));
-  });
-  versionConfigBody?.addEventListener('click', (event) => {
-    const deleteBtn = event.target.closest('.version-delete-gas-row');
-    if (deleteBtn && versionConfigBody.querySelectorAll('tr').length > 1) deleteBtn.closest('tr').remove();
-  });
-  factorVersionModal?.addEventListener('click', (event) => { if (event.target === factorVersionModal) closeVersionEditForm(); });
   detailModal.addEventListener('click', (event) => { if (event.target === detailModal) closeDetail(); });
 
   document.addEventListener('click', (event) => {
@@ -2414,7 +2288,7 @@ document.getElementById('factor-accounting-params')?.addEventListener('change', 
 
       if (action === "edit") {
         closeVersionDrawer();
-        openVersionEditForm(kind, item);
+        openForm(kind, "edit", item);
         return;
       }
 
@@ -2514,7 +2388,7 @@ document.getElementById('factor-accounting-params')?.addEventListener('change', 
 
   document.getElementById('factor-page-jump')?.addEventListener('change', jumpToFactorPage);
 
-  window.addEventListener('keydown', (event) => { if (event.key === 'Escape') { if (!modal.classList.contains('hidden')) closeForm(); if (!factorVersionModal?.classList.contains('hidden')) closeVersionEditForm(); if (!detailModal.classList.contains('hidden')) closeDetail(); } });
+  window.addEventListener('keydown', (event) => { if (event.key === 'Escape') { if (!modal.classList.contains('hidden')) closeForm(); if (!detailModal.classList.contains('hidden')) closeDetail(); } });
   function refreshFromUpperTabState() {
     syncFromSharedFactorState();
     activateTab(activeTab);
@@ -2604,17 +2478,14 @@ document.getElementById('factor-accounting-params')?.addEventListener('change', 
   });
 })();
 </script>
-<!-- Version Management Modal Container -->
-<div class="fixed inset-0 z-[60] pointer-events-none flex items-center justify-center p-6" id="version-management-container">
+<!-- Version Management Drawer Container -->
+<div class="fixed inset-0 z-[60] pointer-events-none" id="version-management-container">
 <!-- Overlay -->
 <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 opacity-0 pointer-events-none" id="version-drawer-overlay"></div>
-<!-- Modal Content -->
-<div class="relative z-10 w-[760px] max-w-[96vw] max-h-[86vh] bg-surface-container-lowest border border-outline-variant shadow-2xl transform transition duration-200 ease-out flex flex-col pointer-events-auto scale-95 opacity-0" id="version-drawer-content"></div><script>
-  // Version management modal behavior is implemented in the main factor-library-interactions script.
+<!-- Drawer Content -->
+<div class="absolute right-0 top-0 h-full w-[480px] bg-surface-container-lowest border-l border-outline-variant shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col pointer-events-auto translate-x-full" id="version-drawer-content"></div><script>
+  // Version drawer behavior is implemented in the main factor-library-interactions script.
 </script>
 </body></html>
-
-
-
 
 
