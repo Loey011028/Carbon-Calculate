@@ -4231,7 +4231,7 @@ addGwpOperationLog,
         modal.querySelector("[data-rerun-defer]").onclick = () => modal.remove();
         modal.querySelector("[data-rerun-open]").onclick = () => {
           if (root.parent && root.parent !== root) {
-            root.parent.postMessage({ type: "carbon-open-module", moduleKey: "reportRerun" }, "*");
+            root.parent.postMessage({ type: "carbon-open-module", moduleKey: "reportRerun", focusPending: true }, "*");
             modal.remove();
             return;
           }
