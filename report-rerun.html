@@ -1206,11 +1206,10 @@ function currentProgressPanel(task) {
   const reached = task.status === "completed"
     ? (segments[segments.length - 1]?.end || task.dateRange || "-")
     : (segment?.start || task.dateRange || "-");
-  const sequenceText = segments.length > 1 ? "按时间分段顺序重算" : "按选择时间范围重算";
   const title = task.status === "completed" ? "任务进度" : "当前进度";
   const text = task.status === "completed"
-    ? `已完成全部重跑（${esc(sequenceText)}，共 ${segments.length || 1} 段）。`
-    : `已重跑到 <strong>${esc(reached)}</strong>（${esc(sequenceText)}，已完成 ${completed}/${segments.length || 1} 段）`;
+    ? `已完成全部重跑，共 ${segments.length || 1} 段。`
+    : `已重跑到 <strong>${esc(reached)}</strong>，已完成 ${completed}/${segments.length || 1} 段`;
   const actions = "";
   return `<section class="rerun-current-progress-card ${esc(task.status)}"><div class="rerun-current-progress-title">${title}</div><div class="rerun-current-progress-text">${text}</div><div class="rerun-detail-progress"><span style="width:${progress}%"></span></div>${actions}</section>`;
 }
@@ -1230,7 +1229,7 @@ function showDetail(id) {
   if (!task) return;
   activeDetailTaskId = task.id;
   $("rerun-detail-title").innerHTML = `任务详情 <span class="font-mono text-sm font-semibold text-outline ml-3">${esc(task.id)}</span>`;
-  $("rerun-detail-body").innerHTML = `<div class="rerun-detail-shell"><section class="rerun-detail-summary-line"><span><span class="rerun-detail-label">任务状态：</span><strong class="rerun-detail-value rerun-detail-status ${esc(task.status)}">${esc(statusText[task.status] || "-")}</strong></span><span><span class="rerun-detail-label">重跑时间范围：</span><strong class="rerun-detail-value">${esc(task.dateRange)}</strong></span><span><span class="rerun-detail-label">创建时间：</span><strong class="rerun-detail-value">${esc(task.createdAt || "-")}</strong></span></section><section class="rerun-detail-content-line"><span class="rerun-detail-label">重跑内容：</span><strong>${esc(taskDetailRerunContent(task))}</strong></section>${currentProgressPanel(task)}${detailSegmentRows(task)}<section class="rerun-detail-note">时间列表按时间正序展示，已完成 / 执行中 / 排队中三态标识；当前执行位置会自动高亮并定位。</section></div>`;
+  $("rerun-detail-body").innerHTML = `<div class="rerun-detail-shell"><section class="rerun-detail-summary-line"><span><span class="rerun-detail-label">任务状态：</span><strong class="rerun-detail-value rerun-detail-status ${esc(task.status)}">${esc(statusText[task.status] || "-")}</strong></span><span><span class="rerun-detail-label">重跑时间范围：</span><strong class="rerun-detail-value">${esc(task.dateRange)}</strong></span><span><span class="rerun-detail-label">创建时间：</span><strong class="rerun-detail-value">${esc(task.createdAt || "-")}</strong></span></section><section class="rerun-detail-content-line"><span class="rerun-detail-label">重跑内容：</span><strong>${esc(taskDetailRerunContent(task))}</strong></section>${currentProgressPanel(task)}${detailSegmentRows(task)}</div>`;
   setModal("rerun-detail-modal", true);
   focusCurrentSegmentInDetail();
 }
