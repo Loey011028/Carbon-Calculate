@@ -954,24 +954,58 @@
       els.detail.classList.add("flex");
     }
 
-    function showDetail(model) {
-      openInfoModal("核算模型详情", `
+    function openModelDetailModal(title, model, options = {}) {
+      openInfoModal(title, renderModelDetailContent(model, options));
+    }
+
+    function renderDetailRow(label, valueHtml, wide = false) {
+      return `<div class="flex ${wide ? "col-span-2" : ""}"><span class="eco-detail-label w-24 shrink-0">${label}</span><span class="eco-detail-value mt-0 flex-1">${valueHtml}</span></div>`;
+    }
+
+    function modelDetailChangeDescription(model = {}) {
+      const raw = model.raw || {};
+      const firstChange = Array.isArray(raw.changeLog) ? raw.changeLog[0] : null;
+      return model.description || raw.changeDescription || firstChange?.description || raw.description || "保存模型配置。";
+    }
+
+    function renderModelDetailContent(model, options = {}) {
+      const versionStatusHtml = options.versionStatusHtml || versionBadge(model.versionStatus || versionLifecycleStatus(model));
+      const extraRows = Array.isArray(options.extraRows) ? options.extraRows : [];
+      const basicHeading = options.basicHeading || "基本信息";
+      const logicHeading = options.logicHeading || "核算逻辑";
+      const changeHeading = options.changeHeading || "版本变更";
+      return `
         <section class="eco-form-card p-4">
-          <h4 class="eco-form-heading mb-4">基础信息</h4>
+          <h4 class="eco-form-heading mb-4">${escapeHtml(basicHeading)}</h4>
           <div class="grid grid-cols-2 gap-y-3 gap-x-8">
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">模型名称：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.name)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">版本号：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.version)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算范围：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.scopeLabel)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">排放类别：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.categoryLabel)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">状态：</span><span class="${statusClass(model.status)}">${escapeHtml(model.status)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算方法：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.method)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算单位：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.unit)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">生效时间：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.effectiveAt)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">失效时间：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.expiredAt)}</span></div>
-            <div class="flex col-span-2"><span class="eco-detail-label w-24 shrink-0">引用标准：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(model.standard)}</span></div>
+            ${renderDetailRow("模型名称：", escapeHtml(model.name || "-"))}
+            ${renderDetailRow("版本号：", escapeHtml(model.version || "-"))}
+            ${renderDetailRow("所属范围：", escapeHtml(model.scopeLabel || "-"))}
+            ${renderDetailRow("所属类别：", escapeHtml(model.categoryLabel || "-"))}
+            ${renderDetailRow("引用标准：", escapeHtml(model.standard || "-"))}
+            ${renderDetailRow("版本状态：", versionStatusHtml)}
+            ${extraRows.map(row => renderDetailRow(row.label, row.valueHtml, row.wide !== false)).join("")}
           </div>
         </section>
-      `);
+        <section class="eco-form-card p-4 mt-4">
+          <h4 class="eco-form-heading mb-4">${escapeHtml(logicHeading)}</h4>
+          <div class="grid grid-cols-2 gap-y-3 gap-x-8">
+            ${renderDetailRow("核算方法：", escapeHtml(model.method || "-"))}
+            ${renderDetailRow("核算单位：", escapeHtml(model.unit || "-"))}
+            ${renderDetailRow("计算公式：", escapeHtml(model.formula || "-"), true)}
+          </div>
+        </section>
+        <section class="eco-form-card p-4 mt-4">
+          <h4 class="eco-form-heading mb-4">${escapeHtml(changeHeading)}</h4>
+          <div class="grid grid-cols-1 gap-y-3">
+            ${renderDetailRow("版本变更：", escapeHtml(modelDetailChangeDescription(model)), true)}
+          </div>
+        </section>
+      `;
+    }
+
+    function showDetail(model) {
+      openModelDetailModal("核算模型详情", model);
     }
 
     function changeLogs(model) {
@@ -1118,24 +1152,7 @@
 
     function showModelVersionDetail(model, log, index) {
       const snapshot = snapshotForVersion(model, log, index);
-      openInfoModal("模型版本详情", `
-        <section class="eco-form-card p-4">
-          <h4 class="eco-form-heading mb-4">${escapeHtml(snapshot.version)} 版本信息</h4>
-          <div class="grid grid-cols-2 gap-y-3 gap-x-8">
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">模型名称：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.name)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">版本状态：</span><span class="eco-detail-value mt-0 flex-1">${versionBadge(snapshot.versionStatus)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算范围：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.scopeLabel)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">排放类别：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.categoryLabel)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算方法：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.method)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">核算单位：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.unit)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">生效时间：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.effectiveAt)}</span></div>
-            <div class="flex"><span class="eco-detail-label w-24 shrink-0">失效时间：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.expiredAt)}</span></div>
-            <div class="flex col-span-2"><span class="eco-detail-label w-24 shrink-0">引用标准：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.standard)}</span></div>
-            <div class="flex col-span-2"><span class="eco-detail-label w-24 shrink-0">计算公式：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.formula)}</span></div>
-            <div class="flex col-span-2"><span class="eco-detail-label w-24 shrink-0">变更说明：</span><span class="eco-detail-value mt-0 flex-1">${escapeHtml(snapshot.description)}</span></div>
-          </div>
-        </section>
-      `);
+      openModelDetailModal("核算模型详情", snapshot);
     }
 
     function snapshotForVersion(model, log, index) {
