@@ -284,7 +284,10 @@
   </div>
 
   <script>
-    const APP_VERSION = "20260814-rerun-source-tree";
+    const APP_VERSION = "20260722-shell2";
+    const MODULE_VERSION = {
+      reportRerun: "20260817-rerun-current-task-tabs"
+    };
     const modules = {
       boundary: { title: "核算边界管理", url: "./boundary.html" },
       source: { title: "排放源管理", url: "./source.html" },
@@ -302,6 +305,7 @@
     const titleNode = document.getElementById("current-title");
     const tabContainer = document.getElementById("sidebar-tabs");
     const moduleFrames = new Map();
+    const pendingModuleMessages = new Map();
     let activeFrame = null;
 
     function getOrCreateModuleFrame(moduleKey) {
@@ -313,18 +317,28 @@
       moduleFrame.title = `${module.title}模块内容`;
       moduleFrame.dataset.moduleKey = moduleKey;
       moduleFrame.addEventListener("load", () => {
+        moduleFrame.dataset.loaded = "true";
         if (activeFrame === moduleFrame) {
           frameShell.classList.remove("frame-loading");
           loadingMask.classList.add("hidden");
         }
+        const pendingMessages = pendingModuleMessages.get(moduleKey) || [];
+        pendingModuleMessages.delete(moduleKey);
+        pendingMessages.forEach((message) => notifyModuleFrame(moduleFrame, message));
       });
-      moduleFrame.src = `${module.url}?v=${APP_VERSION}`;
+      moduleFrame.src = `${module.url}?v=${MODULE_VERSION[moduleKey] || APP_VERSION}`;
       if (!moduleFrame.parentElement) frameShell.appendChild(moduleFrame);
       moduleFrames.set(moduleKey, moduleFrame);
       return moduleFrame;
     }
 
-    function switchModule(key) {
+    function notifyModuleFrame(moduleFrame, message = { type: "carbon-mock-updated" }) {
+      window.setTimeout(() => {
+        moduleFrame.contentWindow?.postMessage(message, "*");
+      }, 0);
+    }
+
+    function switchModule(key, message = null) {
       const moduleKey = modules[key] ? key : "boundary";
       const module = modules[moduleKey];
 
@@ -340,9 +354,12 @@
         item.classList.toggle("hidden", item !== moduleFrame);
       });
       activeFrame = moduleFrame;
-      if (moduleFrame.contentDocument?.readyState === "complete") {
+      if (moduleFrame.dataset.loaded === "true") {
         frameShell.classList.remove("frame-loading");
         loadingMask.classList.add("hidden");
+        notifyModuleFrame(moduleFrame, message || { type: "carbon-mock-updated" });
+      } else if (message) {
+        pendingModuleMessages.set(moduleKey, [...(pendingModuleMessages.get(moduleKey) || []), message]);
       }
       history.replaceState(null, "", "#" + moduleKey);
     }
@@ -358,6 +375,10 @@
     });
 
     window.addEventListener("message", (event) => {
+      if (event.data?.type === "carbon-open-module") {
+        switchModule(event.data.moduleKey, { type: "carbon-mock-updated", focusPending: Boolean(event.data.focusPending) });
+        return;
+      }
       if (event.data?.type !== "carbon-mock-updated") return;
       moduleFrames.forEach((moduleFrame) => {
         if (moduleFrame.contentWindow && moduleFrame.contentWindow !== event.source) {
@@ -366,7 +387,9 @@
       });
     });
 
-    switchModule((location.hash || "#boundary").slice(1));
+    const searchParams = new URLSearchParams(location.search);
+    const requestedModule = searchParams.get("module");
+    switchModule(requestedModule || (location.hash || "#boundary").slice(1));
   </script>
 </body>
 </html>
