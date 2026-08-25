@@ -47,7 +47,7 @@
           <div class="flex items-center border-b border-outline-variant px-lg py-4 bg-slate-50/50">
             <span class="text-sm font-bold text-slate-800">版本列表</span>
             <div class="ml-auto flex gap-2 items-center">
-              <button class="px-4 py-1.5 bg-primary text-white rounded-lg text-sm flex items-center gap-1.5 hover:brightness-110 shadow-sm transition-all font-medium" onclick="openModal('version-add')">新建版本</button>
+              <button class="px-4 py-1.5 bg-primary text-white rounded-lg text-sm flex items-center gap-1.5 hover:brightness-110 shadow-sm transition-all font-medium" onclick="openModal('version-add')">新增GWP版本</button>
             </div>
           </div>
           <div class="overflow-auto custom-scrollbar h-[240px]">
@@ -108,7 +108,7 @@
   <div class="fixed inset-0 z-[100] flex items-center justify-center modal-backdrop hidden" id="modal-container" onclick="closeModal()">
     <div class="bg-white rounded-xl shadow-2xl w-[680px] max-w-[92vw] max-h-[90vh] flex flex-col overflow-hidden hidden" id="modal-version-form" onclick="event.stopPropagation()">
       <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-slate-50">
-        <h3 class="text-base font-bold text-slate-800" id="form-title">新增GWP标准</h3>
+        <h3 class="text-base font-bold text-slate-800" id="form-title">新增GWP版本</h3>
         <span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-slate-600" onclick="closeModal()">close</span>
       </div>
       <div class="p-6 space-y-5 overflow-y-auto custom-scrollbar">
@@ -441,7 +441,7 @@ function openModal(type,id=''){
   document.querySelectorAll('#modal-container > div').forEach(d=>d.classList.add('hidden'));
   if(type.startsWith('version')){
     document.getElementById('modal-version-form').classList.remove('hidden');
-    document.getElementById('form-title').textContent=type==='version-edit'?'编辑GWP标准':'新增GWP标准';
+    document.getElementById('form-title').textContent=type==='version-edit'?'编辑GWP版本':'新增GWP版本';
     const v=getVersion(id)||{};
     document.getElementById('modal-version-name').value=v.name||'';
     setVersionStandardValue(v.sourceStandard||v.standard||'IPCC AR6 第六次报告');
