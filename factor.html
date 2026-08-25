@@ -283,7 +283,7 @@
 <section class="eco-filter-bar factor-filter-bar shrink-0 overflow-x-auto whitespace-nowrap">
 <label class="eco-filter-label"><span class="eco-form-label">气体：</span><select class="eco-select eco-filter-select-sm" id="factor-search-gas"><option>全部</option><option>CO₂</option><option>CH₄</option><option>N₂O</option><option>R410A</option></select></label>
 <label class="eco-filter-label"><span class="eco-form-label">方法学标准：</span><select class="eco-select eco-filter-select-sm" id="factor-search-standard"></select></label>
-<label class="eco-filter-label"><span class="eco-form-label">活动类型：</span><select class="eco-select eco-filter-select" id="factor-search-activity-type"></select></label>
+<label class="eco-filter-label"><span class="eco-form-label">活动数据类型：</span><select class="eco-select eco-filter-select" id="factor-search-activity-type"></select></label>
 <button class="eco-btn eco-btn-primary eco-btn-sm shrink-0 whitespace-nowrap" id="factor-search-btn" type="button"><span class="material-symbols-outlined text-sm">search</span>查询</button>
 <button class="eco-btn eco-btn-secondary eco-btn-sm shrink-0 whitespace-nowrap" id="factor-reset-btn" type="button">重置</button>
 <button class="eco-btn eco-btn-primary eco-filter-spacer shrink-0 whitespace-nowrap" id="add-factor-btn" type="button">新增因子</button>
@@ -1361,9 +1361,11 @@ function sourceCategoryMatchesItem(item, categoryCode) {
     return item.category === key || item.category.startsWith(key + ' /');
   }
   function matchesFactorFilters(item) {
-    const gas = firstGas(item).gas;
+    const gasRows = Array.isArray(item.gases) && item.gases.length
+      ? item.gases
+      : [firstGas(item)];
     return matchesCategory(item) &&
-      (factorFilters.gas === '全部' || gas === factorFilters.gas) &&
+      (factorFilters.gas === '全部' || gasRows.some((gas) => gas?.gas === factorFilters.gas)) &&
       (factorFilters.standardId === '全部' || item.standardId === factorFilters.standardId) &&
       (factorFilters.activityDataType === '全部' || item.activityDataType === factorFilters.activityDataType);
   }
@@ -1595,7 +1597,7 @@ return factor.id !== group.id &&
   factor.standardId === standardId &&
   paramsMatched &&
   !isDisabledStatus(factor.status) &&
-  versionStatus(factor) !== '历史版本';
+  versionStatus(factor) !== '已归档';
   }
 
   function renderFactorCandidates(selectedIds = []) {
@@ -2487,5 +2489,3 @@ document.getElementById('factor-accounting-params')?.addEventListener('change', 
   // Version drawer behavior is implemented in the main factor-library-interactions script.
 </script>
 </body></html>
-
-
