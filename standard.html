@@ -148,7 +148,7 @@
 <div id="standard-view-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
   <div class="eco-card w-[1040px] max-w-[96vw] max-h-[92vh] overflow-hidden flex flex-col">
     <div class="px-6 py-4 border-b eco-divider flex items-center justify-between">
-      <h2 class="eco-section-title">标准文件查看</h2>
+      <h2 class="eco-section-title">标准详情</h2>
       <button data-close-view type="button" class="text-outline hover:text-on-surface"><span class="material-symbols-outlined">close</span></button>
     </div>
     <div id="standard-view-body" class="p-6 space-y-4 overflow-y-auto"></div>
@@ -205,7 +205,26 @@ function filteredStandards(){const q=$("standard-search-input").value.trim().toL
 function renderSummary(){const enabled=standards.find(x=>x.enabled)||standards[0],latest=standards.slice().sort((a,b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)))[0];$("enabled-standard-name").textContent=enabled?.name||"-";$("standard-count").textContent=standards.length;$("latest-standard-time").textContent=latest?.uploadedAt||"-"}
 function pageBounds(total){const totalPages=Math.max(1,Math.ceil(total/pageSize));currentPage=Math.min(Math.max(1,currentPage),totalPages);return{totalPages,start:(currentPage-1)*pageSize,end:Math.min(total,currentPage*pageSize)}}
 function renderPagination(){const total=filteredStandards().length,{totalPages,start,end}=pageBounds(total),pages=[];for(let i=1;i<=totalPages;i++)pages.push('<button type="button" class="eco-btn '+(i===currentPage?"eco-btn-primary":"eco-btn-secondary")+' eco-btn-sm" data-page="'+i+'">'+i+'</button>');$("standard-pagination-summary").textContent=total?"共 "+total+" 条，显示 "+(start+1)+"-"+end+" 条":"共 0 条";$("standard-pagination-pages").innerHTML=pages.join("");$("standard-pagination-prev").disabled=currentPage<=1;$("standard-pagination-next").disabled=currentPage>=totalPages;$("standard-pagination-jump").value=currentPage}
-function renderTable(){const rows=filteredStandards(),bounds=pageBounds(rows.length),pageRows=rows.slice(bounds.start,bounds.end);$("standard-table-body").innerHTML=pageRows.length?pageRows.map(item=>'<tr><td><div class="eco-list-primary-text truncate">'+esc(item.name)+'</div></td><td><button type="button" class="eco-link-text" data-action="view" data-id="'+esc(item.id)+'">'+esc(item.fileName)+'</button><div class="eco-list-secondary-text">'+esc(fileSizeLabel(item.fileSize))+'</div></td><td><button type="button" class="eco-status-toggle '+(item.enabled?"eco-status-toggle-on":"")+'" data-action="enable" data-id="'+esc(item.id)+'" aria-pressed="'+(item.enabled?"true":"false")+'" title="'+(item.enabled?"当前默认启用":"点击设为默认启用")+'"><span class="eco-status-toggle-track"><span class="eco-status-toggle-thumb"></span></span><span>'+(item.enabled?"默认启用":"未启用")+'</span></button></td><td class="eco-table-cell-text">'+esc(item.uploadedAt)+'</td><td class="eco-table-cell-text truncate" title="'+esc(item.remark||"-")+'">'+esc(item.remark||"-")+'</td><td><div class="eco-action-buttons"><button type="button" class="eco-btn eco-btn-secondary eco-action-btn" data-action="view" data-id="'+esc(item.id)+'">查看</button><button type="button" class="eco-btn eco-btn-secondary eco-action-btn" data-action="edit" data-id="'+esc(item.id)+'">修改</button><button type="button" class="eco-btn eco-btn-danger eco-action-btn" data-action="delete" data-id="'+esc(item.id)+'">删除</button></div></td></tr>').join(""):'<tr><td colspan="6" class="py-10 text-center eco-muted-text">暂无匹配标准</td></tr>';renderSummary();renderPagination()}
+function renderTable(){
+  const rows=filteredStandards(),bounds=pageBounds(rows.length),pageRows=rows.slice(bounds.start,bounds.end);
+  $("standard-table-body").innerHTML=pageRows.length?pageRows.map(item=>
+    '<tr><td><div class="eco-list-primary-text truncate">'+esc(item.name)+
+    '</div></td><td><button type="button" class="eco-link-text" data-action="view" data-id="'+esc(item.id)+'">'+esc(item.fileName)+
+    '</button><div class="eco-list-secondary-text">'+esc(fileSizeLabel(item.fileSize))+
+    '</div></td><td><button type="button" class="eco-status-toggle '+(item.enabled?"eco-status-toggle-on":"")+
+    '" data-action="enable" data-id="'+esc(item.id)+'" aria-pressed="'+(item.enabled?"true":"false")+
+    '" title="'+(item.enabled?"当前默认启用":"点击设为默认启用")+
+    '"><span class="eco-status-toggle-track"><span class="eco-status-toggle-thumb"></span></span><span>'+(item.enabled?"默认启用":"未启用")+
+    '</span></button></td><td class="eco-table-cell-text">'+esc(item.uploadedAt)+
+    '</td><td class="eco-table-cell-text truncate" title="'+esc(item.remark||"-")+'">'+esc(item.remark||"-")+
+    '</td><td><div class="eco-action-buttons"><button type="button" class="eco-btn eco-btn-secondary eco-action-btn" data-action="view" data-id="'+esc(item.id)+
+    '">查看</button><button type="button" class="eco-btn eco-btn-secondary eco-action-btn" data-action="edit" data-id="'+esc(item.id)+
+    '">编辑</button><button type="button" class="eco-btn eco-btn-danger eco-action-btn" data-action="delete" data-id="'+esc(item.id)+
+    '">删除</button></div></td></tr>'
+  ).join(""):'<tr><td colspan="6" class="py-10 text-center eco-muted-text">暂无匹配标准</td></tr>';
+  renderSummary();
+  renderPagination();
+}
 function resetForm(){editingStandardId=null;selectedFile=null;selectedFileDataUrl="";$("standard-modal-title").textContent="新增标准";$("standard-name-input").value="";$("standard-enabled-input").value="false";$("standard-file-input").value="";$("standard-remark-input").value="";$("standard-file-title").textContent="点击上传相关标准文件";$("standard-file-desc").textContent="支持 PDF、Word、Excel、图片等标准文件"}
 function setModalVisible(show,reset=true){$("standard-modal").classList.toggle("hidden",!show);$("standard-modal").classList.toggle("flex",show);if(show&&reset)resetForm();if(!show)resetForm()}
 function setDeleteModalVisible(show){$("standard-delete-modal").classList.toggle("hidden",!show);$("standard-delete-modal").classList.toggle("flex",show);if(!show){pendingDeleteStandardId=null;$("standard-delete-name").textContent="-"}}
