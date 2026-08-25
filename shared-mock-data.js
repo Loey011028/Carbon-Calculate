@@ -1728,7 +1728,7 @@ function getDefaultFactorMatchFields(categoryCode) {
     const end = item.expireDate || item.endDate || "";
 
     if (start && start > today) return "待生效";
-    if (end && end < today) return "历史版本";
+    if (end && end < today) return "已归档";
     return "当前版本";
   }
 
@@ -4230,12 +4230,32 @@ addGwpOperationLog,
           </div>`;
         modal.querySelector("[data-rerun-defer]").onclick = () => modal.remove();
         modal.querySelector("[data-rerun-open]").onclick = () => {
+          const openRerunShell = () => {
+            const url = new URL("index.html", root.location.href);
+            url.searchParams.set("module", "reportRerun");
+            try {
+              (root.top || root).location.href = url.toString();
+            } catch (error) {
+              root.location.href = url.toString();
+            }
+          };
           if (root.parent && root.parent !== root) {
+            let acknowledged = false;
+            const onAck = (event) => {
+              if (event.data?.type !== "carbon-open-module-ack" || event.data?.moduleKey !== "reportRerun") return;
+              acknowledged = true;
+              root.removeEventListener("message", onAck);
+              modal.remove();
+            };
+            root.addEventListener("message", onAck);
             root.parent.postMessage({ type: "carbon-open-module", moduleKey: "reportRerun", focusPending: true }, "*");
-            modal.remove();
+            root.setTimeout(() => {
+              root.removeEventListener("message", onAck);
+              if (!acknowledged) openRerunShell();
+            }, 220);
             return;
           }
-          root.location.href = "index.html?module=reportRerun";
+          openRerunShell();
         };
         root.document.body.appendChild(modal);
       } catch (error) {
